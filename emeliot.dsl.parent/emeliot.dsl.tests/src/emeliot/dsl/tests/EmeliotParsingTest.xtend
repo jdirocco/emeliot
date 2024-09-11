@@ -20,24 +20,18 @@ class EmeliotParsingTest {
 	
 	@Test
 	def void loadModel() {
-		val result = parseHelper.parse('''
-			model EmeliotTest:
-				mutation FirstMutation "fullpath" java.lang.Integer {
-					read()
-					var a = "asd"
-					val i = 0;
-					
-					addMultipleRandomTimeValues("",5,5,5,5,5);
-					
-				}
-				mutation SicondMutation "secondFullPath" java.lang.Float {
-					read("");
-					addTimeAndRandomValue("",6, 6,6);
-				} 
-				mutation TirthMutation "anotherFullPath" java.lang.Boolean{
-					read("anotherFullPath")
-				}
-		''')
+		val result = parseHelper.parse('''model EmeliotTest:
+			mutation FirstMutation time_series values[(5:5)] {
+				
+			}
+			mutation SicondMutation time_series values [(5:5)]{
+		
+			} 
+			mutation TirthMutation  time_series values [(5:5)]{
+		
+			}
+			 
+			''')
 		Assertions.assertNotNull(result)
 		val errors = result.eResource.errors
 		Assertions.assertTrue(errors.isEmpty, '''Unexpected errors: «errors.join(", ")»''')
