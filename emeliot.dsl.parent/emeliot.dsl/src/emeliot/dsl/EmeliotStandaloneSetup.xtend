@@ -3,7 +3,6 @@
  */
 package emeliot.dsl
 
-
 /**
  * Initialization support for running Xtext languages without Equinox extension registry.
  */

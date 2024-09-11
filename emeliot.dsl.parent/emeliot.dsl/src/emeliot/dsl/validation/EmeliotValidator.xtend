@@ -3,7 +3,6 @@
  */
 package emeliot.dsl.validation
 
-
 /**
  * This class contains custom validation rules. 
  *

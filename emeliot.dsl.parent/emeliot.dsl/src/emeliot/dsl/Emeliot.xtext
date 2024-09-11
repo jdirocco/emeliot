@@ -1,16 +1,24 @@
 grammar emeliot.dsl.Emeliot with org.eclipse.xtext.xbase.annotations.XbaseWithAnnotations
 
 generate read "http://www.emeliot.dsl/Emeliot"
-
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 Model returns Model:
 	'model' name=ID ':'
-	
 	mutations+=Mutation*;
 
 Mutation returns Mutation:
-	'mutation' name=ID 
-	//AGGIUNGERE TIME SERIES
-	timeSeries=STRING
-	timeS=JvmTypeReference
-	operation=XBlockExpression
-;
+	'mutation' name=ID
+	// AGGIUNGERE TIME SERIES
+	'time_series' ('path' timeSeriesPath=STRING | 'values'	timeSeriesValues=TimeSeries)
+
+	operation=XBlockExpression;
+
+TimeSeries returns TimeSeries:
+	{TimeSeries}
+//  'linked_to' port=[Port|EString]
+	('[' timeValues+=TimeValue ("," timeValues+=TimeValue)* ']')?;
+
+TimeValue returns TimeValue:
+	{TimeValue}
+	'(' time=INT ':' value=INT ')';
+//CONCETTO DI TIME SERIES RIPRENDERE DA VECCHIO DSL

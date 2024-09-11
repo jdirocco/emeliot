@@ -4,12 +4,13 @@
 package emeliot.dsl.jvmmodel
 
 import com.google.inject.Inject
+import emeliot.dsl.lib.EmeliotLib
 import emeliot.dsl.read.Model
+import org.eclipse.xtext.common.types.JvmDeclaredType
+import org.eclipse.xtext.common.types.JvmVisibility
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
-import emeliot.dsl.lib.EmeliotLib
-import org.eclipse.xtext.common.types.JvmVisibility
 
 /**
  * <p>Infers a JVM model from the source model.</p>
@@ -30,11 +31,11 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 	 * 
 	 * @param element
 	 *            the model to create one or more
-	 *            {@link org.eclipse.xtext.common.types.JvmDeclaredType declared
+	 *            {@link JvmDeclaredType declared
 	 *            types} from.
 	 * @param acceptor
 	 *            each created
-	 *            {@link org.eclipse.xtext.common.types.JvmDeclaredType type}
+	 *            {@link JvmDeclaredType type}
 	 *            without a container should be passed to the acceptor in order
 	 *            get attached to the current resource. The acceptor's
 	 *            {@link IJvmDeclaredTypeAcceptor#accept(org.eclipse.xtext.common.types.JvmDeclaredType)
@@ -74,7 +75,7 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 				exceptions += Exception.typeRef
 				body = '''
 					«FOR o : element.mutations»
-						«o.name»("«o.timeSeries»");
+						«o.name»("«o.timeSeriesPath»");
 					«ENDFOR»	
 				'''
 			]
