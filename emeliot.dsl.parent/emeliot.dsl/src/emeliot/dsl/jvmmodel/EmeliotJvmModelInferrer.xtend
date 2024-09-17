@@ -11,6 +11,12 @@ import org.eclipse.xtext.common.types.JvmVisibility
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
+import org.eclipse.xtext.common.types.JvmTypeParameterDeclarator
+import java.util.List
+import org.eclipse.xtext.common.types.JvmTypeParameter
+import emeliot.dsl.read.TimeSeries
+import emeliot.dsl.read.ReadFactory
+import emeliot.dsl.read.TimeValue
 
 /**
  * <p>Infers a JVM model from the source model.</p>
@@ -50,11 +56,13 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 	 */
 	def dispatch void infer(Model element, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		val className = element.name
+
 		acceptor.accept(element.toClass(className) [
 //			members += element.toField('path', typeRef(String))[
 //				initializer = '''"«element.timeSeries»"'''
 //			]
 			superTypes += typeRef(EmeliotLib).cloneWithProxies
+
 			members += element.toMethod("main", typeRef(Void.TYPE)) [
 				parameters += element.toParameter("args", typeRef(String).addArrayTypeDimension)
 				static = true
@@ -66,19 +74,65 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 			for (mut : element.mutations) {
 				members += mut.toMethod(mut.name, typeRef(Void.TYPE)) [
 					body = mut.operation
-					parameters += mut.toParameter("eobject", typeRef(Object))
+
+					parameters += mut.toParameter("timeSeries", typeRef(TimeSeries))
 				]
 			}
+			for (mut : element.mutations) {
+				members += mut.timeSeriesValues.toField(mut.timeSeriesValues.name, typeRef(TimeSeries)) [
+					initializer = ''' ReadFactory.eINSTANCE.createTimeSeries() '''
+				]
+				for (tv: mut.timeSeriesValues.timeValues){				
+				
+					members += tv.toField(tv.name, typeRef(TimeValue)) [
+					initializer = ''' ReadFactory.eINSTANCE.createTimeValue() '''
+					
+				]
+					
+				}
+				
+
+				
+			}
+			
+	
+			
+			
+			
+
 			members += element.toMethod("doExecute", Void.TYPE.typeRef) [
 				visibility = JvmVisibility.PROTECTED
 //					annotations += Override.annotationRef
 				exceptions += Exception.typeRef
-				body = '''
-					«FOR o : element.mutations»
-						«o.name»("«o.timeSeriesPath»");
-					«ENDFOR»	
+
+				body = '''				
+					
+						«FOR o : element.mutations»	
+							
+							«FOR e : o.timeSeriesValues.timeValues»
+							
+								«e.name».setTime(«e.time»);
+								«e.name».setValue(«e.value»);
+								
+								«o.timeSeriesValues.name».getTimeValues().add(«e.name»);
+												
+							«ENDFOR»
+							
+										
+							«o.name»(«o.timeSeriesValues.name»);
+								
+												
+						«ENDFOR»	
 				'''
+
 			]
 		])
+
+	}
+
+	def private void copyTypeParameters(JvmTypeParameterDeclarator target, List<JvmTypeParameter> typeParameters) {
+		for (typeParameter : typeParameters) {
+			target.typeParameters += typeParameter.cloneWithProxies
+		}
 	}
 }
