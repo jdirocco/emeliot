@@ -1,0 +1,22 @@
+model emeliot : mutation omission time_series values input1 [ tv1 (5:2), tv2 (5:4)] {
+	var tvOut = selectRandomTimeValue(input1) 
+	 
+	var isTime = existTime(input1,tvOut.time)
+	 
+	System.out.println(isTime)  
+	  
+	
+	
+	
+}
+	
+
+					
+				
+					
+					
+					
+				
+					
+				
+				
