@@ -58,10 +58,12 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 		val className = element.name
 
 		acceptor.accept(element.toClass(className) [
+
 //			members += element.toField('path', typeRef(String))[
 //				initializer = '''"«element.timeSeries»"'''
 //			]
 			superTypes += typeRef(EmeliotLib).cloneWithProxies
+			typeRef(ReadFactory)
 
 			members += element.toMethod("main", typeRef(Void.TYPE)) [
 				parameters += element.toParameter("args", typeRef(String).addArrayTypeDimension)
@@ -72,6 +74,8 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 	} catch(Exception e){e.printStackTrace();}'''
 			]
 			for (mut : element.mutations) {
+				members += mut.toField("factory", typeRef(ReadFactory))
+
 				members += mut.toMethod(mut.name, typeRef(Void.TYPE)) [
 					body = mut.operation
 
@@ -82,23 +86,16 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 				members += mut.timeSeriesValues.toField(mut.timeSeriesValues.name, typeRef(TimeSeries)) [
 					initializer = ''' ReadFactory.eINSTANCE.createTimeSeries() '''
 				]
-				for (tv: mut.timeSeriesValues.timeValues){				
-				
-					members += tv.toField(tv.name, typeRef(TimeValue)) [
-					initializer = ''' ReadFactory.eINSTANCE.createTimeValue() '''
-					
-				]
-					
-				}
-				
+				for (tv : mut.timeSeriesValues.timeValues) {
 
-				
+					members += tv.toField(tv.name, typeRef(TimeValue)) [
+						initializer = ''' ReadFactory.eINSTANCE.createTimeValue() '''
+
+					]
+
+				}
+
 			}
-			
-	
-			
-			
-			
 
 			members += element.toMethod("doExecute", Void.TYPE.typeRef) [
 				visibility = JvmVisibility.PROTECTED
@@ -107,10 +104,8 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 
 				body = '''				
 					
-						«FOR o : element.mutations»	
-							
-							«FOR e : o.timeSeriesValues.timeValues»
-							
+						«FOR o : element.mutations»								
+							«FOR e : o.timeSeriesValues.timeValues»							
 								«e.name».setTime(«e.time»);
 								«e.name».setValue(«e.value»);
 								
