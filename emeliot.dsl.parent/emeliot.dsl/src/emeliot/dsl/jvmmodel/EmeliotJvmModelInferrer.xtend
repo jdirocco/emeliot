@@ -107,8 +107,7 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 						«FOR o : element.mutations»								
 							«FOR e : o.timeSeriesValues.timeValues»							
 								«e.name».setTime(«e.time»);
-								«e.name».setValue(«e.value»);
-								
+								«e.name».setValue(«e.value»);								
 								«o.timeSeriesValues.name».getTimeValues().add(«e.name»);
 												
 							«ENDFOR»

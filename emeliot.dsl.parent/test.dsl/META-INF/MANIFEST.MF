@@ -4,6 +4,7 @@ Bundle-Name: Dsl
 Bundle-SymbolicName: test.dsl
 Bundle-Version: 1.0.0.qualifier
 Require-Bundle: emeliot.dsl;bundle-version="1.0.0",
- org.eclipse.xtext;bundle-version="2.36.0"
+ org.eclipse.xtext;bundle-version="2.36.0",
+ org.eclipse.xtext.xbase;bundle-version="2.36.0"
 Automatic-Module-Name: test.dsl
 Bundle-RequiredExecutionEnvironment: JavaSE-22

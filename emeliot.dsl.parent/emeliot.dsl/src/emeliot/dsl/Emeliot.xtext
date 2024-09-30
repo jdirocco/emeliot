@@ -6,9 +6,12 @@ import "http://www.eclipse.org/xtext/xbase/Xbase" as xbase
 import "http://www.eclipse.org/xtext/xbase/Xtype" as xtype
 import "http://www.eclipse.org/xtext/common/JavaVMTypes" as types
 Model returns Model:
-	'model' name=EString ':'
 	
-	mutations+=Mutation*;
+	'model' name=EString ':'
+	specification=Specification		
+	mutations+=Mutation*
+	discovery=Discovery	
+	;
 
 Mutation returns Mutation:
 	'mutation' name=EString
@@ -25,11 +28,88 @@ TimeSeries returns TimeSeries:
 TimeValue returns TimeValue:
 	{TimeValue} name=EString
 	
-	'(' time=INT ':' value=INT ')';
+	'(' time=INT ':' value=(EDouble) ')';
 	
 	
 EString returns ecore::EString:
 	STRING | ID;
+
+
+DataType returns DataType:
+	IntegerType  | BooleanType;
+
+Specification returns Specification:
+	{Specification}
+	'specification'	
+	//importSection=XImportSection?
+	//('package' name=QualifiedName ';'?)?
+	('simulationPlatform' simulationPlatform=EString)?
+	('projectName' projectName=EString)?
+	//('import' '{' ^import+=Import ("," ^import+=Import)* '}')?
+	('components' '[' components+=Component  ']')?;
+	
+Component returns Component:
+	{Component}
+	'name' name=EString
+	('ports' '[' ports+=Port ("," ports+=Port)* ']')?
+	;
+	
+Port returns Port:
+	{Port}
+	'Port'
+	name=EString
+	
+	('type' type=PORT_TYPE)?
+	('times' times=ELong)?
+	('eps' eps=EDouble)?
+	;
+
+
+Discovery returns Discovery:
+	{Discovery}
+	'discovery'
+	name=EString
+	
+	('outputSeries' expSeries=[TimeSeries|EString])?
+	//('appliedTo' appliedTo=[Port|EString])?	
+	('expectedSeries' '[' series+=TimeValue ("," series+=TimeValue)* ']')?	
+	expression=XBlockExpression
+	;
+
+Import returns Import:
+	{Import}
+	'Import'
+	'{'
+	('qualifiedName' qualifiedName=EString)?
+	'}';
+	
+enum PORT_TYPE returns PORT_TYPE:
+	INPUT='INPUT' | OUTPUT='OUTPUT';
+
+ELong returns ecore::ELong:
+	'-'? INT;
+
+EDouble returns ecore::EDouble:
+	'-'? INT? '.' INT (('E' | 'e') '-'? INT)?;
 	
 	
-//CONCETTO DI TIME SERIES RIPRENDERE DA VECCHIO DSL
+	
+IntegerType returns IntegerType:
+	{IntegerType}
+	value=EInt;
+
+
+
+BooleanType returns BooleanType:
+	{BooleanType}
+	value=EBoolean;
+
+EInt returns ecore::EInt:
+	'-'? INT;
+
+EBoolean returns ecore::EBoolean:
+	'true' | 'false';
+
+	
+	
+
