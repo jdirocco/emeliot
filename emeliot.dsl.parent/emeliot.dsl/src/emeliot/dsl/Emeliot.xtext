@@ -69,9 +69,8 @@ Discovery returns Discovery:
 	{Discovery}
 	'discovery'
 	name=EString
-	
-	('outputSeries' expSeries=[TimeSeries|EString])?
-	//('appliedTo' appliedTo=[Port|EString])?	
+	//('appliedTo' appliedTo=[Port|EString])?		
+	//('outputSeries' expSeries=[TimeSeries|EString])?	
 	('expectedSeries' '[' series+=TimeValue ("," series+=TimeValue)* ']')?	
 	expression=XBlockExpression
 	;

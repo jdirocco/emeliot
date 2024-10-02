@@ -96,11 +96,20 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 				}
 
 			}
+			
+			
+			
+			members += element.discovery.toMethod(element.discovery.name, typeRef(Void.TYPE))[
+				body = element.discovery.expression
+					parameters += element.discovery.toParameter("expectedSeries", typeRef(TimeSeries))
+			]
+			
 
 			members += element.toMethod("doExecute", Void.TYPE.typeRef) [
 				visibility = JvmVisibility.PROTECTED
 //					annotations += Override.annotationRef
 				exceptions += Exception.typeRef
+				
 
 				body = '''				
 					
@@ -117,6 +126,10 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 								
 												
 						«ENDFOR»	
+						
+						final TimeSeries outSeries  =  ReadFactory.eINSTANCE.createTimeSeries() ;
+						
+						«element.discovery.name»(outSeries);
 				'''
 
 			]
