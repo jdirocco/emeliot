@@ -28,4 +28,4 @@ Export-Package: emeliot.dsl,
  emeliot.dsl.read.util,
  emeliot.dsl.scoping,
  emeliot.dsl.jvmmodel
-Import-Package: org.apache.log4j
+Import-Package: org.apache.log4j, org.apache.commons.logging
