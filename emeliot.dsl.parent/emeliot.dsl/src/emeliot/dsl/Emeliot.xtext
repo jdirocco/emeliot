@@ -10,7 +10,8 @@ Model returns Model:
 	'model' name=EString ':'
 	specification=Specification		
 	mutations+=Mutation*
-	discovery=Discovery	
+	discovery=Discovery		
+	//configuratore di discovery
 	;
 
 Mutation returns Mutation:
@@ -72,6 +73,8 @@ Discovery returns Discovery:
 	//('appliedTo' appliedTo=[Port|EString])?		
 	//('outputSeries' expSeries=[TimeSeries|EString])?	
 	('expectedSeries' '[' series+=TimeValue ("," series+=TimeValue)* ']')?	
+	
+
 	expression=XBlockExpression
 	;
 

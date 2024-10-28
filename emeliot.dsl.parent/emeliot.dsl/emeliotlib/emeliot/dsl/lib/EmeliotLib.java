@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
+
+
 public class EmeliotLib {
 	//Interface 
 	
@@ -18,6 +20,12 @@ public class EmeliotLib {
             e.printStackTrace();
         }
         return fileContente;
+    }
+    
+    
+    public static void doSomething (String fileName) {
+        System.out.println("hello");
+        return;
     }
 
 }
