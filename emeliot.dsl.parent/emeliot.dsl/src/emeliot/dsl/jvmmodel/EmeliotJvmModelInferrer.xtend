@@ -17,6 +17,10 @@ import org.eclipse.xtext.common.types.JvmTypeParameter
 import emeliot.dsl.read.TimeSeries
 import emeliot.dsl.read.ReadFactory
 import emeliot.dsl.read.TimeValue
+import emeliot.dsl.read.ConfigMutation
+import emeliot.dsl.read.Mutation
+import emeliot.dsl.read.TimeSeriesValue
+import emeliot.dsl.read.TimeSeriesPath
 
 /**
  * <p>Infers a JVM model from the source model.</p>
@@ -64,6 +68,7 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 //			]
 			superTypes += typeRef(EmeliotLib).cloneWithProxies
 			typeRef(ReadFactory)
+			typeRef(TimeValue)
 
 			members += element.toMethod("main", typeRef(Void.TYPE)) [
 				parameters += element.toParameter("args", typeRef(String).addArrayTypeDimension)
@@ -82,11 +87,17 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 					parameters += mut.toParameter("timeSeries", typeRef(TimeSeries))
 				]
 			}
-			for (mut : element.mutations) {
-				members += mut.timeSeriesValues.toField(mut.timeSeriesValues.name, typeRef(TimeSeries)) [
+			
+			/*for (config : element.configurations.filter[e|e instanceof ConfigMutation]) {
+				var mutation =  config as ConfigMutation
+				
+				
+				var mut = mutation.mut
+				
+				members += mutation.timeSeriesValues.toField(mutation.timeSeriesValues.name, typeRef(TimeSeries)) [
 					initializer = ''' ReadFactory.eINSTANCE.createTimeSeries() '''
 				]
-				for (tv : mut.timeSeriesValues.timeValues) {
+				for (tv : mutation.timeSeriesValues.timeValues) {
 
 					members += tv.toField(tv.name, typeRef(TimeValue)) [
 						initializer = ''' ReadFactory.eINSTANCE.createTimeValue() '''
@@ -95,14 +106,38 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 
 				}
 
+			}*/
+			
+			members += element.toField('tv', typeRef(TimeValue))
+			for (config : element.configurations.filter[e|e instanceof ConfigMutation]) {
+				var mutation =  config as ConfigMutation
+				
+				
+				var mut = mutation.mut
+				
+				
+				members += mutation.timeSeries.toField(mutation.timeSeries.name, typeRef(TimeSeriesValue)) [
+					initializer = ''' ReadFactory.eINSTANCE.createTimeSeriesValue() '''
+				]
+				
+				
+//				for (tv : mutation.timeSeriesValues.timeValues) {
+
+//					members += tv.toField(tv.name, typeRef(TimeValue)) [
+//						initializer = ''' ReadFactory.eINSTANCE.createTimeValue() '''
+//
+//					]
+
+//				}
+
 			}
 			
 			
 			
-			members += element.discovery.toMethod(element.discovery.name, typeRef(Void.TYPE))[
+		/* 	members += element.discovery.toMethod(element.discovery.name, typeRef(Void.TYPE))[
 				body = element.discovery.expression
 					parameters += element.discovery.toParameter("expectedSeries", typeRef(TimeSeries))
-			]
+			]*/
 			
 
 			members += element.toMethod("doExecute", Void.TYPE.typeRef) [
@@ -110,26 +145,39 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 //					annotations += Override.annotationRef
 				exceptions += Exception.typeRef
 				
-
-				body = '''				
+			
+				body = '''	
+								
 					
-						«FOR o : element.mutations»								
-							«FOR e : o.timeSeriesValues.timeValues»							
-								«e.name».setTime(«e.time»);
-								«e.name».setValue(«e.value»);								
-								«o.timeSeriesValues.name».getTimeValues().add(«e.name»);
+						«FOR o : element.configurations.filter[e|e instanceof ConfigMutation]»		
+									
+«««							for (TimeValue tv : «(o as ConfigMutation).timeSeriesValues») 
+							«IF (o as ConfigMutation).timeSeries instanceof TimeSeriesValue»
+								
+							
+							«FOR e : ( (o as ConfigMutation).timeSeries as TimeSeriesValue).timeValues»
+							
+								tv = ReadFactory.eINSTANCE.createTimeValue();	
+											
+								tv.setTime(«e.time»);
+								tv.setValue(«e.value»);								
+								« ((o as ConfigMutation).timeSeries as TimeSeriesValue).name».getTimeValues().add(tv);
 												
 							«ENDFOR»
 							
 										
-							«o.name»(«o.timeSeriesValues.name»);
-								
+							
+							«ENDIF »
+							«IF (o as ConfigMutation).timeSeries instanceof TimeSeriesPath»
+								« ((o as ConfigMutation).timeSeries.name)» = readTSFromFile("« ((o as ConfigMutation).timeSeries as TimeSeriesPath).timeSeriesPath»");
+							«ENDIF»
+							«(o as ConfigMutation).mut.name»(«(o as ConfigMutation).timeSeries.name»);	
 												
-						«ENDFOR»	
+					«ENDFOR»	
 						
 						final TimeSeries outSeries  =  ReadFactory.eINSTANCE.createTimeSeries() ;
 						
-						«element.discovery.name»(outSeries);
+«««						«element.discovery.name»(outSeries);
 				'''
 
 			]
