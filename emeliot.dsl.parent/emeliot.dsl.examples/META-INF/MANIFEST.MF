@@ -4,6 +4,7 @@ Bundle-Name: Runtime
 Bundle-SymbolicName: emeliot.dls.examples
 Bundle-Version: 1.0.0.qualifier
 Require-Bundle: emeliot.dsl;bundle-version="1.0.0",
- org.eclipse.emf.ecore;bundle-version="2.36.0"
+ org.eclipse.emf.ecore;bundle-version="2.36.0",
+ org.eclipse.xtext.xbase;bundle-version="2.36.0"
 Automatic-Module-Name: test.runtime
-Bundle-RequiredExecutionEnvironment: JavaSE-22
+Bundle-RequiredExecutionEnvironment: JavaSE-21

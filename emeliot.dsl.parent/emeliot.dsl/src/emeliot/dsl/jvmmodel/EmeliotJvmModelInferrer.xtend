@@ -4,23 +4,23 @@
 package emeliot.dsl.jvmmodel
 
 import com.google.inject.Inject
-import emeliot.dsl.lib.EmeliotLib
+import emeliot.dsl.read.ConfigMutation
 import emeliot.dsl.read.Model
+import emeliot.dsl.read.ReadFactory
+import emeliot.dsl.read.TimeSeries
+import emeliot.dsl.read.TimeSeriesPath
+import emeliot.dsl.read.TimeSeriesValue
+import emeliot.dsl.read.TimeValue
+import java.util.List
 import org.eclipse.xtext.common.types.JvmDeclaredType
+import org.eclipse.xtext.common.types.JvmTypeParameter
+import org.eclipse.xtext.common.types.JvmTypeParameterDeclarator
 import org.eclipse.xtext.common.types.JvmVisibility
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
-import org.eclipse.xtext.common.types.JvmTypeParameterDeclarator
-import java.util.List
-import org.eclipse.xtext.common.types.JvmTypeParameter
-import emeliot.dsl.read.TimeSeries
-import emeliot.dsl.read.ReadFactory
-import emeliot.dsl.read.TimeValue
-import emeliot.dsl.read.ConfigMutation
-import emeliot.dsl.read.Mutation
-import emeliot.dsl.read.TimeSeriesValue
-import emeliot.dsl.read.TimeSeriesPath
+import emeliot.dsl.lib.EmeliotLib
+import emeliot.dsl.lib.ProteusService
 
 /**
  * <p>Infers a JVM model from the source model.</p>
@@ -60,13 +60,15 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 	 */
 	def dispatch void infer(Model element, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		val className = element.name
-
+		
 		acceptor.accept(element.toClass(className) [
 
 //			members += element.toField('path', typeRef(String))[
 //				initializer = '''"«element.timeSeries»"'''
 //			]
-			superTypes += typeRef(EmeliotLib).cloneWithProxies
+			if ("proteus".equals(element.simulationPlatform))
+				superTypes+= typeRef(ProteusService)
+//			superTypes += typeRef(ProteusServiceImpl).cloneWithProxies
 			typeRef(ReadFactory)
 			typeRef(TimeValue)
 
@@ -78,12 +80,11 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 		th1s.doExecute();
 	} catch(Exception e){e.printStackTrace();}'''
 			]
+			members += element.toField("factory", typeRef(ReadFactory))
 			for (mut : element.mutations) {
-				members += mut.toField("factory", typeRef(ReadFactory))
 
 				members += mut.toMethod(mut.name, typeRef(Void.TYPE)) [
-					body = mut.operation
-
+					body = mut.operation				
 					parameters += mut.toParameter("timeSeries", typeRef(TimeSeries))
 				]
 			}
@@ -172,7 +173,7 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 								« ((o as ConfigMutation).timeSeries.name)» = readTSFromFile("« ((o as ConfigMutation).timeSeries as TimeSeriesPath).timeSeriesPath»");
 							«ENDIF»
 							«(o as ConfigMutation).mut.name»(«(o as ConfigMutation).timeSeries.name»);	
-												
+							writeTSToFile((TimeSeriesValue)«(o as ConfigMutation).timeSeries.name»,"«(o as ConfigMutation).timeSeries.name»_M.txt");
 					«ENDFOR»	
 						
 						final TimeSeries outSeries  =  ReadFactory.eINSTANCE.createTimeSeries() ;

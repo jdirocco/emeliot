@@ -11,7 +11,8 @@ Model returns Model:
 	specification=Specification
 	mutations+=Mutation*
 	discoveries+=Discovery*
-	'config' ':' configurations+=Configuration*;
+	'config' ':' configurations+=Configuration*
+	'simultation_platfrom' ':' simulationPlatform=EString;
 
 Configuration returns Configuration:
 	ConfigMutation | ConfigDiscovery;
@@ -24,8 +25,8 @@ ConfigMutation returns ConfigMutation:
 
 ConfigDiscovery returns ConfigDiscovery:
 	'discovery' discovery=[Discovery]
-	'expectedSeries' ('path' timeSeriesPath=STRING | 'values' timeSeriesValues=TimeSeries) // produced by Protheus on original input without mutation
-	'mutatedSeries' ('path' timeSeriesPath=STRING | 'values' timeSeriesValues=TimeSeries) // produced by Prothues on mutated input
+	'expectedSeries' ('path' exptectedTimeSeriesPath=STRING | 'values' expectedTimeSeriesValues=TimeSeries) // produced by Protheus on original input without mutation
+	'mutatedSeries' ('path' mutatedTimeSeriesPath=STRING | 'values' mutatedTimeSeriesValues=TimeSeries) // produced by Prothues on mutated input
 ;
 
 Mutation returns Mutation:
