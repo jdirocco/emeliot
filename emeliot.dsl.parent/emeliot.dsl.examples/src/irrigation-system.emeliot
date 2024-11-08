@@ -1,4 +1,5 @@
-model Emeliot : 
+model IrrigationSystem: 
+ 
  	
  specification components [ name  
  	Comp
@@ -7,7 +8,7 @@ model Emeliot :
  ] ] 
   
  
- mutation complexMutation  {   
+ mutation omission  {   
  	var currentDate = java.time.LocalDate.now();
  	if (currentDate.dayOfWeek == java.time.DayOfWeek.FRIDAY){
 		setAllTimesToTime(timeSeries, 6)
@@ -16,38 +17,32 @@ model Emeliot :
  	}
  	else {
  		var tm = new java.util.ArrayList(java.util.List.of(2,3,4,5,6,7));
- 		changeMultipleTimeLate(timeSeries, 0.5, tm,5);
+ 		changeMultipleTimeLate(timeSeries, 0.5, tm,5); 		
  	}
  }
  
- mutation usingCheckOnExistingValue  {   
+ mutation late  {   
  	var mv = getMaxValue(timeSeries)
  	if (mv > 100)
  		addMultipleRandomTimeValues(timeSeries,4,7,1,2,4)
  	else
  		changeTimeAndValue(timeSeries, 5, 3, 43)
- } 
- 
- mutation simpleMutation {
- 	addTimeAndValue(timeSeries, 12.0, 14)
- }
- 
- 
+} 
  
  discovery detectOmission {
- 	//TO BE DISCUSSED
+ 	
  }
  
 config : 	 
+	mut omission  input [ (52 :3.0),  (8:4.5)]  	 
+	mut omission file2  path "/Users/juridirocco/Downloads/irrigationUnit1.txt"  
+	mut late file1 path "/Users/juridirocco/Downloads/irrigationUnit2.txt"
 
-	mut simpleMutation  input [(52 : 3.0), (8 : 4.5)]
-	mut complexMutation irrigationUnit1  path "/Users/juridirocco/Downloads/irrigationUnit1.txt"
-	mut usingCheckOnExistingValue irrigationUnit2 path "/Users/juridirocco/Downloads/irrigationUnit2.txt"
-	
 	discovery detectOmission
 		expectedSeries values expected  [  (32 : 3.0), (8:4.5)] 
 		mutatedSeries values mutated  [  (32 : 3.0), (8:4.5)] 
-		 
+	
+ 
 simultation_platfrom: proteus
 
  
