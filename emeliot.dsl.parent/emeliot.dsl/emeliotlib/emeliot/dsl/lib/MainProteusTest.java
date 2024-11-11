@@ -13,7 +13,8 @@ public class MainProteusTest {
 		try {
 			e.runTestCase(
 					Paths.get("./proteus-example/Component"), 
-					Paths.get("./proteus-example/TestCase"), 
+					Paths.get("./proteus-example/TestCase/inputs"), 
+					Paths.get("./proteus-example/TestCase/outputs"), 
 					Arrays.asList("irrigationUnit1", "irrigationUnit2"));			
 		} catch (Exception exc) {
 			exc.printStackTrace();
