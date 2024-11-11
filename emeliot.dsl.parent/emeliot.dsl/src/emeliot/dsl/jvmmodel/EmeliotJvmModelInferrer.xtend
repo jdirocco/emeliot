@@ -85,7 +85,7 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 
 				members += mut.toMethod(mut.name, typeRef(Void.TYPE)) [
 					body = mut.operation				
-					parameters += mut.toParameter("timeSeries", typeRef(TimeSeries))
+					parameters += mut.toParameter("inTS", typeRef(TimeSeries))
 				]
 			}
 			
@@ -110,6 +110,11 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 			}*/
 			
 			members += element.toField('tv', typeRef(TimeValue))
+			for (ts : element.timeSeries) {
+				members += ts.toField(ts.name, typeRef(TimeSeriesValue)) [
+					initializer = ''' ReadFactory.eINSTANCE.createTimeSeriesValue() '''
+				]
+			}
 			for (config : element.configurations.filter[e|e instanceof ConfigMutation]) {
 				var mutation =  config as ConfigMutation
 				
@@ -117,9 +122,7 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 				var mut = mutation.mut
 				
 				
-				members += mutation.timeSeries.toField(mutation.timeSeries.name, typeRef(TimeSeriesValue)) [
-					initializer = ''' ReadFactory.eINSTANCE.createTimeSeriesValue() '''
-				]
+				
 				
 				
 //				for (tv : mutation.timeSeriesValues.timeValues) {

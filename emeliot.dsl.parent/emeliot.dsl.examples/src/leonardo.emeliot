@@ -1,4 +1,4 @@
-model IrrigationUnit : 
+model Leonardo : 
  	
  specification components : 
  	Component1	 ports : 	

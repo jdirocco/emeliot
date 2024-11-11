@@ -9,6 +9,7 @@ import "http://www.eclipse.org/xtext/common/JavaVMTypes" as types
 Model returns Model:
 	'model' name=EString ':'
 	specification=Specification
+	'time_series' ':' timeSeries+=TimeSeries*
 	mutations+=Mutation*
 	discoveries+=Discovery*
 	'config' ':' configurations+=Configuration*
@@ -18,27 +19,18 @@ Configuration returns Configuration:
 	ConfigMutation | ConfigDiscovery;
 
 ConfigMutation returns ConfigMutation:
-	'mut' mut=[Mutation]
-	// 'port' port = [Port]
-	timeSeries = TimeSeries ;
-	//('path' timeSeriesPath=STRING | 'values' timeSeriesValues=TimeSeries);
+	'mut' mut=[Mutation] ('port' port = [Port|EString])? 'timeSeries' timeSeries = [TimeSeries] ;
 
 ConfigDiscovery returns ConfigDiscovery:
-	'discovery' discovery=[Discovery]
-	'expectedSeries' ('path' exptectedTimeSeriesPath=STRING | 'values' expectedTimeSeriesValues=TimeSeries) // produced by Protheus on original input without mutation
-	'mutatedSeries' ('path' mutatedTimeSeriesPath=STRING | 'values' mutatedTimeSeriesValues=TimeSeries) // produced by Prothues on mutated input
+	'discovery' discovery=[Discovery] ('port' port = [Port|EString])?
+	'expectedSeries' expectedTimeSeries = [TimeSeries] // produced by Protheus on original input without mutation
+	'mutatedSeries' mutatedTimeSeries = [TimeSeries] // produced by Prothues on mutated input
 ;
 
 Mutation returns Mutation:
 	'mutation' name=EString
-	// AGGIUNGERE TIME SERIES
 	operation=XBlockExpression;
 
-/*Mutation returns Mutation:
- * 	'mutation' name=EString
- * 	// AGGIUNGERE TIME SERIES
- * 	'time_series' ('path' timeSeriesPath=STRING | 'values'	timeSeriesValues=TimeSeries)
- operation=XBlockExpression;*/
  
  
 TimeSeries returns TimeSeries:	
@@ -50,7 +42,6 @@ TimeSeriesPath returns TimeSeriesPath:
 
 TimeSeriesValue returns TimeSeriesValue:
 	{TimeSeriesValue} name=EString
-//  'linked_to' port=[Port|EString]
 	('[' timeValues+=TimeValue ("," timeValues+=TimeValue)* ']')?;
 
 TimeValue returns TimeValue:
@@ -65,31 +56,24 @@ Specification returns Specification:
 	'specification'
 	// importSection=XImportSection?
 	// ('package' name=QualifiedName ';'?)?
-	('simulationPlatform' simulationPlatform=EString)?
 	('projectName' projectName=EString)?
 	// ('import' '{' ^import+=Import ("," ^import+=Import)* '}')?
-	('components' '[' components+=Component ']')?;
+	'components' ':' components+=Component*;
 
 Component returns Component:
 	{Component}
-	'name' name=EString
-	('ports' '[' ports+=Port ("," ports+=Port)* ']')?;
+	name=EString
+	'ports' ':' ports+=Port*;
 
 Port returns Port:
 	{Port}
-	'Port'
-	name=EString
-	('type' type=PORT_TYPE)?
-	('times' times=ELong)?
-	('eps' eps=EDouble)?;
+	type=PORT_TYPE
+	name=EString;
 
 Discovery returns Discovery:
 	{Discovery}
 	'discovery'
 	name=EString
-	// ('appliedTo' appliedTo=[Port|EString])?		
-	// ('outputSeries' expSeries=[TimeSeries|EString])?	
-	// ('expectedSeries' '[' series+=TimeValue ("," series+=TimeValue)* ']')?	
 	expression=XBlockExpression;
 
 Import returns Import:
