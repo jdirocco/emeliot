@@ -18,4 +18,11 @@
 		</plugins>
 	</build>
 
+	<dependencies>
+		<dependency>
+			<groupId>emeliot.dsl</groupId>
+			<artifactId>emeliot.dsl.ui</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
 </project>

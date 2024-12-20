@@ -43,7 +43,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	
 	/********** TODO: ADD OPERATORS (ALL ADDRESS COMMISSION MUTATION) **********/
 	
-	public void addTimeAndValue(TimeSeries s, double value, int time) {
+	public void addTimeAndValue(TimeSeries s, double value, double time) {
 		TimeValue tv = ReadFactory.eINSTANCE.createTimeValue();
 		tv.setTime(time);
 		tv.setValue(value);
@@ -51,29 +51,29 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 		reorderTimeSeries(s);
 	}
 	
-	public void addTimeAndValue_File(Path tsInputPath, Path tsOutputPath, double value, int time) throws IOException {
+	public void addTimeAndValue_File(Path tsInputPath, Path tsOutputPath, double value, double time) throws IOException {
 		TimeSeries s = readTSFromFile(tsInputPath);
 		addTimeAndValue(s, value, time);
 		writeTSToFile(s, tsOutputPath);
 	}
 	
-	public void addRandomTimeAndValue(TimeSeries s, double value, int minTime, int maxTime) {
+	public void addRandomTimeAndValue(TimeSeries s, double value, double minTime, double maxTime) {
 		TimeValue tv = ReadFactory.eINSTANCE.createTimeValue();
 		Random r = new Random();
-		int timeRandom = r.nextInt(minTime, maxTime);
+		double timeRandom = r.nextDouble(minTime, maxTime);
 		tv.setTime(timeRandom);
 		tv.setValue(value);
 		s.getTimeValues().add(tv);
 		reorderTimeSeries(s);
 	}
 	
-	public void addRandomTimeAndValue_File(Path tsInputPath, Path tsOutputPath, double value, int minTime, int maxTime) throws IOException {
+	public void addRandomTimeAndValue_File(Path tsInputPath, Path tsOutputPath, double value, double minTime, double maxTime) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    addRandomTimeAndValue(s, value, minTime, maxTime);
 	    writeTSToFile(s, tsOutputPath);
 	}
 	
-	public void addTimeAndRandomValue(TimeSeries s, int time, double minValue, double maxValue) {
+	public void addTimeAndRandomValue(TimeSeries s, double time, double minValue, double maxValue) {
 		TimeValue tv = ReadFactory.eINSTANCE.createTimeValue();
 		Random r = new Random();
 		double valueRandom = r.nextDouble(minValue, maxValue);
@@ -83,17 +83,17 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 		reorderTimeSeries(s);
 	}
 	
-	public void addTimeAndRandomValue_File(Path tsInputPath, Path tsOutputPath, int time, double minValue, double maxValue) throws IOException {
+	public void addTimeAndRandomValue_File(Path tsInputPath, Path tsOutputPath, double time, double minValue, double maxValue) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    addTimeAndRandomValue(s, time, minValue, maxValue);
 	    writeTSToFile(s, tsOutputPath);
 	}
 	
-	public void addRandomTimeAndRandomValue(TimeSeries s, int minTime, int maxTime, 
+	public void addRandomTimeAndRandomValue(TimeSeries s, double minTime, double maxTime, 
 			double minValue, double maxValue) {
 		TimeValue tv = ReadFactory.eINSTANCE.createTimeValue();
 		Random r = new Random();
-		int timeRandom = r.nextInt(minTime, maxTime);
+		double timeRandom = r.nextDouble(minTime, maxTime);
 		double valueRandom = r.nextDouble(minValue, maxValue);
 		tv.setTime(timeRandom);
 		tv.setValue(valueRandom);
@@ -101,13 +101,13 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 		reorderTimeSeries(s);
 	}
 	
-	public void addRandomTimeAndRandomValue_File(Path tsInputPath, Path tsOutputPath, int minTime, int maxTime, double minValue, double maxValue) throws IOException {
+	public void addRandomTimeAndRandomValue_File(Path tsInputPath, Path tsOutputPath, double minTime, double maxTime, double minValue, double maxValue) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    addRandomTimeAndRandomValue(s, minTime, maxTime, minValue, maxValue);
 	    writeTSToFile(s, tsOutputPath);
 	}
 	
-	public void addMultipleTimeValues(TimeSeries s, List<Integer> times, List<Double> values) {
+	public void addMultipleTimeValues(TimeSeries s, List<Double> times, List<Double> values) {
 		if(times.size() != values.size())
 	        throw new IllegalArgumentException("Times and values sizes do not match");
         for (int i = 0; i < times.size(); i++) {
@@ -119,17 +119,17 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
         reorderTimeSeries(s);
     }
 	
-	public void addMultipleTimeValues_File(Path tsInputPath, Path tsOutputPath, List<Integer> times, List<Double> values) throws IOException {
+	public void addMultipleTimeValues_File(Path tsInputPath, Path tsOutputPath, List<Double> times, List<Double> values) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    addMultipleTimeValues(s, times, values);
 	    writeTSToFile(s, tsOutputPath);
 	}
 	
-    public void addMultipleRandomTimeValues(TimeSeries s, int minTime, int maxTime, double minValue, 
+    public void addMultipleRandomTimeValues(TimeSeries s, double minTime, double maxTime, double minValue, 
     		double maxValue, int count) {
         Random r = new Random();
         for (int i=0; i<count; i++) {
-            int timeRandom = r.nextInt(minTime, maxTime);
+            double timeRandom = r.nextDouble(minTime, maxTime);
             double valueRandom = r.nextDouble(minValue, maxValue);
             TimeValue tv = ReadFactory.eINSTANCE.createTimeValue();
             tv.setTime(timeRandom);
@@ -139,7 +139,8 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
         reorderTimeSeries(s);
     }
 	
-    public void addMultipleRandomTimeValues_File(Path tsInputPath, Path tsOutputPath, int minTime, int maxTime, double minValue, double maxValue, int count) throws IOException {
+    public void addMultipleRandomTimeValues_File(Path tsInputPath, Path tsOutputPath, double minTime, double maxTime, double minValue, 
+    		double maxValue, int count) throws IOException {
         TimeSeries s = readTSFromFile(tsInputPath);
         addMultipleRandomTimeValues(s, minTime, maxTime, minValue, maxValue, count);
         writeTSToFile(s, tsOutputPath);
@@ -207,7 +208,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	
 	/********** TODO: EDIT OPERATORS (SOME ADDRESS LATE/EARLY/VALUECOARSE/VALUESUBTLE MUTATIONS)**********/
 	
-    public void changeValue(TimeSeries s, double value, int time) {
+    public void changeValue(TimeSeries s, double value, double time) {
 	    for (TimeValue tv: s.getTimeValues()) {
 	        if (tv.getTime() == time) {
 	            tv.setValue(value);
@@ -216,13 +217,13 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    }
 	}
     
-    public void changeValue_File(Path tsInputPath, Path tsOutputPath, double value, int time) throws IOException {
+    public void changeValue_File(Path tsInputPath, Path tsOutputPath, double value, double time) throws IOException {
         TimeSeries s = readTSFromFile(tsInputPath);
         changeValue(s, value, time);
         writeTSToFile(s, tsOutputPath);
     }
 	
-	public void changeTime(TimeSeries s, int timeOld, int timeNew) {
+	public void changeTime(TimeSeries s, double timeOld, double timeNew) {
 	    for (TimeValue tv: s.getTimeValues()) {
 	        if (tv.getTime() == timeOld) {
 	            tv.setTime(timeNew);
@@ -232,13 +233,13 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    reorderTimeSeries(s);
 	}
 	
-	public void changeTime_File(Path tsInputPath, Path tsOutputPath, int timeOld, int timeNew) throws IOException {
+	public void changeTime_File(Path tsInputPath, Path tsOutputPath, double timeOld, double timeNew) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    changeTime(s, timeOld, timeNew);
 	    writeTSToFile(s, tsOutputPath);
 	}
 	
-	public void changeValueWithRandom(TimeSeries s, double minValue, double maxValue, int time) {
+	public void changeValueWithRandom(TimeSeries s, double minValue, double maxValue, double time) {
 		Random r = new Random();
 		double valueRandom = r.nextDouble(minValue, maxValue);
 	    for (TimeValue tv: s.getTimeValues()) {
@@ -249,15 +250,15 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    }
 	}
 	
-	public void changeValueWithRandom_File(Path tsInputPath, Path tsOutputPath, double minValue, double maxValue, int time) throws IOException {
+	public void changeValueWithRandom_File(Path tsInputPath, Path tsOutputPath, double minValue, double maxValue, double time) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    changeValueWithRandom(s, minValue, maxValue, time);
 	    writeTSToFile(s, tsOutputPath);
 	}
 	
-	public void changeTimeWithRandom(TimeSeries s, int minTime, int maxTime, int time) {
+	public void changeTimeWithRandom(TimeSeries s, double minTime, double maxTime, double time) {
 		Random r = new Random();
-		int timeRandom = r.nextInt(minTime, maxTime);
+		double timeRandom = r.nextDouble(minTime, maxTime);
 	    for (TimeValue tv: s.getTimeValues()) {
 	        if (tv.getTime() == time) {
 	            tv.setTime(timeRandom);
@@ -267,13 +268,13 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    reorderTimeSeries(s);
 	}
 	
-	public void changeTimeWithRandom_File(Path tsInputPath, Path tsOutputPath, int minTime, int maxTime, int time) throws IOException {
+	public void changeTimeWithRandom_File(Path tsInputPath, Path tsOutputPath, double minTime, double maxTime, double time) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    changeTimeWithRandom(s, minTime, maxTime, time);
 	    writeTSToFile(s, tsOutputPath);
 	}
 	
-	public void changeTimeAndValue(TimeSeries s, int timeOld, int timeNew, double newValue) {
+	public void changeTimeAndValue(TimeSeries s, double timeOld, double timeNew, double newValue) {
 	    for (TimeValue tv: s.getTimeValues()) {
 	        if (tv.getTime() == timeOld) {
 	            tv.setTime(timeNew);
@@ -284,16 +285,16 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    reorderTimeSeries(s);
 	}
 
-	public void changeTimeAndValue_File(Path tsInputPath, Path tsOutputPath, int timeOld, int timeNew, double newValue) throws IOException {
+	public void changeTimeAndValue_File(Path tsInputPath, Path tsOutputPath, double timeOld, double timeNew, double newValue) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    changeTimeAndValue(s, timeOld, timeNew, newValue);
 	    writeTSToFile(s, tsOutputPath);
 	}
 	
-	public void changeTimeWithRandomAndValue(TimeSeries s, int timeOld, int minTime, int maxTime, 
+	public void changeTimeWithRandomAndValue(TimeSeries s, double timeOld, double minTime, double maxTime, 
 			double valueNew) {
 	    Random r = new Random();
-	    int timeRandom = r.nextInt(minTime, maxTime);
+	    double timeRandom = r.nextDouble(minTime, maxTime);
 	    for (TimeValue tv: s.getTimeValues()) {
 	        if (tv.getTime() == timeOld) {
 	            tv.setTime(timeRandom);
@@ -304,13 +305,13 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    reorderTimeSeries(s);
 	}
 	
-	public void changeTimeWithRandomAndValue_File(Path tsInputPath, Path tsOutputPath, int timeOld, int minTime, int maxTime, double valueNew) throws IOException {
+	public void changeTimeWithRandomAndValue_File(Path tsInputPath, Path tsOutputPath, double timeOld, double minTime, double maxTime, double valueNew) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    changeTimeWithRandomAndValue(s, timeOld, minTime, maxTime, valueNew);
 	    writeTSToFile(s, tsOutputPath);
 	}
 
-	public void changeTimeAndValueWithRandom(TimeSeries s, int timeOld, int timeNew, double minValue, 
+	public void changeTimeAndValueWithRandom(TimeSeries s, double timeOld, double timeNew, double minValue, 
 			double maxValue) {
 	    Random r = new Random();
 	    double valueRandom = r.nextDouble(minValue, maxValue);
@@ -324,16 +325,16 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    reorderTimeSeries(s);
 	}
 	
-	public void changeTimeAndValueWithRandom_File(Path tsInputPath, Path tsOutputPath, int timeOld, int timeNew, double minValue, double maxValue) throws IOException {
+	public void changeTimeAndValueWithRandom_File(Path tsInputPath, Path tsOutputPath, double timeOld, double timeNew, double minValue, double maxValue) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    changeTimeAndValueWithRandom(s, timeOld, timeNew, minValue, maxValue);
 	    writeTSToFile(s, tsOutputPath);
 	}
 	
-	public void changeTimeWithRandomAndValueWithRandom(TimeSeries s, int timeOld, int minTime, int maxTime, 
+	public void changeTimeWithRandomAndValueWithRandom(TimeSeries s, double timeOld, double minTime, double maxTime, 
 			double minValue, double maxValue) {
 	    Random r = new Random();
-	    int timeRandom = r.nextInt(minTime, maxTime);
+	    double timeRandom = r.nextDouble(minTime, maxTime);
 	    double valueRandom = r.nextDouble(minValue, maxValue);
 	    for (TimeValue tv: s.getTimeValues()) {
 	        if (tv.getTime() == timeOld) {
@@ -345,13 +346,13 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    reorderTimeSeries(s);
 	}
 	
-	public void changeTimeWithRandomAndValueWithRandom_File(Path tsInputPath, Path tsOutputPath, int timeOld, int minTime, int maxTime, double minValue, double maxValue) throws IOException {
+	public void changeTimeWithRandomAndValueWithRandom_File(Path tsInputPath, Path tsOutputPath, double timeOld, double minTime, double maxTime, double minValue, double maxValue) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    changeTimeWithRandomAndValueWithRandom(s, timeOld, minTime, maxTime, minValue, maxValue);
 	    writeTSToFile(s, tsOutputPath);
 	}
 	
-	public void changeARandomTimeValue(TimeSeries s, int newTime, double newValue) {
+	public void changeARandomTimeValue(TimeSeries s, double newTime, double newValue) {
 	    TimeValue tvRandom = selectRandomTimeValue(s);
 	    if (tvRandom != null) {
 	        tvRandom.setTime(newTime);
@@ -360,17 +361,17 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    reorderTimeSeries(s);
 	}
 	
-	public void changeARandomTimeValue_File(Path tsInputPath, Path tsOutputPath, int newTime, double newValue) throws IOException {
+	public void changeARandomTimeValue_File(Path tsInputPath, Path tsOutputPath, double newTime, double newValue) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    changeARandomTimeValue(s, newTime, newValue);
 	    writeTSToFile(s, tsOutputPath);
 	}
 	
-	public void changeARandomTimeValueWithRandomTimeValue(TimeSeries s, int minTime, int maxTime,
+	public void changeARandomTimeValueWithRandomTimeValue(TimeSeries s, double minTime, double maxTime,
 					double minValue, double maxValue) {
 	    TimeValue randomTV = selectRandomTimeValue(s);
 	    Random r = new Random();
-	    int timeRandom = r.nextInt(minTime, maxTime);
+	    double timeRandom = r.nextDouble(minTime, maxTime);
 	    double valueRandom = r.nextDouble(minValue, maxValue);
 	    if (randomTV != null) {
 	        randomTV.setTime(timeRandom);
@@ -379,14 +380,14 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    reorderTimeSeries(s);
 	}
 	
-	public void changeARandomTimeValue_File(Path tsInputPath, Path tsOutputPath,int minTime, int maxTime,
+	public void changeARandomTimeValue_File(Path tsInputPath, Path tsOutputPath, double minTime, double maxTime,
 			double minValue, double maxValue) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    changeARandomTimeValueWithRandomTimeValue(s, minTime, maxTime, minValue, maxValue);
 	    writeTSToFile(s, tsOutputPath);
 	}
 	
-	public void changeMultipleTimeValues(TimeSeries s, List<Integer> timesOld, List<Integer> timesNew,
+	public void changeMultipleTimeValues(TimeSeries s, List<Double> timesOld, List<Double> timesNew,
 			List<Double> valuesNew) {
 		if(timesOld.size() != valuesNew.size() || timesOld.size() != timesNew.size())
 	        throw new IllegalArgumentException("Times and values sizes do not match");
@@ -402,19 +403,19 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
         reorderTimeSeries(s);
     }
 	
-	public void changeMultipleTimeValues_File(Path tsInputPath, Path tsOutputPath, List<Integer> timesOld, List<Integer> timesNew, List<Double> valuesNew) throws IOException {
+	public void changeMultipleTimeValues_File(Path tsInputPath, Path tsOutputPath, List<Double> timesOld, List<Double> timesNew, List<Double> valuesNew) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    changeMultipleTimeValues(s, timesOld, timesNew, valuesNew);
 	    writeTSToFile(s, tsOutputPath);
 	}
 
-	public void changeMultipleTimeValuesWithRandomTimeValues(TimeSeries s, List<Integer> timesOld, int minTime, 
-			int maxTime, double minValue, double maxValue) {
+	public void changeMultipleTimeValuesWithRandomTimeValues(TimeSeries s, List<Double> timesOld, double minTime, 
+			double maxTime, double minValue, double maxValue) {
         Random r = new Random();
         for (int i = 0; i < timesOld.size(); i++) {
     	    for (TimeValue tv: s.getTimeValues()) {
 		        if (tv.getTime() == timesOld.get(i)) {
-			        int timeRandom = r.nextInt(minTime, maxTime);
+		        	double timeRandom = r.nextDouble(minTime, maxTime);
 				    double valueRandom = r.nextDouble(minValue, maxValue);
 		            tv.setTime(timeRandom);
 		            tv.setValue(valueRandom);
@@ -425,17 +426,18 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
         reorderTimeSeries(s);
     }
 	
-	public void changeMultipleTimeValuesWithRandomTimeValues_File(Path tsInputPath, Path tsOutputPath, List<Integer> timesOld, int minTime, int maxTime, double minValue, double maxValue) throws IOException {
+	public void changeMultipleTimeValuesWithRandomTimeValues_File(Path tsInputPath, Path tsOutputPath, List<Double> timesOld, double minTime, 
+			double maxTime, double minValue, double maxValue) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    changeMultipleTimeValuesWithRandomTimeValues(s, timesOld, minTime, maxTime, minValue, maxValue);
 	    writeTSToFile(s, tsOutputPath);
 	}
 	
-    public void changeTimeLate(TimeSeries s, double eps, int time, int maxDomainTime) {
+    public void changeTimeLate(TimeSeries s, double eps, double time, double maxDomainTime) {
         Random r = new Random();
         for (TimeValue tv: s.getTimeValues()) {
 	        if (tv.getTime() == time) {
-	        	int timeNew = time + (int) (r.nextDouble() * (maxDomainTime - time - eps) + eps);
+	        	double timeNew = time + (double) (r.nextDouble() * (maxDomainTime - time - eps) + eps);
 	        	tv.setTime(timeNew);	            
 	            break;
 	        } 
@@ -443,36 +445,36 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
         reorderTimeSeries(s);
     }
     
-    public void changeTimeLate_File(Path tsInputPath, Path tsOutputPath, double eps, int time, int maxDomainTime) throws IOException {
+    public void changeTimeLate_File(Path tsInputPath, Path tsOutputPath, double eps, double time, double maxDomainTime) throws IOException {
         TimeSeries s = readTSFromFile(tsInputPath);
         changeTimeLate(s, eps, time, maxDomainTime);
         writeTSToFile(s, tsOutputPath);
     }
 	
-	public void changeRandomTimeLate(TimeSeries s, double eps, int maxDomainTime) {
+	public void changeRandomTimeLate(TimeSeries s, double eps, double maxDomainTime) {
         Random r = new Random();
         TimeValue randomTV = selectRandomTimeValue(s);
         if (randomTV != null) {
-            int timeOld = randomTV.getTime();
-            int timeNew = timeOld + (int) (r.nextDouble() * (maxDomainTime - timeOld - eps) + eps);
+        	double timeOld = randomTV.getTime();
+        	double timeNew = timeOld + (double) (r.nextDouble() * (maxDomainTime - timeOld - eps) + eps);
             randomTV.setTime(timeNew);
         }
         reorderTimeSeries(s);
     }
 	
-	public void changeRandomTimeLate_File(Path tsInputPath, Path tsOutputPath, double eps, int maxDomainTime) throws IOException {
+	public void changeRandomTimeLate_File(Path tsInputPath, Path tsOutputPath, double eps, double maxDomainTime) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    changeRandomTimeLate(s, eps, maxDomainTime);
 	    writeTSToFile(s, tsOutputPath);
 	}
 	
-	public void changeMultipleTimeLate(TimeSeries s, double eps, List<Integer> times, int maxDomainTime) {
+	public void changeMultipleTimeLate(TimeSeries s, double eps, List<Double> times, double maxDomainTime) {
         Random r = new Random();
 		for (int i = 0; i < times.size(); i++) {
     	    for (TimeValue tv: s.getTimeValues()) {
 		        if (tv.getTime() == times.get(i)) {
-		        	int timeOld = times.get(i);
-		        	int timeNew = timeOld + (int) (r.nextDouble() * (maxDomainTime - timeOld - eps) + eps);
+		        	double timeOld = times.get(i);
+		        	double timeNew = timeOld + (double) (r.nextDouble() * (maxDomainTime - timeOld - eps) + eps);
 		        	tv.setTime(timeNew);	  
 		        	continue;
 		        }
@@ -481,17 +483,17 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
         reorderTimeSeries(s);
 	}
 	
-	public void changeMultipleTimeLate_File(Path tsInputPath, Path tsOutputPath, double eps, List<Integer> times, int maxDomainTime) throws IOException {
+	public void changeMultipleTimeLate_File(Path tsInputPath, Path tsOutputPath, double eps, List<Double> times, double maxDomainTime) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    changeMultipleTimeLate(s, eps, times, maxDomainTime);
 	    writeTSToFile(s, tsOutputPath);
 	}
 	
-    public void changeTimeEarly(TimeSeries s, double eps, int time, int minDomainTime) {
+    public void changeTimeEarly(TimeSeries s, double eps, double time, double minDomainTime) {
         Random r = new Random();
         for (TimeValue tv: s.getTimeValues()) {
 	        if (tv.getTime() == time) {
-	            int timeNew = time - (int) (r.nextDouble() * (time - minDomainTime - eps) + eps);
+	        	double timeNew = time - (double) (r.nextDouble() * (time - minDomainTime - eps) + eps);
 	            tv.setTime(timeNew);
 	            break;
 	        }
@@ -499,36 +501,36 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
         reorderTimeSeries(s);
     }
     
-    public void changeTimeEarly_File(Path tsInputPath, Path tsOutputPath, double eps, int time, int minDomainTime) throws IOException {
+    public void changeTimeEarly_File(Path tsInputPath, Path tsOutputPath, double eps, double time, double minDomainTime) throws IOException {
         TimeSeries s = readTSFromFile(tsInputPath);
         changeTimeEarly(s, eps, time, minDomainTime);
         writeTSToFile(s, tsOutputPath);
     }
     
-    public void changeRandomTimeEarly(TimeSeries s, double eps, int minDomainTime) {
+    public void changeRandomTimeEarly(TimeSeries s, double eps, double minDomainTime) {
         Random r = new Random();
         TimeValue randomTV = selectRandomTimeValue(s);
         if (randomTV != null) {
-            int timeOld = randomTV.getTime();
-            int timeNew = timeOld - (int) (r.nextDouble() * (timeOld - minDomainTime - eps) + eps);
+        	double timeOld = randomTV.getTime();
+        	double timeNew = timeOld - (double) (r.nextDouble() * (timeOld - minDomainTime - eps) + eps);
             randomTV.setTime(timeNew);
         }
         reorderTimeSeries(s);
     }
     
-    public void changeRandomTimeEarly_File(Path tsInputPath, Path tsOutputPath, double eps, int minDomainTime) throws IOException {
+    public void changeRandomTimeEarly_File(Path tsInputPath, Path tsOutputPath, double eps, double minDomainTime) throws IOException {
         TimeSeries s = readTSFromFile(tsInputPath);
         changeRandomTimeEarly(s, eps, minDomainTime);
         writeTSToFile(s, tsOutputPath);
     }
 
-	public void changeMultipleTimeEarly(TimeSeries s, double eps, List<Integer> times, int minDomainTime) {
+	public void changeMultipleTimeEarly(TimeSeries s, double eps, List<Double> times, double minDomainTime) {
         Random r = new Random();
 		for (int i = 0; i < times.size(); i++) {
     	    for (TimeValue tv: s.getTimeValues()) {
 		        if (tv.getTime() == times.get(i)) {
-		        	int timeOld = times.get(i);
-		            int timeNew = timeOld - (int) (r.nextDouble() * (timeOld - minDomainTime - eps) + eps);
+		        	double timeOld = times.get(i);
+		        	double timeNew = timeOld - (double) (r.nextDouble() * (timeOld - minDomainTime - eps) + eps);
 		        	tv.setTime(timeNew);	  
 		        	continue;
 		        }
@@ -537,13 +539,13 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
         reorderTimeSeries(s);
 	}
 	
-    public void changeMultipleTimeEarly_File(Path tsInputPath, Path tsOutputPath, double eps, List<Integer> times, int minDomainTime) throws IOException {
+    public void changeMultipleTimeEarly_File(Path tsInputPath, Path tsOutputPath, double eps, List<Double> times, double minDomainTime) throws IOException {
         TimeSeries s = readTSFromFile(tsInputPath);
         changeMultipleTimeEarly(s, eps, times, minDomainTime);
         writeTSToFile(s, tsOutputPath);
     }
 	
-    public void changeValueCoarse(TimeSeries s, double eps, double minDomainValue, double maxDomainValue, int time) {
+    public void changeValueCoarse(TimeSeries s, double eps, double minDomainValue, double maxDomainValue, double time) {
         Random r = new Random();
         for (TimeValue tv: s.getTimeValues()) {
 	        if (tv.getTime() == time) {
@@ -556,7 +558,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
         }
     }
 	
-    public void changeValueCoarse_File(Path tsInputPath, Path tsOutputPath, double eps, double minDomainValue, double maxDomainValue, int time) throws IOException {
+    public void changeValueCoarse_File(Path tsInputPath, Path tsOutputPath, double eps, double minDomainValue, double maxDomainValue, double time) throws IOException {
         TimeSeries s = readTSFromFile(tsInputPath);
         changeValueCoarse(s, eps, minDomainValue, maxDomainValue, time);
         writeTSToFile(s, tsOutputPath);
@@ -579,7 +581,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
         writeTSToFile(s, tsOutputPath);
     }
 
-	public void changeMultipleValueCoarse(TimeSeries s, double eps, List<Integer> times, 
+	public void changeMultipleValueCoarse(TimeSeries s, double eps, List<Double> times, 
 			double minDomainValue, double maxDomainValue) {
 		Random r = new Random();
 		for (int i = 0; i < times.size(); i++) {
@@ -596,13 +598,13 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
         reorderTimeSeries(s);
 	}
 	
-	public void changeMultipleValueCoarse_File(Path tsInputPath, Path tsOutputPath, double eps, List<Integer> times, double minDomainValue, double maxDomainValue) throws IOException {
+	public void changeMultipleValueCoarse_File(Path tsInputPath, Path tsOutputPath, double eps, List<Double> times, double minDomainValue, double maxDomainValue) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    changeMultipleValueCoarse(s, eps, times, minDomainValue, maxDomainValue);
 	    writeTSToFile(s, tsOutputPath);
 	}
 
-	public void changeValueSubtle(TimeSeries s, double eps, int time, double minDomainValue, double maxDomainValue) {
+	public void changeValueSubtle(TimeSeries s, double eps, double time, double minDomainValue, double maxDomainValue) {
 		Random r = new Random();
         for (TimeValue tv: s.getTimeValues()) {
 	        if (tv.getTime() == time) {
@@ -614,7 +616,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
         }
     }
 	
-	public void changeValueSubtle_File(Path tsInputPath, Path tsOutputPath, double eps, int time, double minDomainValue, double maxDomainValue) throws IOException {
+	public void changeValueSubtle_File(Path tsInputPath, Path tsOutputPath, double eps, double time, double minDomainValue, double maxDomainValue) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    changeValueSubtle(s, eps, time, minDomainValue, maxDomainValue);
 	    writeTSToFile(s, tsOutputPath);
@@ -636,7 +638,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    writeTSToFile(s, tsOutputPath);
 	}
 	
-	public void changeMultipleValueSubtle(TimeSeries s, double eps, List<Integer> times, double minDomainValue, 
+	public void changeMultipleValueSubtle(TimeSeries s, double eps, List<Double> times, double minDomainValue, 
 			double maxDomainValue) {
 		Random r = new Random();
 		for (int i = 0; i < times.size(); i++) {
@@ -652,7 +654,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
         reorderTimeSeries(s);
 	}
 
-	public void changeMultipleValueSubtle_File(Path tsInputPath, Path tsOutputPath, double eps, List<Integer> times, double minDomainValue, double maxDomainValue) throws IOException {
+	public void changeMultipleValueSubtle_File(Path tsInputPath, Path tsOutputPath, double eps, List<Double> times, double minDomainValue, double maxDomainValue) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    changeMultipleValueSubtle(s, eps, times, minDomainValue, maxDomainValue);
 	    writeTSToFile(s, tsOutputPath);
@@ -679,11 +681,11 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	
 	/********** TODO: REMOVE OPERATORS (ALL ADDRESS OMISSION MUTATION)**********/
     
-	public void removeTimeValue(TimeSeries s, int time, double value) {
+	public void removeTimeValue(TimeSeries s, double time, double value) {
         s.getTimeValues().removeIf(tv -> tv.getTime() == time && tv.getValue() == value);
     }
 	
-	public void removeTimeValue_File(Path tsInputPath, Path tsOutputPath, int time, double value) throws IOException {
+	public void removeTimeValue_File(Path tsInputPath, Path tsOutputPath, double time, double value) throws IOException {
 	    TimeSeries s = readTSFromFile(tsInputPath);
 	    removeTimeValue(s, time, value);
 	    writeTSToFile(s, tsOutputPath);
@@ -712,15 +714,15 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
         writeTSToFile(s, tsOutputPath);
     }
 
-    public void removeMultipleTimeValues(TimeSeries s, List<Integer> times, List<Double> values) {
+    public void removeMultipleTimeValues(TimeSeries s, List<Double> times, List<Double> values) {
         for (int i=0; i<times.size(); i++) {
-            int time = times.get(i);
+            double time = times.get(i);
             double value = values.get(i);
             s.getTimeValues().removeIf(tv -> tv.getTime() == time && tv.getValue() == value);
         }
     }
     
-    public void removeMultipleTimeValues_File(Path tsInputPath, Path tsOutputPath, List<Integer> times, List<Double> values) throws IOException {
+    public void removeMultipleTimeValues_File(Path tsInputPath, Path tsOutputPath, List<Double> times, List<Double> values) throws IOException {
         TimeSeries s = readTSFromFile(tsInputPath);
         removeMultipleTimeValues(s, times, values);
         writeTSToFile(s, tsOutputPath);
@@ -728,7 +730,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 
     public void removeMultipleTimeValues(TimeSeries s, List<TimeValue> timeValues) {
     	for (int i=0; i<timeValues.size(); i++) {
-    		int time = timeValues.get(i).getTime();
+    		double time = timeValues.get(i).getTime();
             double value = timeValues.get(i).getValue();
             s.getTimeValues().removeIf(tv -> tv.getTime() == time && tv.getValue() == value);
         }
@@ -762,21 +764,21 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
         writeTSToFile(s, tsOutputPath);
     }
 
-    public void removeTimeValuesBeforeTime(TimeSeries s, int time) {
+    public void removeTimeValuesBeforeTime(TimeSeries s, double time) {
         s.getTimeValues().removeIf(tv -> tv.getTime() < time);
     }
     
-    public void removeTimeValuesBeforeTime_File(Path tsInputPath, Path tsOutputPath, int time) throws IOException {
+    public void removeTimeValuesBeforeTime_File(Path tsInputPath, Path tsOutputPath, double time) throws IOException {
         TimeSeries s = readTSFromFile(tsInputPath);
         removeTimeValuesBeforeTime(s, time);
         writeTSToFile(s, tsOutputPath);
     }
 
-    public void removeTimeValuesAfterTime(TimeSeries s, int time) {
+    public void removeTimeValuesAfterTime(TimeSeries s, double time) {
         s.getTimeValues().removeIf(tv -> tv.getTime() > time);
     }
     
-    public void removeTimeValuesAfterTime_File(Path tsInputPath, Path tsOutputPath, int time) throws IOException {
+    public void removeTimeValuesAfterTime_File(Path tsInputPath, Path tsOutputPath, double time) throws IOException {
         TimeSeries s = readTSFromFile(tsInputPath);
         removeTimeValuesAfterTime(s, time);
         writeTSToFile(s, tsOutputPath);
@@ -817,7 +819,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	
     public void reorderTimeSeries(TimeSeries s) {
 		List<TimeValue> timeValues = new ArrayList<>(s.getTimeValues());
-	    timeValues.sort(Comparator.comparingInt(TimeValue::getTime));
+	    timeValues.sort(Comparator.comparingDouble(TimeValue::getTime));
 	    s.getTimeValues().clear();
 	    for (TimeValue tv: timeValues)
 	        s.getTimeValues().add(tv);
@@ -833,7 +835,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    return null;
 	}
 
-	public boolean existTime(TimeSeries s, int time) {
+	public boolean existTime(TimeSeries s, double time) {
 	    for (TimeValue tv: s.getTimeValues())
 	    	if (tv.getTime() == time)
 	            return true;
@@ -849,12 +851,12 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    return false;
 	}
 	
-	public boolean existTimeValue(TimeSeries s, int time, double value) {
+	public boolean existTimeValue(TimeSeries s, double time, double value) {
 	    return (existTime(s, time) && existValue(s, value));
 	}
 
-	public List<Integer> getAllTimes(TimeSeries s) {
-	    List<Integer> times = new ArrayList<>();
+	public List<Double> getAllTimes(TimeSeries s) {
+	    List<Double> times = new ArrayList<>();
 	    for (TimeValue tv: s.getTimeValues())
 	        times.add(tv.getTime());
 	    return times;
@@ -867,8 +869,8 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    return values;
 	}
 
-	public List<Integer> getTimesInRange(TimeSeries s, int minTime, int maxTime) {
-	    List<Integer> times = new ArrayList<>();
+	public List<Double> getTimesInRange(TimeSeries s, double minTime, double maxTime) {
+	    List<Double> times = new ArrayList<>();
 	    for (TimeValue tv: s.getTimeValues())
 	        if (tv.getTime() >= minTime && tv.getTime() <= maxTime)
 	        	times.add(tv.getTime());
@@ -885,7 +887,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    return values;
 	}
 	
-	public List<TimeValue> getTimeValuesInRange(TimeSeries s, int minTime, int maxTime, double minValue, 
+	public List<TimeValue> getTimeValuesInRange(TimeSeries s, double minTime, double maxTime, double minValue, 
 			double maxValue) {
 	    List<TimeValue> timeValues = new ArrayList<>();
 	    for (TimeValue tv: s.getTimeValues()) {
@@ -896,13 +898,13 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    return timeValues;
 	}
 
-	public Double getValueAt(TimeSeries s, int index) {
+	public double getValueAt(TimeSeries s, int index) {
 	    if (index >= 0 && index < s.getTimeValues().size())
 	    	return s.getTimeValues().get(index).getValue();
         throw new IllegalArgumentException("Index is out of range");
 	}
 
-	public int getTimeAt(TimeSeries s, int index) {
+	public double getTimeAt(TimeSeries s, int index) {
 	    if (index >= 0 && index < s.getTimeValues().size())
 	    	return s.getTimeValues().get(index).getTime();
         throw new IllegalArgumentException("Index is out of range");
@@ -914,16 +916,16 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
         throw new IllegalArgumentException("Index is out of range");
 	}
 
-	public int getMaxTime(TimeSeries s) {
+	public double getMaxTime(TimeSeries s) {
 	    return s.getTimeValues().stream()
-	            .mapToInt(TimeValue::getTime)
+	            .mapToDouble(TimeValue::getTime)
 	            .max()
 	            .orElseThrow(NoSuchElementException::new);
 	}
 
-	public int getMinTime(TimeSeries s) {
+	public double getMinTime(TimeSeries s) {
 	    return s.getTimeValues().stream()
-	            .mapToInt(TimeValue::getTime)
+	            .mapToDouble(TimeValue::getTime)
 	            .min()
 	            .orElseThrow(NoSuchElementException::new);
 	}
@@ -950,7 +952,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
         throw new IllegalArgumentException("Index is out of range");
 	}
 
-	public int getNextTime(TimeSeries s, TimeValue tv) {
+	public double getNextTime(TimeSeries s, TimeValue tv) {
 	    TimeValue nextTV = getNextTimeValue(s, tv);
 	    return (nextTV != null) ? nextTV.getTime() : -1;
 	}
@@ -967,7 +969,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
         throw new IllegalArgumentException("Index is out of range");
 	}
 
-	public int getNextTime(TimeSeries s, int index) {
+	public double getNextTime(TimeSeries s, int index) {
 	    TimeValue nextTV = getNextTimeValue(s, index);
 	    return (nextTV != null) ? nextTV.getTime() : -1;
 	}
@@ -985,7 +987,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    return null;
 	}
 
-	public int getPreviousTime(TimeSeries s, TimeValue tv) {
+	public double getPreviousTime(TimeSeries s, TimeValue tv) {
 	    TimeValue prevTV = getPreviousTimeValue(s, tv);
 	    return (prevTV != null) ? prevTV.getTime() : -1;
 	}
@@ -1001,7 +1003,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    return null;
 	}
 
-	public int getPreviousTime(TimeSeries s, int index) {
+	public double getPreviousTime(TimeSeries s, int index) {
 	    TimeValue prevTV = getPreviousTimeValue(s, index);
 	    return (prevTV != null) ? prevTV.getTime() : -1;
 	}
@@ -1011,7 +1013,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    return (prevTV != null) ? prevTV.getValue() : null;
 	}
 
-	public int getFirstTime(TimeSeries s) {
+	public double getFirstTime(TimeSeries s) {
 	    return s.getTimeValues().isEmpty() ? -1 : s.getTimeValues().get(0).getTime();
 	}
 
@@ -1023,7 +1025,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    return s.getTimeValues().isEmpty() ? null : s.getTimeValues().get(0);
 	}
 
-	public int getLastTime(TimeSeries s) {
+	public double getLastTime(TimeSeries s) {
 	    return s.getTimeValues().isEmpty() ? -1 : s.getTimeValues().get(s.getTimeValues().size() - 1).getTime();
 	}
 
@@ -1061,22 +1063,22 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	    setAllValuesToZero(s);
 	}
 
-	public void setAllTimesToTime(TimeSeries s, int time) {
+	public void setAllTimesToTime(TimeSeries s, double time) {
 	    for (TimeValue tv : s.getTimeValues())
 	        tv.setTime(time);
 	}
 
-	public void setAllValuesToValue(TimeSeries s, int value) {
+	public void setAllValuesToValue(TimeSeries s, double value) {
 	    for (TimeValue tv : s.getTimeValues())
 	        tv.setValue(value);
 	}
 
-	public void setAllToTimeValue(TimeSeries s, int time, int value) {
+	public void setAllToTimeValue(TimeSeries s, double time, double value) {
 	    setAllTimesToTime(s, time);
 	    setAllValuesToValue(s, value);
 	}
 
-	public TimeSeries getSubTimeSeriesInTimeRange(TimeSeries s, int minTime, int maxTime) {
+	public TimeSeries getSubTimeSeriesInTimeRange(TimeSeries s, double minTime, double maxTime) {
 	    TimeSeries subSeries = ReadFactory.eINSTANCE.createTimeSeries();
 	    for (TimeValue tv : s.getTimeValues()) {
 	        if (tv.getTime() >= minTime && tv.getTime() <= maxTime) {
@@ -1131,7 +1133,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
             if (parts.length != 2)
                 throw new IOException("Invalid line format: " + line);
             TimeValue tv = ReadFactory.eINSTANCE.createTimeValue();
-    		tv.setTime(Integer.parseInt(parts[0].trim()));
+    		tv.setTime(Double.parseDouble(parts[0].trim()));
             double value = (Double.parseDouble(parts[1].trim()));
             tv.setValue(value);
             timeSeries.getTimeValues().add(tv);
@@ -1176,12 +1178,12 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	public boolean isLate(TimeSeries tsOriginal, TimeSeries tsMutated, double eps) {
 		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) {
 			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
-			int time1 = tv1.getTime();			
+			double time1 = tv1.getTime();			
 			double value1 = tv1.getValue();
-			int closestDiffTime = Integer.MAX_VALUE;
+			double closestDiffTime = Double.MAX_VALUE;
 			for(int j=1; j<tsMutated.getTimeValues().size(); j++) {
 				TimeValue tv2 = tsMutated.getTimeValues().get(i);
-				int time2 = tv2.getTime();			
+				double time2 = tv2.getTime();			
 				double value2 = tv2.getValue();
 				//if time and value are the same, no early/late
 				if(time1 == time2 && value1 == value2) {
@@ -1190,7 +1192,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 				}
 				//if only value is the same, check closest time
 				else if (value1 == value2){
-					int timeDiff = time1 - time2;//diff between times
+					double timeDiff = time1 - time2;//diff between times
 					if(Math.abs(timeDiff)<=Math.abs(closestDiffTime)) {
 						closestDiffTime = timeDiff;
 					}
@@ -1209,12 +1211,12 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 	public boolean isEarly(TimeSeries tsOriginal, TimeSeries tsMutated, double eps) {
 		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) {
 			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
-			int time1 = tv1.getTime();			
+			double time1 = tv1.getTime();			
 			double value1 = tv1.getValue();
-			int closestDiffTime = Integer.MAX_VALUE;
+			double closestDiffTime = Double.MAX_VALUE;
 			for(int j=1; j<tsMutated.getTimeValues().size(); j++) {
 				TimeValue tv2 = tsMutated.getTimeValues().get(i);
-				int time2 = tv2.getTime();			
+				double time2 = tv2.getTime();			
 				double value2 = tv2.getValue();
 				//if time and value are the same, no early/late
 				if(time1 == time2 && value1 == value2) {
@@ -1223,7 +1225,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 				}
 				//if only value is the same, check closest time
 				else if (value1 == value2){
-					int timeDiff = time1 - time2;//diff between times
+					double timeDiff = time1 - time2;//diff between times
 					if(Math.abs(timeDiff)<=Math.abs(closestDiffTime)) {
 						closestDiffTime = timeDiff;
 					}
@@ -1239,7 +1241,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 		return false;
 	}
 	
-	public boolean isValueCoarse(TimeSeries tsOriginal, TimeSeries tsMutated, double eps, int minValue, int maxValue) {
+	public boolean isValueCoarse(TimeSeries tsOriginal, TimeSeries tsMutated, double eps, double minValue, double maxValue) {
 		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) {
 			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
 			TimeValue tv2 = tsMutated.getTimeValues().get(i);
@@ -1253,7 +1255,7 @@ public class EmeliotStandardLibrary extends EmeliotRuntime{
 		return false;
 	}
 	
-	public boolean isValueSubtle(TimeSeries tsOriginal, TimeSeries tsMutated, double eps, int minValue, int maxValue) {
+	public boolean isValueSubtle(TimeSeries tsOriginal, TimeSeries tsMutated, double eps, double minValue, double maxValue) {
 		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) {
 			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
 			TimeValue tv2 = tsMutated.getTimeValues().get(i);
