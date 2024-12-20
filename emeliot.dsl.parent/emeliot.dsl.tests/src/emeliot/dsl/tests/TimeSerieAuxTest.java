@@ -1,6 +1,7 @@
 package emeliot.dsl.tests;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 import emeliot.dsl.lib.EmeliotLib;
 import emeliot.dsl.read.ReadFactory;
@@ -320,6 +321,215 @@ public class TimeSerieAuxTest extends MainStdLibraryTest{
 			e1.printStackTrace();
 		}
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public static void testAuxOperatorsFiles(EmeliotLib e) throws IOException {
+
+	    String pathIN = Paths.get("./proteus-example/io/tsIN.txt").toString();
+
+	    // Test: printTimeSeries_File
+	    System.out.println("Testing: printTimeSeries_File");
+	    e.printTimeSeries_File(pathIN);
+
+	    // Test: reorderTimeSeries_File
+	    String pathOUT1 = Paths.get("./proteus-example/io/tsOUTReordered.txt").toString();
+	    System.out.println("Testing: reorderTimeSeries_File");
+	    e.reorderTimeSeries_File(pathIN, pathOUT1);
+
+	    // Test: selectRandomTimeValue_File
+	    System.out.println("Testing: selectRandomTimeValue_File");
+	    System.out.println("Result: " + e.selectRandomTimeValue_File(pathIN));
+
+	    // Test: existTime_File
+	    System.out.println("Testing: existTime_File with time = 0");
+	    System.out.println("Result: " + e.existTime_File(pathIN, 0));
+	    System.out.println("Testing: existTime_File with time = 5");
+	    System.out.println("Result: " + e.existTime_File(pathIN, 5));
+
+	    // Test: existValue_File
+	    System.out.println("Testing: existValue_File with value = 0");
+	    System.out.println("Result: " + e.existValue_File(pathIN, 0));
+	    System.out.println("Testing: existValue_File with value = 10");
+	    System.out.println("Result: " + e.existValue_File(pathIN, 10));
+
+	    // Test: existTimeValue_File
+	    System.out.println("Testing: existTimeValue_File with time = 0, value = 0");
+	    System.out.println("Result: " + e.existTimeValue_File(pathIN, 0, 0));
+	    System.out.println("Testing: existTimeValue_File with time = 3, value = 10");
+	    System.out.println("Result: " + e.existTimeValue_File(pathIN, 3, 10));
+	    System.out.println("Testing: existTimeValue_File with time = 3, value = 50");
+	    System.out.println("Result: " + e.existTimeValue_File(pathIN, 3, 50));
+	    System.out.println("Testing: existTimeValue_File with time = 3, value = 20");
+	    System.out.println("Result: " + e.existTimeValue_File(pathIN, 3, 20));
+
+	    // Test: getAllTimes_File
+	    System.out.println("Testing: getAllTimes_File");
+	    System.out.println("Result: " + e.getAllTimes_File(pathIN));
+
+	    // Test: getAllValues_File
+	    System.out.println("Testing: getAllValues_File");
+	    System.out.println("Result: " + e.getAllValues_File(pathIN));
+
+	    // Test: getTimesInRange_File
+	    System.out.println("Testing: getTimesInRange_File with range 3 to 5");
+	    System.out.println("Result: " + e.getTimesInRange_File(pathIN, 3, 5));
+
+	    // Test: getValuesInRange_File
+	    System.out.println("Testing: getValuesInRange_File with range 10 to 20");
+	    System.out.println("Result: " + e.getValuesInRange_File(pathIN, 10, 20));
+
+	    // Test: getTimeValuesInRange_File
+	    System.out.println("Testing: getTimeValuesInRange_File with time range 3 to 5, value range 10 to 50");
+	    System.out.println("Result: " + e.getTimeValuesInRange_File(pathIN, 3, 5, 10, 50));
+
+	    // Test: getValueAt_File
+	    System.out.println("Testing: getValueAt_File at index 2");
+	    System.out.println("Result: " + e.getValueAt_File(pathIN, 2));
+
+	    // Test: getTimeAt_File
+	    System.out.println("Testing: getTimeAt_File at index 2");
+	    System.out.println("Result: " + e.getTimeAt_File(pathIN, 2));
+
+	    // Test: getTimeValueAt_File
+	    System.out.println("Testing: getTimeValueAt_File at index 2");
+	    System.out.println("Result: " + e.getTimeValueAt_File(pathIN, 2));
+
+	    // Test: getMaxTime_File
+	    System.out.println("Testing: getMaxTime_File");
+	    System.out.println("Result: " + e.getMaxTime_File(pathIN));
+
+	    // Test: getMinTime_File
+	    System.out.println("Testing: getMinTime_File");
+	    System.out.println("Result: " + e.getMinTime_File(pathIN));
+
+	    // Test: getMaxValue_File
+	    System.out.println("Testing: getMaxValue_File");
+	    System.out.println("Result: " + e.getMaxValue_File(pathIN));
+
+	    // Test: getMinValue_File
+	    System.out.println("Testing: getMinValue_File");
+	    System.out.println("Result: " + e.getMinValue_File(pathIN));
+
+	    // Test: getNextTimeValue
+	    System.out.println("Testing: getNextTimeValue_File for time = 1");
+	    System.out.println("Result: " + e.getNextTimeValue_File(pathIN, 1));
+
+	    // Test: getNextTime
+	    System.out.println("Testing: getNextTime_File for time = 1");
+	    System.out.println("Result: " + e.getNextTime_File(pathIN, 1));
+
+	    // Test: getNextValue
+	    System.out.println("Testing: getNextValue_File for time = 1");
+	    System.out.println("Result: " + e.getNextValue_File(pathIN, 1));
+
+	    // Test: getPreviousTimeValue_File
+	    System.out.println("Testing: getPreviousTimeValue_File for time = 1");
+	    System.out.println("Result: " + e.getPreviousTimeValue_File(pathIN, 1));
+
+	    // Test: getPreviousTime_File
+	    System.out.println("Testing: getPreviousTime_File for time = 1");
+	    System.out.println("Result: " + e.getPreviousTime_File(pathIN, 1));
+
+	    // Test: getPreviousValue_File
+	    System.out.println("Testing: getPreviousValue_File for time = 1");
+	    System.out.println("Result: " + e.getPreviousValue_File(pathIN, 1));
+
+	    // Test: getFirstTime_File
+	    System.out.println("Testing: getFirstTime_File");
+	    System.out.println("Result: " + e.getFirstTime_File(pathIN));
+
+	    // Test: getFirstValue_File
+	    System.out.println("Testing: getFirstValue_File");
+	    System.out.println("Result: " + e.getFirstValue_File(pathIN));
+
+	    // Test: getFirstTimeValue_File
+	    System.out.println("Testing: getFirstTimeValue_File");
+	    System.out.println("Result: " + e.getFirstTimeValue_File(pathIN));
+
+	    // Test: getLastTime_File
+	    System.out.println("Testing: getLastTime_File");
+	    System.out.println("Result: " + e.getLastTime_File(pathIN));
+
+	    // Test: getLastValue_File
+	    System.out.println("Testing: getLastValue_File");
+	    System.out.println("Result: " + e.getLastValue_File(pathIN));
+
+	    // Test: getLastTimeValue_File
+	    System.out.println("Testing: getLastTimeValue_File");
+	    System.out.println("Result: " + e.getLastTimeValue_File(pathIN));
+
+	    // Test: copyTimeSeries_File
+	    System.out.println("Testing: copyTimeSeries_File");
+	    e.printTimeSeries(e.copyTimeSeries_File(pathIN));
+
+	    // Test: setAllTimesToZero_File
+	    String pathOUT2 = Paths.get("./proteus-example/io/tsOUTAllTimesToZero.txt").toString();
+	    System.out.println("Testing: setAllTimesToZero_File");
+	    e.setAllTimesToZero_File(pathIN, pathOUT2);
+
+	    // Test: setAllValuesToZero_File
+	    String pathOUT3 = Paths.get("./proteus-example/io/tsOUTAllValuesToZero.txt").toString();
+	    System.out.println("Testing: setAllValuesToZero_File");
+	    e.setAllValuesToZero_File(pathIN, pathOUT3);
+
+	    // Test: setAllToZero_File
+	    String pathOUT4 = Paths.get("./proteus-example/io/tsOUTAllToZero.txt").toString();
+	    System.out.println("Testing: setAllToZero_File");
+	    e.setAllToZero_File(pathIN, pathOUT4);
+
+	    // Test: setAllTimesToTime_File
+	    String pathOUT5 = Paths.get("./proteus-example/io/tsOUTAllTimesToTime.txt").toString();
+	    System.out.println("Testing: setAllTimesToTime_File with time = 33");
+	    e.setAllTimesToTime_File(pathIN, pathOUT5, 33);
+
+	    // Test: setAllValuesToValue_File
+	    String pathOUT6 = Paths.get("./proteus-example/io/tsOUTAllValuesToValue.txt").toString();
+	    System.out.println("Testing: setAllValuesToValue_File with value = 33");
+	    e.setAllValuesToValue_File(pathIN, pathOUT6, 33);
+
+	    // Test: setAllToTimeValue_File
+	    String pathOUT7 = Paths.get("./proteus-example/io/tsOUTAllToTimeValue.txt").toString();
+	    System.out.println("Testing: setAllToTimeValue_File with time = 33, value = 33");
+	    e.setAllToTimeValue_File(pathIN, pathOUT7, 33, 33);
+
+	    // Test: getSubTimeSeriesInTimeRange_File
+	    System.out.println("Testing: getSubTimeSeriesInTimeRange_File with time range 3 to 5");
+	    e.printTimeSeries(e.getSubTimeSeriesInTimeRange_File(pathIN, 3, 5));
+
+	    // Test: countTimeValues_File
+	    System.out.println("Testing: countTimeValues_File");
+	    System.out.println("Result: " + e.countTimeValues_File(pathIN));
+
+	    // Test: isEmpty_File
+	    System.out.println("Testing: isEmpty_File");
+	    System.out.println("Result: " + e.isEmpty_File(pathIN));
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 		
 	

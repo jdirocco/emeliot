@@ -974,6 +974,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 		}
 		System.out.print("]\n");
 	}
+	
+	@Override
+	public void printTimeSeries_File(String tsInputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    printTimeSeries(s);
+	}
 
 	@Override	
     public void reorderTimeSeries(TimeSeries s) {
@@ -987,6 +993,13 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	}
 
 	@Override
+	public void reorderTimeSeries_File(String tsInputPath, String tsOutputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    reorderTimeSeries(s);
+	    writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+	}
+	
+	@Override
 	public TimeValue selectRandomTimeValue(TimeSeries s) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
@@ -997,6 +1010,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	        return timeValues.get(randomIndex);
 	    }
 	    return null;
+	}
+	
+	@Override
+	public TimeValue selectRandomTimeValue_File(String tsInputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return selectRandomTimeValue(s);
 	}
 
 	@Override
@@ -1010,6 +1029,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	}
 	
 	@Override
+	public boolean existTime_File(String tsInputPath, double time) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return existTime(s, time);
+	}
+	
+	@Override
 	public boolean existValue(TimeSeries s, double value) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
@@ -1020,8 +1045,25 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	}
 	
 	@Override
+	public boolean existValue_File(String tsInputPath, double value) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return existValue(s, value);
+	}
+	
+	@Override
 	public boolean existTimeValue(TimeSeries s, double time, double value) {
-	    return (existTime(s, time) && existValue(s, value));
+		if (!(s instanceof TimeSeriesValue))
+			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
+	    for (TimeValue tv: ((TimeSeriesValue) s).getTimeValues())
+	    	if (tv.getTime() == time && tv.getValue() == value)
+	            return true;
+	    return false;
+	}
+	
+	@Override
+	public boolean existTimeValue_File(String tsInputPath, double time, double value) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return existTimeValue(s, time, value);
 	}
 
 	@Override
@@ -1033,6 +1075,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	    	times.add(tv.getTime());
 	    return times;
 	}
+	
+	@Override
+	public List<Double> getAllTimes_File(String tsInputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getAllTimes(s);
+	}
 
 	@Override
 	public List<Double> getAllValues(TimeSeries s) {
@@ -1042,6 +1090,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	    for (TimeValue tv: ((TimeSeriesValue) s).getTimeValues())
 	    	values.add(tv.getValue());
 	    return values;
+	}
+	
+	@Override
+	public List<Double> getAllValues_File(String tsInputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getAllValues(s);
 	}
 
 	@Override
@@ -1056,6 +1110,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	}
 	
 	@Override
+	public List<Double> getTimesInRange_File(String tsInputPath, double timeMin, double timeMax) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getTimesInRange(s, timeMin, timeMax);
+	}
+	
+	@Override
 	public List<Double> getValuesInRange(TimeSeries s, double valueMin, double valueMax) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
@@ -1064,6 +1124,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
     		if (tv.getValue() >= valueMin && tv.getValue() <= valueMax)
     			values.add(tv.getValue());
 	    return values;
+	}
+	
+	@Override
+	public List<Double> getValuesInRange_File(String tsInputPath, double valueMin, double valueMax) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getValuesInRange(s, valueMin, valueMax);
 	}
 	
 	@Override
@@ -1076,6 +1142,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	            timeValues.add(tv);
 	    return timeValues;
 	}
+	
+	@Override
+	public List<TimeValue> getTimeValuesInRange_File(String tsInputPath, double timeMin, double timeMax, double valueMin, double valueMax) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getTimeValuesInRange(s, timeMin, timeMax, valueMin, valueMax);
+	}
 
 	@Override
 	public double getValueAt(TimeSeries s, int index) {
@@ -1085,6 +1157,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 			return ((TimeSeriesValue) s).getTimeValues().get(index).getValue();
 		else throw new IllegalArgumentException("Index is out of range");
 	}
+	
+	@Override
+	public double getValueAt_File(String tsInputPath, int index) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getValueAt(s, index);
+	}
 
 	@Override
 	public double getTimeAt(TimeSeries s, int index) {
@@ -1093,6 +1171,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 		if (index >= 0 && index < ((TimeSeriesValue) s).getTimeValues().size())
 			return ((TimeSeriesValue) s).getTimeValues().get(index).getTime();
 		else throw new IllegalArgumentException("Index is out of range");
+	}
+	
+	@Override
+	public double getTimeAt_File(String tsInputPath, int index) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getTimeAt(s, index);
 	}
 
 	@Override
@@ -1104,6 +1188,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 		else 
 			throw new IllegalArgumentException("Index is out of range");
 	}
+	
+	@Override
+	public TimeValue getTimeValueAt_File(String tsInputPath, int index) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getTimeValueAt(s, index);
+	}
 
 	@Override
 	public double getMaxTime(TimeSeries s) {
@@ -1113,6 +1203,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	            .mapToDouble(TimeValue::getTime)
 	            .max()
 	            .orElseThrow(NoSuchElementException::new);
+	}
+	
+	@Override
+	public double getMaxTime_File(String tsInputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getMaxTime(s);
 	}
 
 	@Override
@@ -1124,6 +1220,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 		            .min()
 		            .orElseThrow(NoSuchElementException::new);
 	}
+	
+	@Override
+	public double getMinTime_File(String tsInputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getMinTime(s);
+	}
 
 	@Override
 	public double getMaxValue(TimeSeries s) {
@@ -1133,6 +1235,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 		            .mapToDouble(tv -> tv.getValue())
 		            .max()
 		            .orElseThrow(NoSuchElementException::new);
+	}
+	
+	@Override
+	public double getMaxValue_File(String tsInputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getMaxValue(s);
 	}
 
 	@Override
@@ -1146,6 +1254,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	}
 	
 	@Override
+	public double getMinValue_File(String tsInputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getMinValue(s);
+	}
+	
+	@Override
 	public TimeValue getNextTimeValue(TimeSeries s, TimeValue tv) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
@@ -1156,15 +1270,33 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	}
 
 	@Override
+	public TimeValue getNextTimeValue_File(String tsInputPath, TimeValue tv) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getNextTimeValue(s, tv);
+	}
+	
+	@Override
 	public double getNextTime(TimeSeries s, TimeValue tv) {
 	    TimeValue nextTV = getNextTimeValue(s, tv);
 	    return (nextTV != null) ? nextTV.getTime() : -1;
+	}
+	
+	@Override
+	public double getNextTime_File(String tsInputPath, TimeValue tv) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getNextTime(s, tv);
 	}
 
 	@Override
 	public double getNextValue(TimeSeries s, TimeValue tv) {
 	    TimeValue nextTV = getNextTimeValue(s, tv);
 	    return (nextTV != null) ? nextTV.getValue() : null;
+	}
+	
+	@Override
+	public double getNextValue_File(String tsInputPath, TimeValue tv) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getNextValue(s, tv);
 	}
 	
 	@Override
@@ -1175,17 +1307,35 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	        return ((TimeSeriesValue) s).getTimeValues().get(index + 1);
         throw new IllegalArgumentException("Index is out of range");
 	}
+	
+	@Override
+	public TimeValue getNextTimeValue_File(String tsInputPath, int index) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getNextTimeValue(s, index);
+	}
 
 	@Override
 	public double getNextTime(TimeSeries s, int index) {
 	    TimeValue nextTV = getNextTimeValue(s, index);
 	    return (nextTV != null) ? nextTV.getTime() : -1;
 	}
+	
+	@Override
+	public double getNextTime_File(String tsInputPath, int index) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getNextTime(s, index);
+	}
 
 	@Override
 	public double getNextValue(TimeSeries s, int index) {
 	    TimeValue nextTV = getNextTimeValue(s, index);
 	    return (nextTV != null) ? nextTV.getValue() : null;
+	}
+	
+	@Override
+	public double getNextValue_File(String tsInputPath, int index) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getNextValue(s, index);
 	}
 
 	@Override
@@ -1195,7 +1345,13 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 		int index = ((TimeSeriesValue) s).getTimeValues().indexOf(tv);
 	    if (index > 0)
 	        return ((TimeSeriesValue) s).getTimeValues().get(index - 1);
-	    return null;
+        throw new IllegalArgumentException("Index is out of range");
+	}
+	
+	@Override
+	public TimeValue getPreviousTimeValue_File(String tsInputPath, TimeValue tv) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getPreviousTimeValue(s, tv);
 	}
 	
 	@Override
@@ -1205,9 +1361,21 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	}
 	
 	@Override
+	public double getPreviousTime_File(String tsInputPath, TimeValue tv) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getPreviousTime(s, tv);
+	}
+	
+	@Override
 	public double getPreviousValue(TimeSeries s, TimeValue tv) {
 	    TimeValue prevTV = getPreviousTimeValue(s, tv);
 	    return (prevTV != null) ? prevTV.getValue() : null;
+	}
+	
+	@Override
+	public double getPreviousValue_File(String tsInputPath, TimeValue tv) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getPreviousValue(s, tv);
 	}
 
 	@Override
@@ -1218,11 +1386,23 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	        return ((TimeSeriesValue) s).getTimeValues().get(index - 1);
 	    return null;
 	}
+	
+	@Override
+	public TimeValue getPreviousTimeValue_File(String tsInputPath, int index) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getPreviousTimeValue(s, index);
+	}
 
 	@Override
 	public double getPreviousTime(TimeSeries s, int index) {
 	    TimeValue prevTV = getPreviousTimeValue(s, index);
 	    return (prevTV != null) ? prevTV.getTime() : -1;
+	}
+	
+	@Override
+	public double getPreviousTime_File(String tsInputPath, int index) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getPreviousTime(s, index);
 	}
 
 	@Override
@@ -1230,47 +1410,101 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	    TimeValue prevTV = getPreviousTimeValue(s, index);
 	    return (prevTV != null) ? prevTV.getValue() : null;
 	}
+	
+	@Override
+	public double getPreviousValue_File(String tsInputPath, int index) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getPreviousValue(s, index);
+	}
 
 	@Override
 	public double getFirstTime(TimeSeries s) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
-		return ((TimeSeriesValue) s).getTimeValues().isEmpty() ? -1 : ((TimeSeriesValue) s).getTimeValues().get(0).getTime();
+		if (!((TimeSeriesValue) s).getTimeValues().isEmpty())
+			return ((TimeSeriesValue) s).getTimeValues().get(0).getTime();
+		throw new NoSuchElementException("TimeSeries is empty");
+	}
+	
+	@Override
+	public double getFirstTime_File(String tsInputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getFirstTime(s);
 	}
 
 	@Override
 	public double getFirstValue(TimeSeries s) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
-		return ((TimeSeriesValue) s).getTimeValues().isEmpty() ? null : ((TimeSeriesValue) s).getTimeValues().get(0).getValue();
+		if (!((TimeSeriesValue) s).getTimeValues().isEmpty())
+			return ((TimeSeriesValue) s).getTimeValues().get(0).getValue();
+		throw new NoSuchElementException("TimeSeries is empty");
 	}
-
+	
+	@Override
+	public double getFirstValue_File(String tsInputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getFirstValue(s);
+	}
+	
 	@Override
 	public TimeValue getFirstTimeValue(TimeSeries s) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
-		return ((TimeSeriesValue) s).getTimeValues().isEmpty() ? null : ((TimeSeriesValue) s).getTimeValues().get(0);
+		if (!((TimeSeriesValue) s).getTimeValues().isEmpty())
+			return ((TimeSeriesValue) s).getTimeValues().get(0);
+		throw new NoSuchElementException("TimeSeries is empty");
+	}
+	
+	@Override
+	public TimeValue getFirstTimeValue_File(String tsInputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getFirstTimeValue(s);
 	}
 
 	@Override
 	public double getLastTime(TimeSeries s) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
-		return ((TimeSeriesValue) s).getTimeValues().isEmpty() ? -1 : ((TimeSeriesValue) s).getTimeValues().get(((TimeSeriesValue) s).getTimeValues().size() - 1).getTime();
+		if (!((TimeSeriesValue) s).getTimeValues().isEmpty())
+			return ((TimeSeriesValue) s).getTimeValues().get(((TimeSeriesValue) s).getTimeValues().size() - 1).getTime();
+		throw new NoSuchElementException("TimeSeries is empty");
+	}
+	
+	@Override
+	public double getLastTime_File(String tsInputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getLastTime(s);
 	}
 
 	@Override
 	public double getLastValue(TimeSeries s) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
-		return ((TimeSeriesValue) s).getTimeValues().isEmpty() ? null : ((TimeSeriesValue) s).getTimeValues().get(((TimeSeriesValue) s).getTimeValues().size() - 1).getValue();
+		if (!((TimeSeriesValue) s).getTimeValues().isEmpty())
+			return ((TimeSeriesValue) s).getTimeValues().get(((TimeSeriesValue) s).getTimeValues().size() - 1).getValue();
+		throw new NoSuchElementException("TimeSeries is empty");
+	}
+	
+	@Override
+	public double getLastValue_File(String tsInputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getLastValue(s);
 	}
 
 	@Override
 	public TimeValue getLastTimeValue(TimeSeries s) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
-		return ((TimeSeriesValue) s).getTimeValues().isEmpty() ? null : ((TimeSeriesValue) s).getTimeValues().get(((TimeSeriesValue) s).getTimeValues().size() - 1);
+		if (!((TimeSeriesValue) s).getTimeValues().isEmpty())
+			return ((TimeSeriesValue) s).getTimeValues().get(((TimeSeriesValue) s).getTimeValues().size() - 1);
+		throw new NoSuchElementException("TimeSeries is empty");
+	}
+	
+	@Override
+	public TimeValue getLastTimeValue_File(String tsInputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getLastTimeValue(s);
 	}
 
 	@Override
@@ -1286,6 +1520,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	    }
 	    return copy;
 	}
+	
+	@Override
+	public TimeSeries copyTimeSeries_File(String tsInputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return copyTimeSeries(s);
+	}
 
 	@Override
 	public void setAllTimesToZero(TimeSeries s) {
@@ -1294,6 +1534,13 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	    for (TimeValue tv : ((TimeSeriesValue) s).getTimeValues())
 	        tv.setTime(0);
 	}
+	
+	@Override
+	public void setAllTimesToZero_File(String tsInputPath, String tsOutputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    setAllTimesToZero(s);
+	    writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+	}	
 
 	@Override
 	public void setAllValuesToZero(TimeSeries s) {
@@ -1302,11 +1549,25 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	    for (TimeValue tv : ((TimeSeriesValue) s).getTimeValues())
 	        tv.setValue(0);
 	}
+	
+	@Override
+	public void setAllValuesToZero_File(String tsInputPath, String tsOutputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    setAllValuesToZero(s);
+	    writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+	}	
 
 	@Override
 	public void setAllToZero(TimeSeries s) {
 	    setAllTimesToZero(s);
 	    setAllValuesToZero(s);
+	}
+	
+	@Override
+	public void setAllToZero_File(String tsInputPath, String tsOutputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    setAllToZero(s);
+	    writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 
 	@Override
@@ -1316,6 +1577,13 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	    for (TimeValue tv : ((TimeSeriesValue) s).getTimeValues())
 	        tv.setTime(time);
 	}
+	
+	@Override
+	public void setAllTimesToTime_File(String tsInputPath, String tsOutputPath, double time) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    setAllTimesToTime(s, time);
+	    writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+	}
 
 	@Override
 	public void setAllValuesToValue(TimeSeries s, double value) {
@@ -1324,11 +1592,25 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	    for (TimeValue tv : ((TimeSeriesValue) s).getTimeValues())
 	        tv.setValue(value);
 	}
+	
+	@Override
+	public void setAllValuesToValue_File(String tsInputPath, String tsOutputPath, double value) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    setAllValuesToValue(s, value);
+	    writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+	}
 
 	@Override
 	public void setAllToTimeValue(TimeSeries s, double time, double value) {
 	    setAllTimesToTime(s, time);
 	    setAllValuesToValue(s, value);
+	}
+	
+	@Override
+	public void setAllToTimeValue_File(String tsInputPath, String tsOutputPath, double time, double value) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    setAllToTimeValue(s, time, value);
+	    writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 
 	@Override
@@ -1345,12 +1627,24 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	        }
 	    return subSeries;
 	}
+	
+	@Override
+	public TimeSeries getSubTimeSeriesInTimeRange_File(String tsInputPath, double timeMin, double timeMax) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return getSubTimeSeriesInTimeRange(s, timeMin, timeMax);
+	}
 
 	@Override
 	public int countTimeValues(TimeSeries s) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
 		return ((TimeSeriesValue) s).getTimeValues().size();
+	}
+	
+	@Override
+	public int countTimeValues_File(String tsInputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return countTimeValues(s);
 	}
 
 	@Override
@@ -1359,7 +1653,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
 		return ((TimeSeriesValue) s).getTimeValues().size() == 0;
 	}
-
+	
+	@Override
+	public boolean isEmpty_File(String tsInputPath) throws IOException {
+	    TimeSeries s = readTSFromFile(tsInputPath);
+	    return isEmpty(s);
+	}
 	
 	@Override
 	public void writeTSToFile(TimeSeriesValue TimeSeriesValue, String filePath) throws IOException {
@@ -1407,7 +1706,8 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	
 	
-/********************TODO: SIMULATION OPERATORS (Proteus)********************/
+	
+	/********************TODO: SIMULATION OPERATORS (Proteus)********************/
 	
 	//this method runs a test case (i.e., a set of mutated TimeSeriesValue) on a Proteus component
 	//output ports are needed to interact with the GUI to activate the proper simulation graphs

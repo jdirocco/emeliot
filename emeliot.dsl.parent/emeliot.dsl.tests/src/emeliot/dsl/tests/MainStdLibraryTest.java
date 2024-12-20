@@ -23,6 +23,7 @@ public class MainStdLibraryTest {
 		testAddOperatorsFiles(e);
 		testChangeOperatorsFiles(e);
 		testRemoveOperatorsFiles(e);
+		testAuxOperatorsFiles(e);
 		//TODO: test discovery methods
 	}
 
@@ -340,6 +341,11 @@ public class MainStdLibraryTest {
 	    System.out.println("=================================");
 	}
 
+	
+	public static void testAuxOperatorsFiles(EmeliotLib e) throws IOException {
+		TimeSerieAuxTest.testAuxOperatorsFiles(e);
+	}
+	
 	
 	
 	public static TimeSeries createTimeSerie(ReadFactory factory, EmeliotLib e) {

@@ -27,8 +27,6 @@ import emeliot.dsl.read.TimeValue;
 public class ProteusService extends EmeliotLib {
 
 	
-	
-	
 	@Override
 	public void writeTSToFile(TimeSeriesValue TimeSeriesValue, String filePath) throws IOException {
 		reorderTimeSeries(TimeSeriesValue);
