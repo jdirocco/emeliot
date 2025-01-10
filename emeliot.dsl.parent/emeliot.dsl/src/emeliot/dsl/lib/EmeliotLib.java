@@ -1706,15 +1706,16 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	//TODO: DISCOVERY OPERATORS
 	
 	
-	/*public boolean isCommission(TimeSeries tsOriginal, TimeSeries tsMutated) {
-		return tsOriginal.getTimeValues().size() < tsMutated.getTimeValues().size(); //TODO: what if more elements are added and removed?
+	public boolean isCommission(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
+		return tsOriginal.getTimeValues().size() < tsMutated.getTimeValues().size(); 
 	}
 	
-	public boolean isOmission(TimeSeries tsOriginal, TimeSeries tsMutated) {
-		return tsOriginal.getTimeValues().size() > tsMutated.getTimeValues().size(); //TODO: what if more elements are added and removed?
+	public boolean isOmission(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
+		return tsOriginal.getTimeValues().size() > tsMutated.getTimeValues().size();
 	}
 	
-	public boolean isLate(TimeSeries tsOriginal, TimeSeries tsMutated, double eps) {
+	public boolean isLate(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated, double eps) {
+		//for each original time, check the closest time among mutated timeserie and evaluate whether it is late 
 		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) {
 			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
 			double time1 = tv1.getTime();			
@@ -1741,13 +1742,14 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 			}
 			if(closestDiffTime == 0)//no early/late detected for timeseries j as diff time is 0
 				continue;
-			if(Math.abs(closestDiffTime)>eps && closestDiffTime<0)//if diff time bigger than epsilon, late detected
+			if(Math.abs(closestDiffTime)>eps && closestDiffTime<0)//if diff time bigger than epsilon and negative (mutated time is later), late detected
 				return true;
 		}	
 		return false;
 	}
 	
-	public boolean isEarly(TimeSeries tsOriginal, TimeSeries tsMutated, double eps) {
+	public boolean isEarly(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated, double eps) {
+		//for each original time, check the closest time among mutated timeserie and evaluate whether it is early 
 		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) {
 			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
 			double time1 = tv1.getTime();			
@@ -1774,13 +1776,13 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 			}
 			if(closestDiffTime == 0)//no early/late detected for timeseries j as diff time is 0
 				continue;
-			if(Math.abs(closestDiffTime)> eps && closestDiffTime>0) //if diff time bigger than epsilon, early detected
+			if(Math.abs(closestDiffTime)> eps && closestDiffTime>0) //if diff time bigger than epsilon and positive (mutated time is earlier), early detected
 				return true;
 		}	
 		return false;
 	}
 	
-	public boolean isValueCoarse(TimeSeries tsOriginal, TimeSeries tsMutated, double eps, double valueMin, double valueMax) {
+	public boolean isValueCoarse(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated, double eps, double valueMin, double valueMax) {
 		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) {
 			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
 			TimeValue tv2 = tsMutated.getTimeValues().get(i);
@@ -1794,7 +1796,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 		return false;
 	}
 	
-	public boolean isValueSubtle(TimeSeries tsOriginal, TimeSeries tsMutated, double eps, double valueMin, double valueMax) {
+	public boolean isValueSubtle(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated, double eps, double valueMin, double valueMax) {
 		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) {
 			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
 			TimeValue tv2 = tsMutated.getTimeValues().get(i);
@@ -1806,7 +1808,28 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 				return true;
 		}
 		return false;
-	}*/
+	}
 	
+	public boolean areSameSize(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
+	    return tsOriginal.getTimeValues().size() == tsMutated.getTimeValues().size();
+	}
+	
+	public boolean isSmaller(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
+	    return tsOriginal.getTimeValues().size() < tsMutated.getTimeValues().size();
+	}
+	
+	public boolean isBigger(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
+	    return tsOriginal.getTimeValues().size() > tsMutated.getTimeValues().size();
+	}
+	
+	public boolean hasTimeOutRange(TimeSeriesValue tsMutated, double timeMin, double timeMax) {
+	    for (TimeValue tv : tsMutated.getTimeValues()) {
+	        double time = tv.getTime();
+	        if (time < timeMin || time > timeMax) {
+	            return true;
+	        }
+	    }
+	    return false;
+	}
 
 }
