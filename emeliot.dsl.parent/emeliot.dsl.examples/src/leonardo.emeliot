@@ -2,26 +2,26 @@ model Leonardo :
  	
  specification components : 
  	Component1	 ports : 	
- 		INPUT c1p1 
- 		INPUT c1p2 
- 		OUTPUT c1p13 
+ 		port c1p1 INPUT 
+ 		port c1p2 INPUT 
+ 		port  c1p13 OUTPUT 
  	Component2	 ports : 	
- 		INPUT c2p1 
- 		INPUT c2p2 
- 		OUTPUT c2p3 
+ 		port c2p1 INPUT  
+ 		port c2p2 INPUT  
+ 		port c2p3 OUTPUT 
  	//TO BE DISCUSSED 	  
-  
+   
  time_series :
- 	ts_c1p1 [(52 : 3.0),  (8 : 4.5)]
+ 	ts_c1p1 [(52.0 : 3.0),  (8.0 : 4.5)]
  	ts_c1p2 path "/Users/juridirocco/Downloads/irrigationUnit2.txt"
 	ts_c1_output path "/Users/juridirocco/Downloads/irrigationUnit1.txt"
 	
 	ts_c2p1 path "/Users/juridirocco/Downloads/irrigationUnit1.txt"
  	ts_c2p2 path "/Users/juridirocco/Downloads/irrigationUnit2.txt"
-	ts_c2_output_mutated [(52 : 3.0),  (8 : 4.5),  (6 : 4.5),  (87: 4.5),  (88 : 4.5),  (87 : 4.5),  (87 : 4.5)]
-	ts_c2_output_expected [(52 : 3.0),  (8 : 4.5),  (6 : 4.5),  (87: 4.5),  (88 : 4.5),  (87 : 4.5),  (87 : 4.5)] 
+	ts_c2_output_mutated [(52.0 : 3.0),  (8.0 : 4.5),  (6.0 : 4.5),  (87.0 : 4.5),  (88.0 : 4.5),  (87.0 : 4.5),  (87.0 : 4.5)]
+	ts_c2_output_expected [(52.0 : 3.0),  (8.0 : 4.5),  (6.0 : 4.5),  (87.0: 4.5),  (88.0 : 4.5),  (87.0 : 4.5),  (87.0 : 4.5)] 
  	
- 	
+
  mutation simpleMutation {
  	addTimeAndValue(inTS, 12.0, 14)
  	
@@ -29,8 +29,7 @@ model Leonardo :
  
  mutation esempio {
  	setAllTimesToTime(inTS, 5)
- }
-
+ }  
   
  mutation usingCheckOnExistingValue  {   
  	var mv = getMaxValue(inTS)
@@ -48,7 +47,7 @@ model Leonardo :
  		changeARandomTimeValue(inTS, 100, 140) 	
  	}
  	else {
- 		var tm = new java.util.ArrayList(java.util.List.of(2,3,4,5,6,7));
+ 		var tm = new java.util.ArrayList(java.util.List.of(2.0,3.0,4.0,5.0,6.0,7.0));
  		changeMultipleTimeLate(inTS, 0.5, tm,5);
  	}
  }
@@ -56,14 +55,15 @@ model Leonardo :
  
  discovery myDetection {
  	//TO BE DISCUSSED
+ 	addMu
  }
  
 config : 	 
-	mut simpleMutation timeSeries ts_c1p1
-	mut complexMutation timeSeries ts_c1p2
+	mut simpleMutation port "c1p1" timeSeries ts_c1p1
+	mut complexMutation port "c1p2" timeSeries ts_c1p2
 	
-	mut usingCheckOnExistingValue timeSeries ts_c2p1
-	mut complexMutation timeSeries ts_c1p2
+	mut usingCheckOnExistingValue port "c1p2" timeSeries ts_c2p1
+	mut complexMutation port "c1p2" timeSeries ts_c1p2
 	
 	mut esempio timeSeries ts_c1p1
 	
@@ -75,18 +75,6 @@ config :
 		expectedSeries  ts_c2_output_expected
 		mutatedSeries  ts_c2_output_mutated 
 		 
-simultation_platfrom: proteus
+simultation_platfrom : proteus
 
- 
- 
-
-
-					
-				
-					
-					
-					
-				
-					
-				
-				
+project_file : "asd"

@@ -13,16 +13,17 @@ Model returns Model:
 	mutations+=Mutation*
 	discoveries+=Discovery*
 	'config' ':' configurations+=Configuration*
-	'simultation_platfrom' ':' simulationPlatform=EString;
+	'simultation_platfrom' ':' simulationPlatform=EString
+	'project_file' ':' projectFile=EString;
 
 Configuration returns Configuration:
 	ConfigMutation | ConfigDiscovery;
 
 ConfigMutation returns ConfigMutation:
-	'mut' mut=[Mutation] ('port' port = [Port|EString])? 'timeSeries' timeSeries = [TimeSeries] ;
+	'mut' mut=[Mutation] ('port' port = STRING)? 'timeSeries' timeSeries = [TimeSeries] ;
 
 ConfigDiscovery returns ConfigDiscovery:
-	'discovery' discovery=[Discovery] ('port' port = [Port|EString])?
+	'discovery' discovery=[Discovery] ('port' portName = STRING)?
 	'expectedSeries' expectedTimeSeries = [TimeSeries] // produced by Protheus on original input without mutation
 	'mutatedSeries' mutatedTimeSeries = [TimeSeries] // produced by Prothues on mutated input
 ;
@@ -33,20 +34,22 @@ Mutation returns Mutation:
 
  
  
-TimeSeries returns TimeSeries:	
-	TimeSeriesPath  | TimeSeriesValue;
-
-TimeSeriesPath returns TimeSeriesPath:
+TimeSeries returns TimeSeries:
 	name=EString
-	'path' timeSeriesPath=STRING;
-
-TimeSeriesValue returns TimeSeriesValue:
-	{TimeSeriesValue} name=EString
+	('path' timeSeriesPath=STRING)?
 	('[' timeValues+=TimeValue ("," timeValues+=TimeValue)* ']')?;
+
+//TimeSeriesPath returns TimeSeriesPath:
+//	name=EString
+//	'path' timeSeriesPath=STRING;
+//	
+//TimeSeriesValue returns TimeSeriesValue:
+//	{TimeSeriesValue} name=EString
+//	('[' timeValues+=TimeValue ("," timeValues+=TimeValue)* ']')?;
 
 TimeValue returns TimeValue:
 	{TimeValue} // name=EString
-	'(' time=INT ':' value=(EDouble) ')';
+	'(' time=EDouble ':' value=(EDouble) ')';
 
 EString returns ecore::EString:
 	STRING | ID;
@@ -54,8 +57,6 @@ EString returns ecore::EString:
 Specification returns Specification:
 	{Specification}
 	'specification'
-	// importSection=XImportSection?
-	// ('package' name=QualifiedName ';'?)?
 	('projectName' projectName=EString)?
 	// ('import' '{' ^import+=Import ("," ^import+=Import)* '}')?
 	'components' ':' components+=Component*;
@@ -67,8 +68,7 @@ Component returns Component:
 
 Port returns Port:
 	{Port}
-	type=PORT_TYPE
-	name=EString;
+	'port' name=ID type=PORT_TYPE;
 
 Discovery returns Discovery:
 	{Discovery}

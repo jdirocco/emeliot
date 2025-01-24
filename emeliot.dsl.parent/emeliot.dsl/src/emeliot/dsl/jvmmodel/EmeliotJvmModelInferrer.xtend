@@ -8,8 +8,6 @@ import emeliot.dsl.read.ConfigMutation
 import emeliot.dsl.read.Model
 import emeliot.dsl.read.ReadFactory
 import emeliot.dsl.read.TimeSeries
-import emeliot.dsl.read.TimeSeriesPath
-import emeliot.dsl.read.TimeSeriesValue
 import emeliot.dsl.read.TimeValue
 import java.util.List
 import org.eclipse.xtext.common.types.JvmDeclaredType
@@ -19,8 +17,10 @@ import org.eclipse.xtext.common.types.JvmVisibility
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
-import emeliot.dsl.lib.EmeliotLib
 import emeliot.dsl.lib.ProteusService
+import emeliot.dsl.read.PORT_TYPE
+import emeliot.dsl.read.Configuration
+import emeliot.dsl.read.Port
 
 /**
  * <p>Infers a JVM model from the source model.</p>
@@ -89,6 +89,24 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 				]
 			}
 			
+			//NEW
+			val inport = newArrayList()
+			val outport = newArrayList()
+			for (component :element.specification.components)
+				for (port : component.ports)
+					if (port.type == PORT_TYPE.INPUT)
+						inport.add(port.name)
+					else
+						outport.add(port.name)
+			members += element.specification.toField("inport", typeRef(List))[
+				initializer = '''new ArrayList();'''
+					
+			]
+			members += element.specification.toField("outport", typeRef(List))[
+				initializer = '''new ArrayList();'''
+					
+			]
+				
 			/*for (config : element.configurations.filter[e|e instanceof ConfigMutation]) {
 				var mutation =  config as ConfigMutation
 				
@@ -108,13 +126,14 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 				}
 
 			}*/
-			
+			members += element.toField('p', typeRef(Port))
 			members += element.toField('tv', typeRef(TimeValue))
 			for (ts : element.timeSeries) {
-				members += ts.toField(ts.name, typeRef(TimeSeriesValue)) [
-					initializer = ''' ReadFactory.eINSTANCE.createTimeSeriesValue() '''
+				members += ts.toField(ts.name, typeRef(TimeSeries)) [
+					initializer = ''' ReadFactory.eINSTANCE.createTimeSeries() '''
 				]
 			}
+			
 			for (config : element.configurations.filter[e|e instanceof ConfigMutation]) {
 				var mutation =  config as ConfigMutation
 				
@@ -151,43 +170,76 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 				
 			
 				body = '''	
-								
+						 		
 					
 						«FOR o : element.configurations.filter[e|e instanceof ConfigMutation]»		
 									
 «««							for (TimeValue tv : «(o as ConfigMutation).timeSeriesValues») 
-							«IF (o as ConfigMutation).timeSeries instanceof TimeSeriesValue»
+							«IF (o as ConfigMutation).timeSeries.timeValues !== null»
 								
 							
-							«FOR e : ( (o as ConfigMutation).timeSeries as TimeSeriesValue).timeValues»
+							«FOR e : ( (o as ConfigMutation).timeSeries).timeValues»
 							
 								tv = ReadFactory.eINSTANCE.createTimeValue();	
 											
 								tv.setTime(«e.time»);
 								tv.setValue(«e.value»);								
-								« ((o as ConfigMutation).timeSeries as TimeSeriesValue).name».getTimeValues().add(tv);
+								« (o as ConfigMutation).timeSeries.name».getTimeValues().add(tv);
 												
 							«ENDFOR»
 							
 										
 							
 							«ENDIF »
-							«IF (o as ConfigMutation).timeSeries instanceof TimeSeriesPath»
-								« ((o as ConfigMutation).timeSeries.name)» = readTSFromFile("« ((o as ConfigMutation).timeSeries as TimeSeriesPath).timeSeriesPath»");
+							«IF (o as ConfigMutation).timeSeries.name !== null»
+								« ((o as ConfigMutation).timeSeries.name)» = readTSFromFile("« (o as ConfigMutation).timeSeries.timeSeriesPath»");
 							«ENDIF»
 							«(o as ConfigMutation).mut.name»(«(o as ConfigMutation).timeSeries.name»);	
-							writeTSToFile((TimeSeriesValue)«(o as ConfigMutation).timeSeries.name»,"«(o as ConfigMutation).timeSeries.name»_M.txt");
-					«ENDFOR»	
+							writeTSToFile((TimeSeries)«(o as ConfigMutation).timeSeries.name»,"«(o as ConfigMutation).timeSeries.name»_M.txt");
+							
+							
+						«ENDFOR»	
 						
 						final TimeSeries outSeries  =  ReadFactory.eINSTANCE.createTimeSeries() ;
-						
+«««						«FOR o: inport»
+«««							«getFilePath(element.configurations,o)»
+«««						«ENDFOR»
 «««						«element.discovery.name»(outSeries);
+						«FOR component : element.specification.components»
+							
+							«FOR port : component.ports.filter[it.type == PORT_TYPE.OUTPUT]»
+								p = ReadFactory.eINSTANCE.createPort();
+								p.setName("Nome");
+								p.setPath("Path");
+								outport.add(p);
+							«ENDFOR»
+						«ENDFOR»
+						outport.stream().map(x -> x.path).collect(Collectors.toList();
+						
 				'''
 
 			]
 		])
 
 	}
+	def private String getFilePath(List<Configuration> confs, String portName){
+		print(confs)
+		for (ConfigMutation conf : confs.filter[it instanceof ConfigMutation].map[it as ConfigMutation]){
+			if (conf.timeSeries.timeSeriesPath!==null){
+				var path = conf.timeSeries
+				if(path.name.equals(portName)){
+					return path.timeSeriesPath;
+				}
+					
+			}
+		}
+		throw new Exception();
+	}
+
+//	for (ConfigMutation conf : element.configurations.filter[it instanceof ConfigMutation].map[it as ConfigMutation]){
+//				var TSpath = conf.timeSeries as TimeSeriesPath
+//								 
+//			}
 
 	def private void copyTypeParameters(JvmTypeParameterDeclarator target, List<JvmTypeParameter> typeParameters) {
 		for (typeParameter : typeParameters) {
