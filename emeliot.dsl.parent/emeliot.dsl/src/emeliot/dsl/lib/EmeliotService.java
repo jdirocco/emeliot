@@ -1,6 +1,20 @@
 package emeliot.dsl.lib;
 
+import java.awt.Robot;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.KeyEvent;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Comparator;
 import java.util.List;
 
 import emeliot.dsl.read.TimeSeries;
@@ -116,23 +130,16 @@ public interface EmeliotService {
 
 	public boolean isEmpty(TimeSeries s);
 
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
 	public void writeTSToFile(TimeSeriesValue TimeSeriesValue, String filePath) throws IOException;
 
 	//this method writes to file a Proteus timeserie (to be used during TimeSeriesValue mutation phase)
     public TimeSeriesValue readTSFromFile(String filePath) throws IOException ;
+    
+    public void runTestCase(String projectName, List<String> inPorts, List<String> outputPorts) throws Exception;
+	
+	
+    
+    
 	
 
 }
