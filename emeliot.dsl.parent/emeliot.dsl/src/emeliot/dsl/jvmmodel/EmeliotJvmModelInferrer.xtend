@@ -88,6 +88,14 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 					parameters += mut.toParameter("inTS", typeRef(TimeSeries))
 				]
 			}
+			for (mut : element.discoveries) {
+
+				members += mut.toMethod(mut.name, typeRef(Void.TYPE)) [
+					body = mut.expression				
+					parameters += mut.toParameter("inTS", typeRef(TimeSeries))
+					parameters += mut.toParameter("outTS", typeRef(TimeSeries))
+				]
+			}
 			
 			//NEW
 			val inport = newArrayList()

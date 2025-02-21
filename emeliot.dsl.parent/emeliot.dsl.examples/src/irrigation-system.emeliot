@@ -46,19 +46,22 @@ model IrrigationUnit :
  	else {
  		var tm = new java.util.ArrayList(java.util.List.of(2.0,3.0,4.0,5.0,6.0,7.0));
  		changeMultipleTimeLate(inTS, 0.5, tm,5);
+ 		
  	}
  }
  
  
  discovery myDetection {
- 	
+ 	var tm = new java.util.ArrayList(java.util.List.of(2.0,3.0,4.0,5.0,6.0,7.0));
+ 	changeMultipleTimeLate(inTS, 0.5,tm, 5);
  }
  
 config :
 	mut simpleMutation port 'cp1p1' timeSeries ts_c1p1
 	mut simpleMutation port 'cp1p1' timeSeries ts_c2p1
 	mut usingCheckOnExistingValue port 'c2p1' timeSeries ts_c2p1
-
+	discovery myDetection port 'asd' expectedSeries ts_c2_output mutatedSeries ts_c1_output
+	 
 		 
 simultation_platfrom: proteus
 project_file : "project_file_path"
