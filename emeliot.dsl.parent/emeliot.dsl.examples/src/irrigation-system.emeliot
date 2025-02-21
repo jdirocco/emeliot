@@ -1,26 +1,27 @@
 model IrrigationUnit :
- 	
+
  specification
  	components : 
 	 	Component1	 ports : 	
-	 		port c1p1 INPUT 
-	 		port c1p13 OUTPUT  
+	 		port c1_in INPUT 
+	 		port c1_out OUTPUT  
 	 		
 	 	Component2	 ports : 	
-	 		port c2p1 INPUT 
-	 		port c2p3 OUTPUT
+	 		port c2_in INPUT 
+	 		port c2_out OUTPUT
 	 
  	//TO BE DISCUSSED 	  
  time_series :
- 	ts_c1p1 path "/Users/juridirocco/Downloads/irrigationUnit1.txt"
-	ts_c1_output path "/Users/juridirocco/Downloads/irrigationUnit1.txt"
+ 	ts_c1 path "/Users/juridirocco/eclipse-workspace/emeliot.dsl.parent/emeliot.dsl.examples/irrigationUnit1.txt"
+	ts_c1_output path "/Users/juridirocco/eclipse-workspace/emeliot.dsl.parent/emeliot.dsl.examples/irrigationUnit1_MUT.DAT"
+	ts_c1_expected path "/Users/juridirocco/eclipse-workspace/emeliot.dsl.parent/emeliot.dsl.examples/irrigationUnit1_EX.DAT"
 	 
-	ts_c2p1 path "/Users/juridirocco/Downloads/irrigationUnit1.txt"
- 	ts_c2_output path "/Users/juridirocco/Downloads/irrigationUnit1.txt"
+	ts_c2 path "/Users/juridirocco/eclipse-workspace/emeliot.dsl.parent/emeliot.dsl.examples/irrigationUnit2.txt"
+ 	ts_c2_output path "/Users/juridirocco/eclipse-workspace/emeliot.dsl.parent/emeliot.dsl.examples/irrigationUnit2_MUT.DAT"
+ 	ts_c2_expected path "/Users/juridirocco/eclipse-workspace/emeliot.dsl.parent/emeliot.dsl.examples/irrigationUnit2_EX.DAT"
  	 
  mutation simpleMutation {
  	addTimeAndValue(inTS, 12.0, 14)
-
  } 	
  
  mutation esempio {
@@ -46,21 +47,30 @@ model IrrigationUnit :
  	else {
  		var tm = new java.util.ArrayList(java.util.List.of(2.0,3.0,4.0,5.0,6.0,7.0));
  		changeMultipleTimeLate(inTS, 0.5, tm,5);
- 		
  	}
  }
  
  
- discovery myDetection {
- 	var tm = new java.util.ArrayList(java.util.List.of(2.0,3.0,4.0,5.0,6.0,7.0));
- 	changeMultipleTimeLate(inTS, 0.5,tm, 5);
+ discovery Omission {
+ 	return isOmission(outTS, expectedTS); 
+ }
+ 
+ discovery CustomFailure {
+ 	return smaller(outTS, expectedTS) || outOfRange(outTS, expectedTS);
+ }
+ discovery smaller {	
+ 	return isSmaller(outTS, expectedTS)
+ }
+ 
+ discovery outOfRange{
+ 	return hasTimeOutRange(outTS, 0.0, 3.0)
  }
  
 config :
-	mut simpleMutation port 'cp1p1' timeSeries ts_c1p1
-	mut simpleMutation port 'cp1p1' timeSeries ts_c2p1
-	mut usingCheckOnExistingValue port 'c2p1' timeSeries ts_c2p1
-	discovery myDetection port 'asd' expectedSeries ts_c2_output mutatedSeries ts_c1_output
+	mut simpleMutation port 'cp1p1' timeSeries ts_c1
+	mut simpleMutation port 'cp1p1' timeSeries ts_c2
+	discovery Omission port 'c1_out' expectedSeries ts_c1_expected mutatedSeries ts_c1_output
+	discovery CustomFailure port 'c2_out' expectedSeries ts_c2_expected mutatedSeries ts_c2_output  
 	 
 		 
 simultation_platfrom: proteus

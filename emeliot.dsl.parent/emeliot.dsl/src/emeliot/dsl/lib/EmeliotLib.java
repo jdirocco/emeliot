@@ -18,7 +18,7 @@ import emeliot.dsl.read.TimeValue;
 
 
 
-public abstract class EmeliotLib implements EmeliotService, EmeliotMutationService {
+public abstract class EmeliotLib implements EmeliotService, EmeliotMutationService, EmeliotDiscoveryService {
 
 	
 	
@@ -1831,4 +1831,10 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	    return false;
 	}
 
+
+	@Override
+	public boolean hasValueOutRange(TimeSeries tsMutated, double valueMin, double valueMax) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

@@ -20,10 +20,10 @@ Configuration returns Configuration:
 	ConfigMutation | ConfigDiscovery;
 
 ConfigMutation returns ConfigMutation:
-	'mut' mut=[Mutation] ('port' port = STRING)? 'timeSeries' timeSeries = [TimeSeries] ;
+	'mut' mut=[Mutation] ('port' port = EString)? 'timeSeries' timeSeries = [TimeSeries] ;
 
 ConfigDiscovery returns ConfigDiscovery:
-	'discovery' discovery=[Discovery] ('port' portName = STRING)?
+	'discovery' discovery=[Discovery] ('port' port = EString)?
 	'expectedSeries' expectedTimeSeries = [TimeSeries] // produced by Protheus on original input without mutation
 	'mutatedSeries' mutatedTimeSeries = [TimeSeries] // produced by Prothues on mutated input
 ;
@@ -67,8 +67,7 @@ Component returns Component:
 	'ports' ':' ports+=Port*;
 
 Port returns Port:
-	{Port}
-	'port' name=ID type=PORT_TYPE;
+	'port' name=EString type=PORT_TYPE;
 
 Discovery returns Discovery:
 	{Discovery}

@@ -1,36 +1,33 @@
-model Leonardo : 
- 	
- specification components : 
- 	Component1	 ports : 	
- 		port c1p1 INPUT 
- 		port c1p2 INPUT 
- 		port  c1p13 OUTPUT 
- 	Component2	 ports : 	
- 		port c2p1 INPUT  
- 		port c2p2 INPUT  
- 		port c2p3 OUTPUT 
- 	//TO BE DISCUSSED 	  
-   
- time_series :
- 	ts_c1p1 [(52.0 : 3.0),  (8.0 : 4.5)]
- 	ts_c1p2 path "/Users/juridirocco/Downloads/irrigationUnit2.txt"
-	ts_c1_output path "/Users/juridirocco/Downloads/irrigationUnit1.txt"
-	
-	ts_c2p1 path "/Users/juridirocco/Downloads/irrigationUnit1.txt"
- 	ts_c2p2 path "/Users/juridirocco/Downloads/irrigationUnit2.txt"
-	ts_c2_output_mutated [(52.0 : 3.0),  (8.0 : 4.5),  (6.0 : 4.5),  (87.0 : 4.5),  (88.0 : 4.5),  (87.0 : 4.5),  (87.0 : 4.5)]
-	ts_c2_output_expected [(52.0 : 3.0),  (8.0 : 4.5),  (6.0 : 4.5),  (87.0: 4.5),  (88.0 : 4.5),  (87.0 : 4.5),  (87.0 : 4.5)] 
- 	
+model Leonardo:
 
+ specification
+ 	components : 
+	 	Component1	 ports : 	
+	 		port c1_in INPUT 
+	 		port c1_out OUTPUT  	
+	 	Component2	 ports : 	
+	 		port c2_in INPUT 
+	 		port c2_out OUTPUT
+	 
+ 	//TO BE DISCUSSED 	  
+ time_series :
+ 	ts_c1 path "/Users/juridirocco/eclipse-workspace/emeliot.dsl.parent/emeliot.dsl.examples/irrigationUnit1.txt"
+	ts_c1_output path "/Users/juridirocco/eclipse-workspace/emeliot.dsl.parent/emeliot.dsl.examples/irrigationUnit1_MUT.DAT"
+	ts_c1_expected path "/Users/juridirocco/eclipse-workspace/emeliot.dsl.parent/emeliot.dsl.examples/irrigationUnit1_EX.DAT"
+	 
+	ts_c2 path "/Users/juridirocco/eclipse-workspace/emeliot.dsl.parent/emeliot.dsl.examples/irrigationUnit2.txt"
+ 	ts_c2_output path "/Users/juridirocco/eclipse-workspace/emeliot.dsl.parent/emeliot.dsl.examples/irrigationUnit2_MUT.DAT"
+ 	ts_c2_expected path "/Users/juridirocco/eclipse-workspace/emeliot.dsl.parent/emeliot.dsl.examples/irrigationUnit2_EX.DAT"
+ 	 
  mutation simpleMutation {
  	addTimeAndValue(inTS, 12.0, 14)
- 	
  } 	
  
  mutation esempio {
  	setAllTimesToTime(inTS, 5)
- }  
-  
+ }
+
+ 
  mutation usingCheckOnExistingValue  {   
  	var mv = getMaxValue(inTS)
  	if (mv > 100)
@@ -51,30 +48,29 @@ model Leonardo :
  		changeMultipleTimeLate(inTS, 0.5, tm,5);
  	}
  }
- 
- 
- discovery myDetection {
- 	//TO BE DISCUSSED
- 	addMu
+
+ discovery omission {
+ 	return isOmission(outTS, expectedTS); 
  }
  
-config : 	 
-	mut simpleMutation port "c1p1" timeSeries ts_c1p1
-	mut complexMutation port "c1p2" timeSeries ts_c1p2
-	
-	mut usingCheckOnExistingValue port "c1p2" timeSeries ts_c2p1
-	mut complexMutation port "c1p2" timeSeries ts_c1p2
-	
-	mut esempio timeSeries ts_c1p1
-	
-	discovery myDetection 
-		expectedSeries  ts_c1_output 
-		mutatedSeries  ts_c1_output
-		
-	discovery myDetection
-		expectedSeries  ts_c2_output_expected
-		mutatedSeries  ts_c2_output_mutated 
-		 
-simultation_platfrom : proteus
+ discovery customValueTime {
+ 	for (Double elemen : outTS.allTimes)
+ 		if (elemen >100)
+ 			return true;
+ 	for (Double elemen : outTS.allValues)
+ 		if (elemen <0)
+ 			return true;
+ 	return false;
+ 		
+ }
 
-project_file : "asd"
+ 
+config :
+	mut simpleMutation port 'cp1p1' timeSeries ts_c1
+	mut simpleMutation port 'cp1p1' timeSeries ts_c2
+	discovery omission port 'c1_out' expectedSeries ts_c1_expected mutatedSeries ts_c1_output
+	discovery customValueTime port 'c2_out' expectedSeries ts_c2_expected mutatedSeries ts_c2_output  
+	 
+		 
+simultation_platfrom: proteus
+project_file : "project_file_path"

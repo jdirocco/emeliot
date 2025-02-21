@@ -21,6 +21,7 @@ import emeliot.dsl.lib.ProteusService
 import emeliot.dsl.read.PORT_TYPE
 import emeliot.dsl.read.Configuration
 import emeliot.dsl.read.Port
+import emeliot.dsl.read.ConfigDiscovery
 
 /**
  * <p>Infers a JVM model from the source model.</p>
@@ -90,11 +91,12 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 			}
 			for (mut : element.discoveries) {
 
-				members += mut.toMethod(mut.name, typeRef(Void.TYPE)) [
+				members += mut.toMethod(mut.name, typeRef(Boolean.TYPE)) [
 					body = mut.expression				
-					parameters += mut.toParameter("inTS", typeRef(TimeSeries))
+					parameters += mut.toParameter("expectedTS", typeRef(TimeSeries))
 					parameters += mut.toParameter("outTS", typeRef(TimeSeries))
 				]
+				
 			}
 			
 			//NEW
@@ -115,25 +117,7 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 					
 			]
 				
-			/*for (config : element.configurations.filter[e|e instanceof ConfigMutation]) {
-				var mutation =  config as ConfigMutation
-				
-				
-				var mut = mutation.mut
-				
-				members += mutation.timeSeriesValues.toField(mutation.timeSeriesValues.name, typeRef(TimeSeries)) [
-					initializer = ''' ReadFactory.eINSTANCE.createTimeSeries() '''
-				]
-				for (tv : mutation.timeSeriesValues.timeValues) {
-
-					members += tv.toField(tv.name, typeRef(TimeValue)) [
-						initializer = ''' ReadFactory.eINSTANCE.createTimeValue() '''
-
-					]
-
-				}
-
-			}*/
+			
 			members += element.toField('p', typeRef(Port))
 			members += element.toField('tv', typeRef(TimeValue))
 			for (ts : element.timeSeries) {
@@ -206,23 +190,58 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 							writeTSToFile((TimeSeries)«(o as ConfigMutation).timeSeries.name»,"«(o as ConfigMutation).timeSeries.name»_M.txt");
 							
 							
-						«ENDFOR»	
-						
-						final TimeSeries outSeries  =  ReadFactory.eINSTANCE.createTimeSeries() ;
-«««						«FOR o: inport»
-«««							«getFilePath(element.configurations,o)»
-«««						«ENDFOR»
-«««						«element.discovery.name»(outSeries);
-						«FOR component : element.specification.components»
 							
-							«FOR port : component.ports.filter[it.type == PORT_TYPE.OUTPUT]»
-								p = ReadFactory.eINSTANCE.createPort();
-								p.setName("Nome");
-								p.setPath("Path");
-								outport.add(p);
-							«ENDFOR»
+							
 						«ENDFOR»
-						outport.stream().map(x -> x.path).collect(Collectors.toList();
+					//SIMULATION
+					//TODO Claudio and Juri
+					//DISCOVERY
+					boolean guard = false;	
+						«FOR o : element.configurations.filter[e|e instanceof ConfigDiscovery]»		
+															
+«««							for (TimeValue tv : «(o as ConfigMutation).timeSeriesValues») 
+							«IF (o as ConfigDiscovery).expectedTimeSeries.timeValues !== null»
+								
+							
+							«FOR e : ( (o as ConfigDiscovery).expectedTimeSeries).timeValues»
+							
+								tv = ReadFactory.eINSTANCE.createTimeValue();	
+											
+								tv.setTime(«e.time»);
+								tv.setValue(«e.value»);								
+								« (o as ConfigMutation).timeSeries.name».getTimeValues().add(tv);
+												
+							«ENDFOR»
+							
+										
+							
+							«ENDIF »
+							
+							«IF (o as ConfigDiscovery).expectedTimeSeries.name !== null»
+								« ((o as ConfigDiscovery).expectedTimeSeries.name)» = readTSFromFile("« (o as ConfigDiscovery).expectedTimeSeries.timeSeriesPath»");
+								« ((o as ConfigDiscovery).mutatedTimeSeries.name)» = readTSFromFile("« (o as ConfigDiscovery).mutatedTimeSeries.timeSeriesPath»");
+							«ENDIF»
+							if («(o as ConfigDiscovery).discovery.name»(«(o as ConfigDiscovery).expectedTimeSeries.name»,«(o as ConfigDiscovery).mutatedTimeSeries.name»))	{
+								System.out.println("Discovery «(o as ConfigDiscovery).discovery.name» on PORT «(o as ConfigDiscovery).port» \n\ttime series EXPECTED:«(o as ConfigDiscovery).expectedTimeSeries.name»\n\tOUTPUT:«(o as ConfigDiscovery).expectedTimeSeries.name»");
+								guard = true;
+							}
+							
+							
+							
+						«ENDFOR»
+					if(!guard) System.out.println("No failure found"); 
+«««						final TimeSeries outSeries  =  ReadFactory.eINSTANCE.createTimeSeries() ;
+«««						«FOR component : element.specification.components»
+«««							
+«««							«FOR port : component.ports.filter[it.type == PORT_TYPE.OUTPUT]»
+«««								p = ReadFactory.eINSTANCE.createPort();
+«««								p.setName("Nome");
+«««								p.setPath("Path");
+«««								outport.add(p);
+«««							«ENDFOR»
+«««						«ENDFOR»
+«««						outport.stream().map(x -> x.path).collect(Collectors.toList());
+
 						
 				'''
 
