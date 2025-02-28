@@ -314,8 +314,8 @@ public class TimeSerieAuxTest extends MainStdLibraryTest{
 	public static void testWriteAndReadTSFromFile(ReadFactory factory, EmeliotLib e) {
 	    TimeSeries ts = createTimeSerie(factory, e);
 		try {
-			e.writeTSToFile(((TimeSeriesValue) ts), "./proteus-example/io/ts.txt");
-			TimeSeries ts1 = e.readTSFromFile("./proteus-example/io/ts.txt");
+			e.writeInTSToFile(((TimeSeriesValue) ts), "./proteus-example/io/ts.txt");
+			TimeSeries ts1 = e.readInTSFromFile("./proteus-example/io/ts.txt");
 			e.printTimeSeries(ts1);
 		} catch (IOException e1) {
 			e1.printStackTrace();

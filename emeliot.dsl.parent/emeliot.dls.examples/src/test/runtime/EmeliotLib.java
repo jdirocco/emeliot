@@ -23,6 +23,8 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import emeliot.dsl.lib.DiscoveryOutcome;
+import emeliot.dsl.lib.EmeliotDiscoveryService;
 import emeliot.dsl.lib.EmeliotMutationService;
 import emeliot.dsl.lib.EmeliotService;
 import emeliot.dsl.read.ReadFactory;
@@ -33,7 +35,7 @@ import emeliot.dsl.read.TimeValue;
 
 
 
-public abstract class EmeliotLib implements EmeliotService, EmeliotMutationService {
+public abstract class EmeliotLib implements EmeliotService, EmeliotMutationService, EmeliotDiscoveryService {
 
 	
 	
@@ -55,9 +57,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void addTimeAndValue_File(String tsInputPath, String tsOutputPath, double time, double value) throws IOException {
-		TimeSeries s = readTSFromFile(tsInputPath);
+		TimeSeries s = readInTSFromFile(tsInputPath);
 		addTimeAndValue(s, time, value);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 	
 	@Override
@@ -75,9 +77,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void addRandomTimeAndValue_File(String tsInputPath, String tsOutputPath, double timeMin, double timeMax, double value) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    addRandomTimeAndValue(s, timeMin, timeMax, value);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 	
 	@Override
@@ -95,9 +97,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void addTimeAndRandomValue_File(String tsInputPath, String tsOutputPath, double time, double valueMin, double valueMax) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    addTimeAndRandomValue(s, time, valueMin, valueMax);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 	
 	@Override
@@ -116,9 +118,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void addRandomTimeAndRandomValue_File(String tsInputPath, String tsOutputPath, double timeMin, double timeMax, double valueMin, double valueMax) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    addRandomTimeAndRandomValue(s, timeMin, timeMax, valueMin, valueMax);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 	
 	@Override
@@ -138,9 +140,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void addMultipleTimeValues_File(String tsInputPath, String tsOutputPath, List<Double> times, List<Double> values) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    addMultipleTimeValues(s, times, values);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 	
 	@Override
@@ -161,9 +163,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
     public void addMultipleRandomTimeValues_File(String tsInputPath, String tsOutputPath, double timeMin, double timeMax, double valueMin, double valueMax, int count) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
         addMultipleRandomTimeValues(s, timeMin, timeMax, valueMin, valueMax, count);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
 
     
@@ -178,10 +180,10 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
     
 	@Override
     public void appendTimeSeries_File(String tsInputPath, String tsAppendPath, String tsOutputPath) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
-        TimeSeries s1 = readTSFromFile(tsAppendPath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
+        TimeSeries s1 = readInTSFromFile(tsAppendPath);
         appendTimeSeries(s, s1);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
     
 	@Override
@@ -201,10 +203,10 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
     
 	@Override
     public void mergeTimeSeries_File(String tsInputPath, String tsMergePath, String tsOutputPath) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
-        TimeSeries s1 = readTSFromFile(tsMergePath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
+        TimeSeries s1 = readInTSFromFile(tsMergePath);
         mergeTimeSeries(s, s1);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
     
 	@Override
@@ -218,10 +220,10 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 
 	@Override
     public void replaceTimeSeries_File(String tsInputPath, String tsReplacePath, String tsOutputPath) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
-        TimeSeries s1 = readTSFromFile(tsReplacePath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
+        TimeSeries s1 = readInTSFromFile(tsReplacePath);
         replaceTimeSeries(s, s1);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
 	
 	
@@ -254,9 +256,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
     
 	@Override
     public void changeValue_File(String tsInputPath, String tsOutputPath, double time, double value) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
         changeValue(s, time, value);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
 	
 	@Override
@@ -273,9 +275,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void changeTime_File(String tsInputPath, String tsOutputPath, double timeOld, double timeNew) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    changeTime(s, timeOld, timeNew);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 	
 	@Override
@@ -293,9 +295,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void changeValueWithRandom_File(String tsInputPath, String tsOutputPath, double time, double valueMin, double valueMax) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    changeValueWithRandom(s, time, valueMin, valueMax);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 	
 	@Override
@@ -314,9 +316,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void changeTimeWithRandom_File(String tsInputPath, String tsOutputPath, double timeMin, double timeMax, double time) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    changeTimeWithRandom(s, timeMin, timeMax, time);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 	
 	@Override
@@ -334,9 +336,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 
 	@Override
 	public void changeTimeAndValue_File(String tsInputPath, String tsOutputPath, double timeOld, double timeNew, double valueNew) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    changeTimeAndValue(s, timeOld, timeNew, valueNew);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 	
 	@Override
@@ -356,9 +358,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void changeTimeWithRandomAndValue_File(String tsInputPath, String tsOutputPath, double timeOld, double timeMin, double timeMax, double valueNew) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    changeTimeWithRandomAndValue(s, timeOld, timeMin, timeMax, valueNew);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 
 	@Override
@@ -378,9 +380,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void changeTimeAndValueWithRandom_File(String tsInputPath, String tsOutputPath, double timeOld, double timeNew, double valueMin, double valueMax) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    changeTimeAndValueWithRandom(s, timeOld, timeNew, valueMin, valueMax);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 	
 	@Override
@@ -401,9 +403,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void changeTimeWithRandomAndValueWithRandom_File(String tsInputPath, String tsOutputPath, double timeOld, double timeMin, double timeMax, double valueMin, double valueMax) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    changeTimeWithRandomAndValueWithRandom(s, timeOld, timeMin, timeMax, valueMin, valueMax);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 	
 	@Override
@@ -418,9 +420,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void changeARandomTimeValue_File(String tsInputPath, String tsOutputPath, double timeNew, double valueNew) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    changeARandomTimeValue(s, timeNew, valueNew);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 	
 	@Override
@@ -438,9 +440,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void changeARandomTimeValue_File(String tsInputPath, String tsOutputPath, double timeMin, double timeMax, double valueMin, double valueMax) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    changeARandomTimeValueWithRandomTimeValue(s, timeMin, timeMax, valueMin, valueMax);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 	
 	@Override
@@ -461,9 +463,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void changeMultipleTimeValues_File(String tsInputPath, String tsOutputPath, List<Double> timesOld, List<Double> timesNew, List<Double> valuesNew) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    changeMultipleTimeValues(s, timesOld, timesNew, valuesNew);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 
 	@Override
@@ -485,9 +487,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void changeMultipleTimeValuesWithRandomTimeValues_File(String tsInputPath, String tsOutputPath, List<Double> timesOld, double timeMin, double timeMax, double valueMin, double valueMax) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    changeMultipleTimeValuesWithRandomTimeValues(s, timesOld, timeMin, timeMax, valueMin, valueMax);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 	
 	@Override
@@ -506,9 +508,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
     
 	@Override
     public void changeTimeLate_File(String tsInputPath, String tsOutputPath, double eps, double time, double timeMaxDomain) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
         changeTimeLate(s, eps, time, timeMaxDomain);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
 	
 	@Override
@@ -525,9 +527,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void changeRandomTimeLate_File(String tsInputPath, String tsOutputPath, double eps, double timeMaxDomain) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    changeRandomTimeLate(s, eps, timeMaxDomain);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 	
 	@Override
@@ -548,9 +550,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void changeMultipleTimeLate_File(String tsInputPath, String tsOutputPath, double eps, List<Double> times, double timeMaxDomain) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    changeMultipleTimeLate(s, eps, times, timeMaxDomain);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 	
 	@Override
@@ -569,9 +571,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
     
 	@Override
     public void changeTimeEarly_File(String tsInputPath, String tsOutputPath, double eps, double time, double timeMinDomain) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
         changeTimeEarly(s, eps, time, timeMinDomain);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
     
 	@Override
@@ -588,9 +590,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
     
 	@Override
     public void changeRandomTimeEarly_File(String tsInputPath, String tsOutputPath, double eps, double timeMinDomain) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
         changeRandomTimeEarly(s, eps, timeMinDomain);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
 
 	@Override
@@ -611,9 +613,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
     public void changeMultipleTimeEarly_File(String tsInputPath, String tsOutputPath, double eps, List<Double> times, double timeMinDomain) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
         changeMultipleTimeEarly(s, eps, times, timeMinDomain);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
 	
 	@Override
@@ -633,9 +635,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
     public void changeValueCoarse_File(String tsInputPath, String tsOutputPath, double eps, double time, double valueMinDomain, double valueMaxDomain) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
         changeValueCoarse(s, eps, time, valueMinDomain, valueMaxDomain);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
     
 	@Override
@@ -652,9 +654,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
     
 	@Override
     public void changeRandomValueCoarse_File(String tsInputPath, String tsOutputPath, double eps, double valueMinDomain, double valueMaxDomain) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
         changeRandomValueCoarse(s, eps, valueMinDomain, valueMaxDomain);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
 
 	@Override
@@ -676,9 +678,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void changeMultipleValueCoarse_File(String tsInputPath, String tsOutputPath, double eps, List<Double> times, double valueMinDomain, double valueMaxDomain) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    changeMultipleValueCoarse(s, eps, times, valueMinDomain, valueMaxDomain);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 
 	@Override
@@ -697,9 +699,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void changeValueSubtle_File(String tsInputPath, String tsOutputPath, double eps, double time, double valueMinDomain, double valueMaxDomain) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    changeValueSubtle(s, eps, time, valueMinDomain, valueMaxDomain);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 	
 	@Override
@@ -715,9 +717,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void changeRandomValueSubtle_File(String tsInputPath, String tsOutputPath, double eps, double valueMinDomain, double valueMaxDomain) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    changeRandomValueSubtle(s, eps, valueMinDomain, valueMaxDomain);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 	
 	@Override
@@ -738,9 +740,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 
 	@Override
 	public void changeMultipleValueSubtle_File(String tsInputPath, String tsOutputPath, double eps, List<Double> times, double valueMinDomain, double valueMaxDomain) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    changeMultipleValueSubtle(s, eps, times, valueMinDomain, valueMaxDomain);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 
 	
@@ -792,31 +794,35 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	//TODO: REMOVE OPERATORS
 	
-	
+	@Override
 	public void removeTimeValue(TimeSeries s, double time, double value) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
 		((TimeSeriesValue) s).getTimeValues().removeIf(tv -> tv.getTime() == time && tv.getValue() == value);
     }
 	
+	@Override
 	public void removeTimeValue_File(String tsInputPath, String tsOutputPath, double time, double value) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    removeTimeValue(s, time, value);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 
+	@Override
     public void removeTimeValue(TimeSeries s, TimeValue tvToRemove) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");			
 		((TimeSeriesValue) s).getTimeValues().removeIf(tv -> tv.getTime() == tvToRemove.getTime() && (tv.getValue() == tvToRemove.getValue()));
     }
     
+	@Override
     public void removeTimeValue_File(String tsInputPath, String tsOutputPath, TimeValue tvToRemove) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
         removeTimeValue(s, tvToRemove);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
 
+	@Override
     public void removeRandomTimeValue(TimeSeries s) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
@@ -825,12 +831,14 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
         	((TimeSeriesValue) s).getTimeValues().remove(randomTV);
     }
     
+	@Override
     public void removeRandomTimeValue_File(String tsInputPath, String tsOutputPath) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
         removeRandomTimeValue(s);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
-
+	
+	@Override
     public void removeMultipleTimeValues(TimeSeries s, List<Double> times, List<Double> values) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
@@ -843,12 +851,14 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
         }
     }
     
+	@Override
     public void removeMultipleTimeValues_File(String tsInputPath, String tsOutputPath, List<Double> times, List<Double> values) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
         removeMultipleTimeValues(s, times, values);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
 
+	@Override
     public void removeMultipleTimeValues(TimeSeries s, List<TimeValue> timeValues) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
@@ -859,12 +869,14 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
         }
     }
     
+	@Override
     public void removeMultipleTimeValues_File(String tsInputPath, String tsOutputPath, List<TimeValue> timeValues) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
         removeMultipleTimeValues(s, timeValues);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
 
+	@Override
     public void removeMultipleTimeValues(TimeSeries s, TimeValue... timeValues) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
@@ -872,70 +884,81 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
     		((TimeSeriesValue) s).getTimeValues().removeIf(tv -> tv.getTime() == tvToRemove.getTime() && tv.getValue() == tvToRemove.getValue());
     }
 
+	@Override
     public void removeMultipleTimeValues_File(String tsInputPath, String tsOutputPath, TimeValue... timeValues) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    removeMultipleTimeValues(s, timeValues);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
 
+	@Override
     public void removeAllTimeValues(TimeSeries s) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
 		((TimeSeriesValue) s).getTimeValues().clear();
     }
     
+	@Override
     public void removeAllTimeValues_File(String tsInputPath, String tsOutputPath) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
         removeAllTimeValues(s);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
 
+	@Override
     public void removeTimeValuesBeforeTime(TimeSeries s, double time) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
 		((TimeSeriesValue) s).getTimeValues().removeIf(tv -> tv.getTime() < time);
     }
     
+	@Override
     public void removeTimeValuesBeforeTime_File(String tsInputPath, String tsOutputPath, double time) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
         removeTimeValuesBeforeTime(s, time);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
 
+	@Override
     public void removeTimeValuesAfterTime(TimeSeries s, double time) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
 		((TimeSeriesValue) s).getTimeValues().removeIf(tv -> tv.getTime() > time);
     }
     
+	@Override
     public void removeTimeValuesAfterTime_File(String tsInputPath, String tsOutputPath, double time) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
         removeTimeValuesAfterTime(s, time);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
 
+	@Override
     public void removeTimeValuesBelowValue(TimeSeries s, double value) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
 		((TimeSeriesValue) s).getTimeValues().removeIf(tv -> tv.getValue() < value);
     }
     
+	@Override
     public void removeTimeValuesBelowValue_File(String tsInputPath, String tsOutputPath, double value) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
         removeTimeValuesBelowValue(s, value);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
 
+	@Override
     public void removeTimeValuesAboveValue(TimeSeries s, double value) {
 		if (!(s instanceof TimeSeriesValue))
 			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
 		((TimeSeriesValue) s).getTimeValues().removeIf(tv -> tv.getValue() > value);
     }
     
+	@Override
     public void removeTimeValuesAboveValue_File(String tsInputPath, String tsOutputPath, double value) throws IOException {
-        TimeSeries s = readTSFromFile(tsInputPath);
+        TimeSeries s = readInTSFromFile(tsInputPath);
         removeTimeValuesAboveValue(s, value);
-		writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+		writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
     }
 	
 	
@@ -977,7 +1000,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void printTimeSeries_File(String tsInputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    printTimeSeries(s);
 	}
 
@@ -994,9 +1017,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 
 	@Override
 	public void reorderTimeSeries_File(String tsInputPath, String tsOutputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    reorderTimeSeries(s);
-	    writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+	    writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 	
 	@Override
@@ -1014,7 +1037,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public TimeValue selectRandomTimeValue_File(String tsInputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return selectRandomTimeValue(s);
 	}
 
@@ -1030,7 +1053,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public boolean existTime_File(String tsInputPath, double time) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return existTime(s, time);
 	}
 	
@@ -1046,7 +1069,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public boolean existValue_File(String tsInputPath, double value) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return existValue(s, value);
 	}
 	
@@ -1062,7 +1085,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public boolean existTimeValue_File(String tsInputPath, double time, double value) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return existTimeValue(s, time, value);
 	}
 
@@ -1078,7 +1101,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public List<Double> getAllTimes_File(String tsInputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getAllTimes(s);
 	}
 
@@ -1094,7 +1117,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public List<Double> getAllValues_File(String tsInputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getAllValues(s);
 	}
 
@@ -1111,7 +1134,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public List<Double> getTimesInRange_File(String tsInputPath, double timeMin, double timeMax) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getTimesInRange(s, timeMin, timeMax);
 	}
 	
@@ -1128,7 +1151,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public List<Double> getValuesInRange_File(String tsInputPath, double valueMin, double valueMax) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getValuesInRange(s, valueMin, valueMax);
 	}
 	
@@ -1145,7 +1168,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public List<TimeValue> getTimeValuesInRange_File(String tsInputPath, double timeMin, double timeMax, double valueMin, double valueMax) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getTimeValuesInRange(s, timeMin, timeMax, valueMin, valueMax);
 	}
 
@@ -1160,7 +1183,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public double getValueAt_File(String tsInputPath, int index) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getValueAt(s, index);
 	}
 
@@ -1175,7 +1198,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public double getTimeAt_File(String tsInputPath, int index) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getTimeAt(s, index);
 	}
 
@@ -1191,7 +1214,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public TimeValue getTimeValueAt_File(String tsInputPath, int index) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getTimeValueAt(s, index);
 	}
 
@@ -1207,7 +1230,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public double getMaxTime_File(String tsInputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getMaxTime(s);
 	}
 
@@ -1223,7 +1246,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public double getMinTime_File(String tsInputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getMinTime(s);
 	}
 
@@ -1239,7 +1262,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public double getMaxValue_File(String tsInputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getMaxValue(s);
 	}
 
@@ -1255,7 +1278,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public double getMinValue_File(String tsInputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getMinValue(s);
 	}
 	
@@ -1271,7 +1294,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 
 	@Override
 	public TimeValue getNextTimeValue_File(String tsInputPath, TimeValue tv) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getNextTimeValue(s, tv);
 	}
 	
@@ -1283,7 +1306,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public double getNextTime_File(String tsInputPath, TimeValue tv) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getNextTime(s, tv);
 	}
 
@@ -1295,7 +1318,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public double getNextValue_File(String tsInputPath, TimeValue tv) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getNextValue(s, tv);
 	}
 	
@@ -1310,7 +1333,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public TimeValue getNextTimeValue_File(String tsInputPath, int index) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getNextTimeValue(s, index);
 	}
 
@@ -1322,7 +1345,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public double getNextTime_File(String tsInputPath, int index) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getNextTime(s, index);
 	}
 
@@ -1334,7 +1357,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public double getNextValue_File(String tsInputPath, int index) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getNextValue(s, index);
 	}
 
@@ -1350,7 +1373,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public TimeValue getPreviousTimeValue_File(String tsInputPath, TimeValue tv) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getPreviousTimeValue(s, tv);
 	}
 	
@@ -1362,7 +1385,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public double getPreviousTime_File(String tsInputPath, TimeValue tv) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getPreviousTime(s, tv);
 	}
 	
@@ -1374,7 +1397,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public double getPreviousValue_File(String tsInputPath, TimeValue tv) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getPreviousValue(s, tv);
 	}
 
@@ -1389,7 +1412,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public TimeValue getPreviousTimeValue_File(String tsInputPath, int index) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getPreviousTimeValue(s, index);
 	}
 
@@ -1401,7 +1424,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public double getPreviousTime_File(String tsInputPath, int index) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getPreviousTime(s, index);
 	}
 
@@ -1413,7 +1436,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public double getPreviousValue_File(String tsInputPath, int index) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getPreviousValue(s, index);
 	}
 
@@ -1428,7 +1451,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public double getFirstTime_File(String tsInputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getFirstTime(s);
 	}
 
@@ -1443,7 +1466,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public double getFirstValue_File(String tsInputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getFirstValue(s);
 	}
 	
@@ -1458,7 +1481,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public TimeValue getFirstTimeValue_File(String tsInputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getFirstTimeValue(s);
 	}
 
@@ -1473,7 +1496,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public double getLastTime_File(String tsInputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getLastTime(s);
 	}
 
@@ -1488,7 +1511,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public double getLastValue_File(String tsInputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getLastValue(s);
 	}
 
@@ -1503,7 +1526,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public TimeValue getLastTimeValue_File(String tsInputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getLastTimeValue(s);
 	}
 
@@ -1523,7 +1546,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public TimeSeries copyTimeSeries_File(String tsInputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return copyTimeSeries(s);
 	}
 
@@ -1537,9 +1560,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void setAllTimesToZero_File(String tsInputPath, String tsOutputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    setAllTimesToZero(s);
-	    writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+	    writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}	
 
 	@Override
@@ -1552,9 +1575,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void setAllValuesToZero_File(String tsInputPath, String tsOutputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    setAllValuesToZero(s);
-	    writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+	    writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}	
 
 	@Override
@@ -1565,9 +1588,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void setAllToZero_File(String tsInputPath, String tsOutputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    setAllToZero(s);
-	    writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+	    writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 
 	@Override
@@ -1580,9 +1603,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void setAllTimesToTime_File(String tsInputPath, String tsOutputPath, double time) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    setAllTimesToTime(s, time);
-	    writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+	    writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 
 	@Override
@@ -1595,9 +1618,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void setAllValuesToValue_File(String tsInputPath, String tsOutputPath, double value) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    setAllValuesToValue(s, value);
-	    writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+	    writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 
 	@Override
@@ -1608,9 +1631,9 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public void setAllToTimeValue_File(String tsInputPath, String tsOutputPath, double time, double value) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    setAllToTimeValue(s, time, value);
-	    writeTSToFile(((TimeSeriesValue) s), tsOutputPath);
+	    writeInTSToFile(((TimeSeriesValue) s), tsOutputPath);
 	}
 
 	@Override
@@ -1630,7 +1653,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public TimeSeries getSubTimeSeriesInTimeRange_File(String tsInputPath, double timeMin, double timeMax) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return getSubTimeSeriesInTimeRange(s, timeMin, timeMax);
 	}
 
@@ -1643,7 +1666,7 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public int countTimeValues_File(String tsInputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return countTimeValues(s);
 	}
 
@@ -1656,19 +1679,19 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	@Override
 	public boolean isEmpty_File(String tsInputPath) throws IOException {
-	    TimeSeries s = readTSFromFile(tsInputPath);
+	    TimeSeries s = readInTSFromFile(tsInputPath);
 	    return isEmpty(s);
 	}
 	
 	@Override
-	public void writeTSToFile(TimeSeriesValue TimeSeriesValue, String filePath) throws IOException {
+	public void writeInTSToFile(TimeSeriesValue TimeSeriesValue, String filePath) throws IOException {
 		reorderTimeSeries(TimeSeriesValue);
 		List<String> lines = TimeSeriesValue.getTimeValues().stream().map(tv -> tv.getTime() + " " + tv.getValue()).collect(Collectors.toList());
 		Files.write(Paths.get(filePath), lines, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 	}
 
 	@Override
-	public TimeSeriesValue readTSFromFile(String filePath) throws IOException {
+	public TimeSeriesValue readInTSFromFile(String filePath) throws IOException {
 		TimeSeriesValue TimeSeriesValue = ReadFactory.eINSTANCE.createTimeSeriesValue();
 		List<String> lines = Files.readAllLines(Paths.get(filePath));
 		for (String line : lines) {
@@ -1685,8 +1708,33 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 		return TimeSeriesValue;
 	}
 	
-	
-	
+	@Override
+	public TimeSeriesValue readOutTSFromFile(String filePath) throws IOException {
+	    TimeSeriesValue timeSeriesValue = ReadFactory.eINSTANCE.createTimeSeriesValue();
+	    List<String> lines = Files.readAllLines(Paths.get(filePath));
+	    if (lines.isEmpty() || !lines.get(0).startsWith("\"TIME\"")) {
+	        throw new IOException("Invalid file format: missing or incorrect header");
+	    }
+	    for (int i = 1; i < lines.size(); i++) { //Skip header
+	        String line = lines.get(i).trim();
+	        String[] parts = line.split(",");
+	        if (parts.length != 2)
+	            throw new IOException("Invalid line format: " + line);
+	        try {
+	            double time = Double.parseDouble(parts[0].trim());
+	            double value = Double.parseDouble(parts[1].trim());
+	            TimeValue tv = ReadFactory.eINSTANCE.createTimeValue();
+	            tv.setTime(time);
+	            tv.setValue(value);
+	            timeSeriesValue.getTimeValues().add(tv);
+	        } catch (NumberFormatException e) {
+	            throw new IOException("Invalid numeric format in line: " + line, e);
+	        }
+	    }
+	    reorderTimeSeries(timeSeriesValue);
+	    return timeSeriesValue;
+	}
+
 	
 	
 	
@@ -1918,21 +1966,61 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	//TODO: DISCOVERY OPERATORS
 	
 	
-	/*public boolean isCommission(TimeSeries tsOriginal, TimeSeries tsMutated) {
-		return tsOriginal.getTimeValues().size() < tsMutated.getTimeValues().size(); //TODO: what if more elements are added and removed?
+	//TODO: DISCOVERY OPERATORS	
+	@Override
+	public DiscoveryOutcome isCommission(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
+	    DiscoveryOutcome outcome = new DiscoveryOutcome();
+	    int originalSize = tsOriginal.getTimeValues().size();
+	    int mutatedSize = tsMutated.getTimeValues().size();
+	    if (originalSize < mutatedSize) {
+	    	outcome.setHasError(true);
+	    	outcome.setOutcomeMsg("Commission error found. Expected Size: " + originalSize + ", Actual Size: " + mutatedSize);
+	    }
+	    return outcome;
+	}
+
+	
+	@Override
+	public DiscoveryOutcome isCommission_File(String tsOriginalPath, String tsMutatedPath) throws IOException {
+		TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
+		TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
+	    return isCommission(s1, s2);
 	}
 	
-	public boolean isOmission(TimeSeries tsOriginal, TimeSeries tsMutated) {
-		return tsOriginal.getTimeValues().size() > tsMutated.getTimeValues().size(); //TODO: what if more elements are added and removed?
+	@Override
+	public DiscoveryOutcome isOmission(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
+	    DiscoveryOutcome outcome = new DiscoveryOutcome();
+	    int originalSize = tsOriginal.getTimeValues().size();
+	    int mutatedSize = tsMutated.getTimeValues().size();
+	    if (originalSize > mutatedSize) {
+	    	outcome.setHasError(true);
+	    	outcome.setOutcomeMsg("Omission error found. Expected Size: " + originalSize + ", Actual Size: " + mutatedSize);
+	    }
+	    return outcome;
 	}
 	
-	public boolean isLate(TimeSeries tsOriginal, TimeSeries tsMutated, double eps) {
-		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) {
+	@Override
+	public DiscoveryOutcome isOmission_File(String tsOriginalPath, String tsMutatedPath) throws IOException {
+		TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
+		TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
+	    return isOmission(s1, s2);
+	}
+	
+	@Override
+	public DiscoveryOutcome isLate(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated, double eps) {
+		//as we compare time values against time values, the time series must be of the same size
+		if(tsOriginal.getTimeValues().size() != tsMutated.getTimeValues().size())
+	        throw new IllegalArgumentException("Time series sizes do not match");
+	    DiscoveryOutcome outcome = new DiscoveryOutcome();
+	    double expectedTime = 0;
+	    double actualTime = 0;
+		//for each original time, check the closest time among mutated timeseries and evaluate whether it is late according to an eps threshold
+		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) {//i=1 as header is skipped
 			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
 			double time1 = tv1.getTime();			
 			double value1 = tv1.getValue();
 			double closestDiffTime = Double.MAX_VALUE;
-			for(int j=1; j<tsMutated.getTimeValues().size(); j++) {
+			for(int j=1; j<tsMutated.getTimeValues().size(); j++) {//j=1 as header is skipped
 				TimeValue tv2 = tsMutated.getTimeValues().get(i);
 				double time2 = tv2.getTime();			
 				double value2 = tv2.getValue();
@@ -1946,26 +2034,46 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 					double timeDiff = time1 - time2;//diff between times
 					if(Math.abs(timeDiff)<=Math.abs(closestDiffTime)) {
 						closestDiffTime = timeDiff;
+						expectedTime = time1;
+						actualTime = time2; 
 					}
 					else
 						break;//the timeseries are ordered so once the diff is getting bigger the cycle can stop
 				}
 			}
-			if(closestDiffTime == 0)//no early/late detected for timeseries j as diff time is 0
+			if(closestDiffTime == 0)//no early/late detected for timeseries i, as diff time is 0
 				continue;
-			if(Math.abs(closestDiffTime)>eps && closestDiffTime<0)//if diff time bigger than epsilon, late detected
-				return true;
+			if(Math.abs(closestDiffTime)>eps && closestDiffTime<0){//if diff time bigger than epsilon and negative (mutated time is later), late detected
+				outcome.setHasError(true);
+				outcome.setOutcomeMsg("Late error found. Expected Time: " + expectedTime + ", Actual Time: " + actualTime);
+		        return outcome;
+			}
 		}	
-		return false;
+		return outcome;
 	}
 	
-	public boolean isEarly(TimeSeries tsOriginal, TimeSeries tsMutated, double eps) {
-		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) {
+	@Override
+	public DiscoveryOutcome isLate_File(String tsOriginalPath, String tsMutatedPath, double eps) throws IOException {
+		TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
+		TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
+	    return isLate(s1, s2, eps);
+	}
+	
+	@Override
+	public DiscoveryOutcome isEarly(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated, double eps) {
+		//as we compare time values against time values, the time series must be of the same size
+		if(tsOriginal.getTimeValues().size() != tsMutated.getTimeValues().size())
+	        throw new IllegalArgumentException("Time series sizes do not match");
+	    DiscoveryOutcome outcome = new DiscoveryOutcome();
+	    double expectedTime = 0;
+	    double actualTime = 0;
+		//for each original time, check the closest time among mutated timeserie and evaluate whether it is early according to an eps threshold
+		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) {//i=1 as header is skipped
 			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
 			double time1 = tv1.getTime();			
 			double value1 = tv1.getValue();
 			double closestDiffTime = Double.MAX_VALUE;
-			for(int j=1; j<tsMutated.getTimeValues().size(); j++) {
+			for(int j=1; j<tsMutated.getTimeValues().size(); j++) {//j=1 as header is skipped
 				TimeValue tv2 = tsMutated.getTimeValues().get(i);
 				double time2 = tv2.getTime();			
 				double value2 = tv2.getValue();
@@ -1979,46 +2087,194 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 					double timeDiff = time1 - time2;//diff between times
 					if(Math.abs(timeDiff)<=Math.abs(closestDiffTime)) {
 						closestDiffTime = timeDiff;
+						expectedTime = time1;
+						actualTime = time2; 
 					}
 					else
 						break;//the timeseries are ordered so once the diff is getting bigger the cycle can stop
 				}
 			}
-			if(closestDiffTime == 0)//no early/late detected for timeseries j as diff time is 0
+			if(closestDiffTime == 0)//no early/late detected for timeseries i, as diff time is 0
 				continue;
-			if(Math.abs(closestDiffTime)> eps && closestDiffTime>0) //if diff time bigger than epsilon, early detected
-				return true;
+			if(Math.abs(closestDiffTime)> eps && closestDiffTime>0) { //if diff time bigger than epsilon and positive (mutated time is earlier), early detected
+				outcome.setHasError(true);
+				outcome.setOutcomeMsg("Early error found. Expected Time: " + expectedTime + ", Actual Time: " + actualTime);
+		        return outcome;
+			}
 		}	
-		return false;
+		return outcome;
 	}
 	
-	public boolean isValueCoarse(TimeSeries tsOriginal, TimeSeries tsMutated, double eps, double valueMin, double valueMax) {
-		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) {
+	@Override
+	public DiscoveryOutcome isEarly_File(String tsOriginalPath, String tsMutatedPath, double eps) throws IOException {
+		TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
+		TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
+	    return isEarly(s1, s2, eps);
+	}
+	
+	@Override
+	public DiscoveryOutcome isValueCoarse(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated, double eps, double valueMin, double valueMax) {
+		//as we compare time values against time values, the time series must be of the same size
+		if(tsOriginal.getTimeValues().size() != tsMutated.getTimeValues().size())
+	        throw new IllegalArgumentException("Time series sizes do not match");
+		DiscoveryOutcome outcome = new DiscoveryOutcome();
+	    double expectedValue = 0;
+	    double actualValue = 0;
+		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) { //i=1 as header is skipped
 			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
 			TimeValue tv2 = tsMutated.getTimeValues().get(i);
 			double valueOriginal = tv1.getValue();
 			double valueMutated = tv2.getValue();
 			double valueDiff = valueOriginal - valueMutated;
-			//value subtle failure found as mutated value is bigger than eps and out of boundary
-			if(Math.abs(valueDiff)> eps && (valueMutated < valueMin || valueMutated > valueMax))
-				return true;
+			//value subtle failure found if diff is bigger than eps and mutated value is out of boundary
+			if(Math.abs(valueDiff)> eps && (valueMutated < valueMin || valueMutated > valueMax)) {
+				expectedValue = valueOriginal;
+				actualValue = valueMutated;
+				outcome.setHasError(true);
+				outcome.setOutcomeMsg("Value Coarse error found. Expected Value: " + expectedValue + ", Actual Value: " + actualValue);
+				return outcome;
+			}
 		}	
-		return false;
+		return outcome;
 	}
 	
-	public boolean isValueSubtle(TimeSeries tsOriginal, TimeSeries tsMutated, double eps, double valueMin, double valueMax) {
-		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) {
+	@Override
+	public DiscoveryOutcome isValueCoarse_File(String tsOriginalPath, String tsMutatedPath, double eps, double valueMin, double valueMax) throws IOException {
+		TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
+		TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
+		return isValueCoarse(s1, s2, eps, valueMin, valueMax);
+	}
+	
+	@Override
+	public DiscoveryOutcome isValueSubtle(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated, double eps, double valueMin, double valueMax) {
+		//as we compare time values against time values, the time series must be of the same size
+		if(tsOriginal.getTimeValues().size() != tsMutated.getTimeValues().size())
+	        throw new IllegalArgumentException("Time series sizes do not match");
+		DiscoveryOutcome outcome = new DiscoveryOutcome();
+	    double expectedValue = 0;
+	    double actualValue = 0;		
+		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) { //i=1 as header is skipped
 			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
 			TimeValue tv2 = tsMutated.getTimeValues().get(i);
 			double valueOriginal = tv1.getValue();
 			double valueMutated = tv2.getValue();
 			double valueDiff = valueOriginal - valueMutated;
-			//value subtle failure found as mutated value is bigger than eps and within boundary
-			if(Math.abs(valueDiff)> eps && (valueMutated >= valueMin && valueMutated <= valueMax))
-				return true;
+			//value subtle failure found if diff is bigger than eps and mutated value is within boundary
+			if(Math.abs(valueDiff)> eps && (valueMutated >= valueMin && valueMutated <= valueMax)) {
+				expectedValue = valueOriginal;
+				actualValue = valueMutated;
+				outcome.setHasError(true);
+				outcome.setOutcomeMsg("Value Subtle error found. Expected Value: " + expectedValue + ", Actual Value: " + actualValue);
+				return outcome;
+			}
 		}
-		return false;
-	}*/
+		return outcome;
+	}
+	
+	@Override
+	public DiscoveryOutcome isValueSubtle_File(String tsOriginalPath, String tsMutatedPath, double eps, double valueMin, double valueMax) throws IOException {
+		TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
+		TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
+		return isValueSubtle(s1, s2, eps, valueMin, valueMax);
+	}
+	
+	@Override
+	public DiscoveryOutcome areSameSize(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
+	    DiscoveryOutcome outcome = new DiscoveryOutcome();
+	    int originalSize = tsOriginal.getTimeValues().size();
+	    int mutatedSize = tsMutated.getTimeValues().size();
+	    if (originalSize == mutatedSize)
+	    	outcome.setOutcomeMsg("The time series have the same size: " + originalSize);
+	    else 
+	    	outcome.setOutcomeMsg("The time series have different size. First time series size: " + originalSize + ", Second time series size: " + mutatedSize);
+	    return outcome;
+	}
+	
+	@Override
+	public DiscoveryOutcome areSameSize_File(String tsOriginalPath, String tsMutatedPath) throws IOException {
+		TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
+		TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
+	    return areSameSize(s1, s2);
+	}
+	
+	@Override
+	public DiscoveryOutcome isSmaller(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
+	    DiscoveryOutcome outcome = new DiscoveryOutcome();
+	    int originalSize = tsOriginal.getTimeValues().size();
+	    int mutatedSize = tsMutated.getTimeValues().size();
+	    if (originalSize < mutatedSize)
+	    	outcome.setOutcomeMsg("The first time series has smaller size than the second time series. First time series size: " + originalSize + ", Second time series size: " + mutatedSize);
+	    else 
+	    	outcome.setOutcomeMsg("The first time series has same or bigger size than the second time series. First time series size: " + originalSize + ", Second time series size: " + mutatedSize);
+	    return outcome;
+	}
+	
+	@Override
+	public DiscoveryOutcome isSmaller_File(String tsOriginalPath, String tsMutatedPath) throws IOException {
+		TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
+		TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
+	    return isSmaller(s1, s2);
+	}
+	
+	@Override
+	public DiscoveryOutcome isBigger(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
+	    DiscoveryOutcome outcome = new DiscoveryOutcome();
+	    int originalSize = tsOriginal.getTimeValues().size();
+	    int mutatedSize = tsMutated.getTimeValues().size();
+	    if (originalSize > mutatedSize)
+	    	outcome.setOutcomeMsg("The first time series has bigger size than the second time series. First time series size: " + originalSize + ", Second time series size: " + mutatedSize);
+	    else 
+	    	outcome.setOutcomeMsg("The first time series has same or smaller size than the second time series. First time series size: " + originalSize + ", Second time series size: " + mutatedSize);
+	   return outcome;
+	    
+	}
+	
+	@Override
+	public DiscoveryOutcome isBigger_File(String tsOriginalPath, String tsMutatedPath) throws IOException {
+		TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
+		TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
+	    return isBigger(s1, s2);
+	}
+	
+	@Override
+	public DiscoveryOutcome hasTimeOutRange(TimeSeriesValue tsMutated, double timeMin, double timeMax) {
+	    DiscoveryOutcome outcome = new DiscoveryOutcome();
+	    for (TimeValue tv : tsMutated.getTimeValues()) {
+	        double time = tv.getTime();
+	        if (time < timeMin || time > timeMax) {
+	        	outcome.setHasError(true);
+		    	outcome.setOutcomeMsg("The time series has following time as out of range (" + timeMin + "-" + timeMax + "): " + time);
+		    	return outcome;
+	        }
+	    }
+	    return outcome;
+	}
+
+	@Override
+	public DiscoveryOutcome hasTimeOutRange_File(String tsMutatedPath, double timeMin, double timeMax) throws IOException {
+		TimeSeriesValue s = readOutTSFromFile(tsMutatedPath);
+	    return hasTimeOutRange(s, timeMin, timeMax);
+	}
+	
+	@Override
+	public DiscoveryOutcome hasValueOutRange(TimeSeriesValue tsMutated, double valueMin, double valueMax) {
+	    DiscoveryOutcome outcome = new DiscoveryOutcome();
+	    for (TimeValue tv : tsMutated.getTimeValues()) {
+	        double value = tv.getValue();
+	        if (value < valueMin || value > valueMax){
+	        	outcome.setHasError(true);
+		    	outcome.setOutcomeMsg("The time series has following value as out of range (" + valueMin + "-" + valueMax + "): " + value);
+		    	return outcome;
+	        }
+	    }
+	    return outcome;
+	}
+
+	@Override
+	public DiscoveryOutcome hasValueOutRange_File(String tsMutatedPath, double valueMin, double valueMax) throws IOException {
+		TimeSeriesValue s = readOutTSFromFile(tsMutatedPath);
+	    return hasValueOutRange(s, valueMin, valueMax);
+	}
 	
 
 }
