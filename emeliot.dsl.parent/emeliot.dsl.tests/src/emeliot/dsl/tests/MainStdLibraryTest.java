@@ -14,6 +14,7 @@ public class MainStdLibraryTest {
 		//EmeliotModelManager em = new EmeliotModelManager();
 		//em.loadEcoreFile("..\\emeliot.dsl\\model\\generated\\Emeliot.ecore");
 		//EmeliotLib e = new ProteusService(em);
+		
 		ReadFactory factory = ReadFactory.eINSTANCE;
 		EmeliotLib e = new ProteusService();
 		testAddOperators(factory, e);
@@ -24,7 +25,8 @@ public class MainStdLibraryTest {
 		testChangeOperatorsFiles(e);
 		testRemoveOperatorsFiles(e);
 		testAuxOperatorsFiles(e);
-		//TODO: test discovery methods
+		testDiscoveryOperators(factory, e);
+		testDiscoveryOperatorsFiles(e);
 	}
 
 	
@@ -339,6 +341,8 @@ public class MainStdLibraryTest {
 	    System.out.println("TEST WRITE-AND-READ");
 	    TimeSerieAuxTest.testWriteAndReadTSFromFile(factory, e);
 	    System.out.println("=================================");
+	    System.out.println("TEST READ OUT TS");
+	    TimeSerieAuxTest.testReadOutTSFromFile(factory, e);
 	}
 
 	
@@ -348,9 +352,67 @@ public class MainStdLibraryTest {
 	
 	
 	
+	
+	
+	
+	
+	public static void testDiscoveryOperators(ReadFactory factory, EmeliotLib e) {
+	    System.out.println("TEST IS COMMISSION");
+	    TimeSerieDiscoveryTest.testIsCommission(factory, e);
+	    System.out.println("=================================");
+	    System.out.println("TEST IS OMISSION");
+	    TimeSerieDiscoveryTest.testIsOmission(factory, e);
+	    System.out.println("=================================");
+	    System.out.println("TEST IS LATE");
+	    TimeSerieDiscoveryTest.testIsLate(factory, e);
+	    System.out.println("=================================");
+	    System.out.println("TEST IS EARLY");
+	    TimeSerieDiscoveryTest.testIsEarly(factory, e);
+	    System.out.println("=================================");
+	    System.out.println("TEST IS VALUE COARSE");
+	    TimeSerieDiscoveryTest.testIsValueCoarse(factory, e);
+	    System.out.println("=================================");
+	    System.out.println("TEST IS VALUE SUBTLE");
+	    TimeSerieDiscoveryTest.testIsValueSubtle(factory, e);
+	    System.out.println("=================================");
+	    System.out.println("TEST ARE SAME SIZE");
+	    TimeSerieDiscoveryTest.testAreSameSize(factory, e);
+	    System.out.println("=================================");
+	    System.out.println("TEST IS SMALLER");
+	    TimeSerieDiscoveryTest.testIsSmaller(factory, e);
+	    System.out.println("=================================");
+	    System.out.println("TEST IS BIGGER");
+	    TimeSerieDiscoveryTest.testIsBigger(factory, e);
+	    System.out.println("=================================");
+	    System.out.println("TEST HAS TIME OUT RANGE");
+	    TimeSerieDiscoveryTest.testTimeOutRange(factory, e);
+	    System.out.println("=================================");
+	    System.out.println("TEST HAS VALUE OUT RANGE");
+	    TimeSerieDiscoveryTest.testValueOutRange(factory, e);
+	    System.out.println("=================================");
+	    
+	}
+	
+	public static void testDiscoveryOperatorsFiles(EmeliotLib e) throws IOException {
+		TimeSerieDiscoveryTest.testDiscoveryOperatorsFiles(e);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public static TimeSeries createTimeSerie(ReadFactory factory, EmeliotLib e) {
 		TimeSeries ts = factory.createTimeSeriesValue();
-		int time = 5;
+		double time = 5;
 		double value = 10;
 		e.addTimeAndValue(ts, time, value);
 		time = 3;
@@ -366,7 +428,7 @@ public class MainStdLibraryTest {
 	
 	public static TimeSeries createTimeSerieDiff(ReadFactory factory, EmeliotLib e) {
 		TimeSeries ts = factory.createTimeSeriesValue();
-		int time = 4;
+		double time = 4;
 		double value = 33;
 		e.addTimeAndValue(ts, time, value);
 		time = 6;
@@ -382,7 +444,7 @@ public class MainStdLibraryTest {
 	
 	public static TimeSeries createTimeSerieEq(ReadFactory factory, EmeliotLib e) {
 		TimeSeries ts = factory.createTimeSeriesValue();
-		int time = 5;
+		double time = 5;
 		double value = 10;
 		e.addTimeAndValue(ts, time, value);
 		time = 3;
@@ -398,7 +460,7 @@ public class MainStdLibraryTest {
 	
 	public static TimeSeries createTimeSerieIntersect(ReadFactory factory, EmeliotLib e) {
 		TimeSeries ts = factory.createTimeSeriesValue();
-		int time = 4;
+		double time = 4;
 		double value = 33;
 		e.addTimeAndValue(ts, time, value);
 		time = 3;
@@ -414,6 +476,167 @@ public class MainStdLibraryTest {
 	
 	
 	
+	
+	
+	
+	
+	
+	public static TimeSeries createOmissionTimeSerie(ReadFactory factory, EmeliotLib e) {
+		TimeSeries ts = factory.createTimeSeriesValue();
+		double time = 5;
+		double value = 10;
+		e.addTimeAndValue(ts, time, value);
+		time = 3;
+		value = 20;
+		e.addTimeAndValue(ts, time, value);
+		return ts;
+	}
+	
+	public static TimeSeries createCommissionTimeSerie(ReadFactory factory, EmeliotLib e) {
+		TimeSeries ts = factory.createTimeSeriesValue();
+		double time = 5;
+		double value = 10;
+		e.addTimeAndValue(ts, time, value);
+		time = 3;
+		value = 20;
+		e.addTimeAndValue(ts, time, value);
+		time = 8;
+		value = 30;
+		e.addTimeAndValue(ts, time, value);
+		time = 11;
+		value = 40;
+		e.addTimeAndValue(ts, time, value);
+		return ts;
+	}
+	
+	public static TimeSeries createLateTimeSerie(ReadFactory factory, EmeliotLib e, double eps) {
+		TimeSeries ts = factory.createTimeSeriesValue();
+		double time = 5;
+		double value = 10;
+		e.addTimeAndValue(ts, time, value);
+		time = 3+eps;
+		value = 20;
+		e.addTimeAndValue(ts, time, value);
+		time = 8;
+		value = 30;
+		e.addTimeAndValue(ts, time, value);
+		return ts;
+	}
+	
+	public static TimeSeries createEarlyTimeSerie(ReadFactory factory, EmeliotLib e, double eps) {
+		TimeSeries ts = factory.createTimeSeriesValue();
+		double time = 5;
+		double value = 10;
+		e.addTimeAndValue(ts, time, value);
+		time = 3-eps;
+		value = 20;
+		e.addTimeAndValue(ts, time, value);
+		time = 8;
+		value = 30;
+		e.addTimeAndValue(ts, time, value);
+		return ts;
+	}
+	
+	public static TimeSeries createValueCoarseTimeSerie(ReadFactory factory, EmeliotLib e, double valueCoarse) {
+		TimeSeries ts = factory.createTimeSeriesValue();
+		double time = 5;
+		double value = 10;
+		e.addTimeAndValue(ts, time, value);
+		time = 3;
+		value = valueCoarse;
+		e.addTimeAndValue(ts, time, value);
+		time = 8;
+		value = 30;
+		e.addTimeAndValue(ts, time, value);
+		return ts;
+	}
+	
+	public static TimeSeries createValueSubtleTimeSerie(ReadFactory factory, EmeliotLib e, double eps) {
+		TimeSeries ts = factory.createTimeSeriesValue();
+		double time = 5;
+		double value = 10;
+		e.addTimeAndValue(ts, time, value);
+		time = 3;
+		value = 20 + eps;
+		e.addTimeAndValue(ts, time, value);
+		time = 8;
+		value = 30;
+		e.addTimeAndValue(ts, time, value);
+		return ts;
+	}
+	
+	public static TimeSeries createSameSizeTimeSerie(ReadFactory factory, EmeliotLib e) {
+		TimeSeries ts = factory.createTimeSeriesValue();
+		double time = 1;
+		double value = 1;
+		e.addTimeAndValue(ts, time, value);
+		time = 2;
+		value = 2;
+		e.addTimeAndValue(ts, time, value);
+		time = 3;
+		value = 3;
+		e.addTimeAndValue(ts, time, value);
+		return ts;
+	}
+	
+	
+	public static TimeSeries createSmallerTimeSerie(ReadFactory factory, EmeliotLib e) {
+		TimeSeries ts = factory.createTimeSeriesValue();
+		double time = 1;
+		double value = 1;
+		e.addTimeAndValue(ts, time, value);
+		time = 2;
+		value = 2;
+		e.addTimeAndValue(ts, time, value);
+		return ts;
+	}
+	
+	
+	public static TimeSeries createBiggerTimeSerie(ReadFactory factory, EmeliotLib e) {
+		TimeSeries ts = factory.createTimeSeriesValue();
+		double time = 1;
+		double value = 1;
+		e.addTimeAndValue(ts, time, value);
+		time = 2;
+		value = 2;
+		e.addTimeAndValue(ts, time, value);
+		time = 3;
+		value = 3;
+		e.addTimeAndValue(ts, time, value);
+		time = 4;
+		value = 4;
+		e.addTimeAndValue(ts, time, value);
+		return ts;
+	}
+	
+	
+	public static TimeSeries createTimeOutRangeTimeSerie(ReadFactory factory, EmeliotLib e, double timeOutRange) {
+		TimeSeries ts = factory.createTimeSeriesValue();
+		double time = 1;
+		double value = 1;
+		e.addTimeAndValue(ts, time, value);
+		time = 2;
+		value = 2;
+		e.addTimeAndValue(ts, time, value);
+		time = timeOutRange;
+		value = 3;
+		e.addTimeAndValue(ts, time, value);
+		return ts;
+	}
+	
+	public static TimeSeries createValueOutRangeTimeSerie(ReadFactory factory, EmeliotLib e, double valueOutRange) {
+		TimeSeries ts = factory.createTimeSeriesValue();
+		double time = 1;
+		double value = 1;
+		e.addTimeAndValue(ts, time, value);
+		time = 2;
+		value = 2;
+		e.addTimeAndValue(ts, time, value);
+		time = 3;
+		value = valueOutRange;
+		e.addTimeAndValue(ts, time, value);
+		return ts;
+	}
 	
 	
 }

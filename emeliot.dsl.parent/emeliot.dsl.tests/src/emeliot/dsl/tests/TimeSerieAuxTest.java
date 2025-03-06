@@ -322,6 +322,14 @@ public class TimeSerieAuxTest extends MainStdLibraryTest{
 		}
 	}
 	
+	public static void testReadOutTSFromFile(ReadFactory factory, EmeliotLib e) {
+		try {
+			TimeSeries ts = e.readOutTSFromFile("./proteus-example/io/testOutTS.dat");
+			e.printTimeSeries(ts);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+	}
 	
 	
 	

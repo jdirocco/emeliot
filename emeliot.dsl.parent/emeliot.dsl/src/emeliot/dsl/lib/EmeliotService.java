@@ -994,11 +994,11 @@ public interface EmeliotService {
 	/**
 	 * Writes an input time series (format is a list of T V doubles) to a file.
 	 *
-	 * @param timeSeriesValue the time series to write
+	 * @param s the time series to write
 	 * @param filePath the path of the file to write to
 	 * @throws IOException if an I/O error occurs
 	 */
-	public void writeInTSToFile(TimeSeriesValue timeSeriesValue, String filePath) throws IOException;
+	public void writeInTSToFile(TimeSeries s, String filePath) throws IOException;
 
 	
 	/**

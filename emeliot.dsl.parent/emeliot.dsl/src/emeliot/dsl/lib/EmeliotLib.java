@@ -1668,9 +1668,11 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	}
 	
 	@Override
-	public void writeInTSToFile(TimeSeriesValue TimeSeriesValue, String filePath) throws IOException {
-		reorderTimeSeries(TimeSeriesValue);
-		List<String> lines = TimeSeriesValue.getTimeValues().stream().map(tv -> tv.getTime() + " " + tv.getValue()).collect(Collectors.toList());
+	public void writeInTSToFile(TimeSeries s, String filePath) throws IOException {
+		if (!(s instanceof TimeSeriesValue))
+			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
+		reorderTimeSeries(s);
+		List<String> lines = ((TimeSeriesValue) s).getTimeValues().stream().map(tv -> tv.getTime() + " " + tv.getValue()).collect(Collectors.toList());
 		Files.write(Paths.get(filePath), lines, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 	}
 
@@ -1696,11 +1698,15 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	public TimeSeriesValue readOutTSFromFile(String filePath) throws IOException {
 	    TimeSeriesValue timeSeriesValue = ReadFactory.eINSTANCE.createTimeSeriesValue();
 	    List<String> lines = Files.readAllLines(Paths.get(filePath));
-	    if (lines.isEmpty() || !lines.get(0).startsWith("\"TIME\"")) {
-	        throw new IOException("Invalid file format: missing or incorrect header");
-	    }
-	    for (int i = 1; i < lines.size(); i++) { //Skip header
+	    if (lines.isEmpty())
+	        throw new IOException("Invalid file format: file is empty");
+	    int startIndex = 0;
+	    if (lines.get(0).trim().toUpperCase().startsWith("\"TIME\""))
+	        startIndex = 1; // Skip header if present
+	    for (int i = startIndex; i < lines.size(); i++) {
 	        String line = lines.get(i).trim();
+	        if (line.isEmpty()) 
+	        	continue; // Skip empty lines
 	        String[] parts = line.split(",");
 	        if (parts.length != 2)
 	            throw new IOException("Invalid line format: " + line);
@@ -1730,10 +1736,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 
 	//TODO: DISCOVERY OPERATORS	
 	@Override
-	public DiscoveryOutcome isCommission(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
+	public DiscoveryOutcome isCommission(TimeSeries tsOriginal, TimeSeries tsMutated) {
+		if (!(tsOriginal instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
 	    DiscoveryOutcome outcome = new DiscoveryOutcome();
-	    int originalSize = tsOriginal.getTimeValues().size();
-	    int mutatedSize = tsMutated.getTimeValues().size();
+	    int originalSize = ((TimeSeriesValue) tsOriginal).getTimeValues().size();
+	    int mutatedSize = ((TimeSeriesValue) tsMutated).getTimeValues().size();
 	    if (originalSize < mutatedSize) {
 	    	outcome.setHasError(true);
 	    	outcome.setOutcomeMsg("Commission error found. Expected Size: " + originalSize + ", Actual Size: " + mutatedSize);
@@ -1750,10 +1758,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	}
 	
 	@Override
-	public DiscoveryOutcome isOmission(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
+	public DiscoveryOutcome isOmission(TimeSeries tsOriginal, TimeSeries tsMutated) {
+		if (!(tsOriginal instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
 	    DiscoveryOutcome outcome = new DiscoveryOutcome();
-	    int originalSize = tsOriginal.getTimeValues().size();
-	    int mutatedSize = tsMutated.getTimeValues().size();
+	    int originalSize = ((TimeSeriesValue) tsOriginal).getTimeValues().size();
+	    int mutatedSize = ((TimeSeriesValue) tsMutated).getTimeValues().size();
 	    if (originalSize > mutatedSize) {
 	    	outcome.setHasError(true);
 	    	outcome.setOutcomeMsg("Omission error found. Expected Size: " + originalSize + ", Actual Size: " + mutatedSize);
@@ -1769,21 +1779,23 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	}
 	
 	@Override
-	public DiscoveryOutcome isLate(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated, double eps) {
+	public DiscoveryOutcome isLate(TimeSeries tsOriginal, TimeSeries tsMutated, double eps) {
+		if (!(tsOriginal instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
 		//as we compare time values against time values, the time series must be of the same size
-		if(tsOriginal.getTimeValues().size() != tsMutated.getTimeValues().size())
+		if(((TimeSeriesValue) tsOriginal).getTimeValues().size() != ((TimeSeriesValue) tsMutated).getTimeValues().size())
 	        throw new IllegalArgumentException("Time series sizes do not match");
 	    DiscoveryOutcome outcome = new DiscoveryOutcome();
 	    double expectedTime = 0;
 	    double actualTime = 0;
 		//for each original time, check the closest time among mutated timeseries and evaluate whether it is late according to an eps threshold
-		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) {//i=1 as header is skipped
-			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
+		for(int i=0; i<((TimeSeriesValue) tsOriginal).getTimeValues().size(); i++) {
+			TimeValue tv1 = ((TimeSeriesValue) tsOriginal).getTimeValues().get(i);
 			double time1 = tv1.getTime();			
 			double value1 = tv1.getValue();
 			double closestDiffTime = Double.MAX_VALUE;
-			for(int j=1; j<tsMutated.getTimeValues().size(); j++) {//j=1 as header is skipped
-				TimeValue tv2 = tsMutated.getTimeValues().get(i);
+			for(int j=0; j<((TimeSeriesValue) tsMutated).getTimeValues().size(); j++) {
+				TimeValue tv2 = ((TimeSeriesValue) tsMutated).getTimeValues().get(i);
 				double time2 = tv2.getTime();			
 				double value2 = tv2.getValue();
 				//if time and value are the same, no early/late
@@ -1822,21 +1834,23 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	}
 	
 	@Override
-	public DiscoveryOutcome isEarly(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated, double eps) {
+	public DiscoveryOutcome isEarly(TimeSeries tsOriginal, TimeSeries tsMutated, double eps) {
+		if (!(tsOriginal instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
 		//as we compare time values against time values, the time series must be of the same size
-		if(tsOriginal.getTimeValues().size() != tsMutated.getTimeValues().size())
+		if(((TimeSeriesValue) tsOriginal).getTimeValues().size() != ((TimeSeriesValue) tsMutated).getTimeValues().size())
 	        throw new IllegalArgumentException("Time series sizes do not match");
 	    DiscoveryOutcome outcome = new DiscoveryOutcome();
 	    double expectedTime = 0;
 	    double actualTime = 0;
 		//for each original time, check the closest time among mutated timeserie and evaluate whether it is early according to an eps threshold
-		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) {//i=1 as header is skipped
-			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
+		for(int i=0; i<((TimeSeriesValue) tsOriginal).getTimeValues().size(); i++) {
+			TimeValue tv1 = ((TimeSeriesValue) tsOriginal).getTimeValues().get(i);
 			double time1 = tv1.getTime();			
 			double value1 = tv1.getValue();
 			double closestDiffTime = Double.MAX_VALUE;
-			for(int j=1; j<tsMutated.getTimeValues().size(); j++) {//j=1 as header is skipped
-				TimeValue tv2 = tsMutated.getTimeValues().get(i);
+			for(int j=0; j<((TimeSeriesValue) tsMutated).getTimeValues().size(); j++) {
+				TimeValue tv2 = ((TimeSeriesValue) tsMutated).getTimeValues().get(i);
 				double time2 = tv2.getTime();			
 				double value2 = tv2.getValue();
 				//if time and value are the same, no early/late
@@ -1875,16 +1889,18 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	}
 	
 	@Override
-	public DiscoveryOutcome isValueCoarse(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated, double eps, double valueMin, double valueMax) {
+	public DiscoveryOutcome isValueCoarse(TimeSeries tsOriginal, TimeSeries tsMutated, double eps, double valueMin, double valueMax) {
+		if (!(tsOriginal instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
 		//as we compare time values against time values, the time series must be of the same size
-		if(tsOriginal.getTimeValues().size() != tsMutated.getTimeValues().size())
+		if(((TimeSeriesValue) tsOriginal).getTimeValues().size() != ((TimeSeriesValue) tsMutated).getTimeValues().size())
 	        throw new IllegalArgumentException("Time series sizes do not match");
 		DiscoveryOutcome outcome = new DiscoveryOutcome();
 	    double expectedValue = 0;
 	    double actualValue = 0;
-		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) { //i=1 as header is skipped
-			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
-			TimeValue tv2 = tsMutated.getTimeValues().get(i);
+		for(int i=0; i<((TimeSeriesValue) tsOriginal).getTimeValues().size(); i++) {
+			TimeValue tv1 = ((TimeSeriesValue) tsOriginal).getTimeValues().get(i);
+			TimeValue tv2 = ((TimeSeriesValue) tsMutated).getTimeValues().get(i);
 			double valueOriginal = tv1.getValue();
 			double valueMutated = tv2.getValue();
 			double valueDiff = valueOriginal - valueMutated;
@@ -1908,16 +1924,18 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	}
 	
 	@Override
-	public DiscoveryOutcome isValueSubtle(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated, double eps, double valueMin, double valueMax) {
+	public DiscoveryOutcome isValueSubtle(TimeSeries tsOriginal, TimeSeries tsMutated, double eps, double valueMin, double valueMax) {
+		if (!(tsOriginal instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
 		//as we compare time values against time values, the time series must be of the same size
-		if(tsOriginal.getTimeValues().size() != tsMutated.getTimeValues().size())
+		if(((TimeSeriesValue) tsOriginal).getTimeValues().size() != ((TimeSeriesValue) tsMutated).getTimeValues().size())
 	        throw new IllegalArgumentException("Time series sizes do not match");
 		DiscoveryOutcome outcome = new DiscoveryOutcome();
 	    double expectedValue = 0;
 	    double actualValue = 0;		
-		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) { //i=1 as header is skipped
-			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
-			TimeValue tv2 = tsMutated.getTimeValues().get(i);
+		for(int i=0; i<((TimeSeriesValue) tsOriginal).getTimeValues().size(); i++) {
+			TimeValue tv1 = ((TimeSeriesValue) tsOriginal).getTimeValues().get(i);
+			TimeValue tv2 = ((TimeSeriesValue) tsMutated).getTimeValues().get(i);
 			double valueOriginal = tv1.getValue();
 			double valueMutated = tv2.getValue();
 			double valueDiff = valueOriginal - valueMutated;
@@ -1941,12 +1959,14 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	}
 	
 	@Override
-	public DiscoveryOutcome areSameSize(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
+	public DiscoveryOutcome areSameSize(TimeSeries tsOriginal, TimeSeries tsMutated) {
+		if (!(tsOriginal instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
 	    DiscoveryOutcome outcome = new DiscoveryOutcome();
-	    int originalSize = tsOriginal.getTimeValues().size();
-	    int mutatedSize = tsMutated.getTimeValues().size();
+	    int originalSize = ((TimeSeriesValue) tsOriginal).getTimeValues().size();
+	    int mutatedSize = ((TimeSeriesValue) tsMutated).getTimeValues().size();
 	    if (originalSize == mutatedSize)
-	    	outcome.setOutcomeMsg("The time series have the same size: " + originalSize);
+	    	outcome.setOutcomeMsg("The time series have the same size (" + originalSize + ")");
 	    else 
 	    	outcome.setOutcomeMsg("The time series have different size. First time series size: " + originalSize + ", Second time series size: " + mutatedSize);
 	    return outcome;
@@ -1960,10 +1980,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	}
 	
 	@Override
-	public DiscoveryOutcome isSmaller(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
+	public DiscoveryOutcome isSmaller(TimeSeries tsOriginal, TimeSeries tsMutated) {
+		if (!(tsOriginal instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
 	    DiscoveryOutcome outcome = new DiscoveryOutcome();
-	    int originalSize = tsOriginal.getTimeValues().size();
-	    int mutatedSize = tsMutated.getTimeValues().size();
+	    int originalSize = ((TimeSeriesValue) tsOriginal).getTimeValues().size();
+	    int mutatedSize = ((TimeSeriesValue) tsMutated).getTimeValues().size();
 	    if (originalSize < mutatedSize)
 	    	outcome.setOutcomeMsg("The first time series has smaller size than the second time series. First time series size: " + originalSize + ", Second time series size: " + mutatedSize);
 	    else 
@@ -1979,10 +2001,12 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	}
 	
 	@Override
-	public DiscoveryOutcome isBigger(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
+	public DiscoveryOutcome isBigger(TimeSeries tsOriginal, TimeSeries tsMutated) {
+		if (!(tsOriginal instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
 	    DiscoveryOutcome outcome = new DiscoveryOutcome();
-	    int originalSize = tsOriginal.getTimeValues().size();
-	    int mutatedSize = tsMutated.getTimeValues().size();
+	    int originalSize = ((TimeSeriesValue) tsOriginal).getTimeValues().size();
+	    int mutatedSize = ((TimeSeriesValue) tsMutated).getTimeValues().size();
 	    if (originalSize > mutatedSize)
 	    	outcome.setOutcomeMsg("The first time series has bigger size than the second time series. First time series size: " + originalSize + ", Second time series size: " + mutatedSize);
 	    else 
@@ -1999,9 +2023,11 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	}
 	
 	@Override
-	public DiscoveryOutcome hasTimeOutRange(TimeSeriesValue tsMutated, double timeMin, double timeMax) {
+	public DiscoveryOutcome hasTimeOutRange(TimeSeries tsMutated, double timeMin, double timeMax) {
+		if (!(tsMutated instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
 	    DiscoveryOutcome outcome = new DiscoveryOutcome();
-	    for (TimeValue tv : tsMutated.getTimeValues()) {
+	    for (TimeValue tv : ((TimeSeriesValue) tsMutated).getTimeValues()) {
 	        double time = tv.getTime();
 	        if (time < timeMin || time > timeMax) {
 	        	outcome.setHasError(true);
@@ -2019,9 +2045,11 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	}
 	
 	@Override
-	public DiscoveryOutcome hasValueOutRange(TimeSeriesValue tsMutated, double valueMin, double valueMax) {
+	public DiscoveryOutcome hasValueOutRange(TimeSeries tsMutated, double valueMin, double valueMax) {
+		if (!(tsMutated instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
 	    DiscoveryOutcome outcome = new DiscoveryOutcome();
-	    for (TimeValue tv : tsMutated.getTimeValues()) {
+	    for (TimeValue tv : ((TimeSeriesValue) tsMutated).getTimeValues()) {
 	        double value = tv.getValue();
 	        if (value < valueMin || value > valueMax){
 	        	outcome.setHasError(true);

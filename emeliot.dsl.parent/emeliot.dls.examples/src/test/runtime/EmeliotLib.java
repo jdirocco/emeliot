@@ -1684,9 +1684,11 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	}
 	
 	@Override
-	public void writeInTSToFile(TimeSeriesValue TimeSeriesValue, String filePath) throws IOException {
-		reorderTimeSeries(TimeSeriesValue);
-		List<String> lines = TimeSeriesValue.getTimeValues().stream().map(tv -> tv.getTime() + " " + tv.getValue()).collect(Collectors.toList());
+	public void writeInTSToFile(TimeSeries s, String filePath) throws IOException {
+		if (!(s instanceof TimeSeriesValue))
+			throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
+		reorderTimeSeries(s);
+		List<String> lines = ((TimeSeriesValue) s).getTimeValues().stream().map(tv -> tv.getTime() + " " + tv.getValue()).collect(Collectors.toList());
 		Files.write(Paths.get(filePath), lines, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 	}
 
@@ -1963,318 +1965,338 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 
 	
 
-	//TODO: DISCOVERY OPERATORS
-	
-	
 	//TODO: DISCOVERY OPERATORS	
-	@Override
-	public DiscoveryOutcome isCommission(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
-	    DiscoveryOutcome outcome = new DiscoveryOutcome();
-	    int originalSize = tsOriginal.getTimeValues().size();
-	    int mutatedSize = tsMutated.getTimeValues().size();
-	    if (originalSize < mutatedSize) {
-	    	outcome.setHasError(true);
-	    	outcome.setOutcomeMsg("Commission error found. Expected Size: " + originalSize + ", Actual Size: " + mutatedSize);
-	    }
-	    return outcome;
-	}
-
-	
-	@Override
-	public DiscoveryOutcome isCommission_File(String tsOriginalPath, String tsMutatedPath) throws IOException {
-		TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
-		TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
-	    return isCommission(s1, s2);
-	}
-	
-	@Override
-	public DiscoveryOutcome isOmission(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
-	    DiscoveryOutcome outcome = new DiscoveryOutcome();
-	    int originalSize = tsOriginal.getTimeValues().size();
-	    int mutatedSize = tsMutated.getTimeValues().size();
-	    if (originalSize > mutatedSize) {
-	    	outcome.setHasError(true);
-	    	outcome.setOutcomeMsg("Omission error found. Expected Size: " + originalSize + ", Actual Size: " + mutatedSize);
-	    }
-	    return outcome;
-	}
-	
-	@Override
-	public DiscoveryOutcome isOmission_File(String tsOriginalPath, String tsMutatedPath) throws IOException {
-		TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
-		TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
-	    return isOmission(s1, s2);
-	}
-	
-	@Override
-	public DiscoveryOutcome isLate(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated, double eps) {
-		//as we compare time values against time values, the time series must be of the same size
-		if(tsOriginal.getTimeValues().size() != tsMutated.getTimeValues().size())
-	        throw new IllegalArgumentException("Time series sizes do not match");
-	    DiscoveryOutcome outcome = new DiscoveryOutcome();
-	    double expectedTime = 0;
-	    double actualTime = 0;
-		//for each original time, check the closest time among mutated timeseries and evaluate whether it is late according to an eps threshold
-		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) {//i=1 as header is skipped
-			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
-			double time1 = tv1.getTime();			
-			double value1 = tv1.getValue();
-			double closestDiffTime = Double.MAX_VALUE;
-			for(int j=1; j<tsMutated.getTimeValues().size(); j++) {//j=1 as header is skipped
-				TimeValue tv2 = tsMutated.getTimeValues().get(i);
-				double time2 = tv2.getTime();			
-				double value2 = tv2.getValue();
-				//if time and value are the same, no early/late
-				if(time1 == time2 && value1 == value2) {
-					closestDiffTime = 0;
-					break;
-				}
-				//if only value is the same, check closest time
-				else if (value1 == value2){
-					double timeDiff = time1 - time2;//diff between times
-					if(Math.abs(timeDiff)<=Math.abs(closestDiffTime)) {
-						closestDiffTime = timeDiff;
-						expectedTime = time1;
-						actualTime = time2; 
-					}
-					else
-						break;//the timeseries are ordered so once the diff is getting bigger the cycle can stop
-				}
-			}
-			if(closestDiffTime == 0)//no early/late detected for timeseries i, as diff time is 0
-				continue;
-			if(Math.abs(closestDiffTime)>eps && closestDiffTime<0){//if diff time bigger than epsilon and negative (mutated time is later), late detected
-				outcome.setHasError(true);
-				outcome.setOutcomeMsg("Late error found. Expected Time: " + expectedTime + ", Actual Time: " + actualTime);
-		        return outcome;
-			}
-		}	
-		return outcome;
-	}
-	
-	@Override
-	public DiscoveryOutcome isLate_File(String tsOriginalPath, String tsMutatedPath, double eps) throws IOException {
-		TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
-		TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
-	    return isLate(s1, s2, eps);
-	}
-	
-	@Override
-	public DiscoveryOutcome isEarly(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated, double eps) {
-		//as we compare time values against time values, the time series must be of the same size
-		if(tsOriginal.getTimeValues().size() != tsMutated.getTimeValues().size())
-	        throw new IllegalArgumentException("Time series sizes do not match");
-	    DiscoveryOutcome outcome = new DiscoveryOutcome();
-	    double expectedTime = 0;
-	    double actualTime = 0;
-		//for each original time, check the closest time among mutated timeserie and evaluate whether it is early according to an eps threshold
-		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) {//i=1 as header is skipped
-			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
-			double time1 = tv1.getTime();			
-			double value1 = tv1.getValue();
-			double closestDiffTime = Double.MAX_VALUE;
-			for(int j=1; j<tsMutated.getTimeValues().size(); j++) {//j=1 as header is skipped
-				TimeValue tv2 = tsMutated.getTimeValues().get(i);
-				double time2 = tv2.getTime();			
-				double value2 = tv2.getValue();
-				//if time and value are the same, no early/late
-				if(time1 == time2 && value1 == value2) {
-					closestDiffTime = 0;
-					break;
-				}
-				//if only value is the same, check closest time
-				else if (value1 == value2){
-					double timeDiff = time1 - time2;//diff between times
-					if(Math.abs(timeDiff)<=Math.abs(closestDiffTime)) {
-						closestDiffTime = timeDiff;
-						expectedTime = time1;
-						actualTime = time2; 
-					}
-					else
-						break;//the timeseries are ordered so once the diff is getting bigger the cycle can stop
-				}
-			}
-			if(closestDiffTime == 0)//no early/late detected for timeseries i, as diff time is 0
-				continue;
-			if(Math.abs(closestDiffTime)> eps && closestDiffTime>0) { //if diff time bigger than epsilon and positive (mutated time is earlier), early detected
-				outcome.setHasError(true);
-				outcome.setOutcomeMsg("Early error found. Expected Time: " + expectedTime + ", Actual Time: " + actualTime);
-		        return outcome;
-			}
-		}	
-		return outcome;
-	}
-	
-	@Override
-	public DiscoveryOutcome isEarly_File(String tsOriginalPath, String tsMutatedPath, double eps) throws IOException {
-		TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
-		TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
-	    return isEarly(s1, s2, eps);
-	}
-	
-	@Override
-	public DiscoveryOutcome isValueCoarse(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated, double eps, double valueMin, double valueMax) {
-		//as we compare time values against time values, the time series must be of the same size
-		if(tsOriginal.getTimeValues().size() != tsMutated.getTimeValues().size())
-	        throw new IllegalArgumentException("Time series sizes do not match");
-		DiscoveryOutcome outcome = new DiscoveryOutcome();
-	    double expectedValue = 0;
-	    double actualValue = 0;
-		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) { //i=1 as header is skipped
-			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
-			TimeValue tv2 = tsMutated.getTimeValues().get(i);
-			double valueOriginal = tv1.getValue();
-			double valueMutated = tv2.getValue();
-			double valueDiff = valueOriginal - valueMutated;
-			//value subtle failure found if diff is bigger than eps and mutated value is out of boundary
-			if(Math.abs(valueDiff)> eps && (valueMutated < valueMin || valueMutated > valueMax)) {
-				expectedValue = valueOriginal;
-				actualValue = valueMutated;
-				outcome.setHasError(true);
-				outcome.setOutcomeMsg("Value Coarse error found. Expected Value: " + expectedValue + ", Actual Value: " + actualValue);
-				return outcome;
-			}
-		}	
-		return outcome;
-	}
-	
-	@Override
-	public DiscoveryOutcome isValueCoarse_File(String tsOriginalPath, String tsMutatedPath, double eps, double valueMin, double valueMax) throws IOException {
-		TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
-		TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
-		return isValueCoarse(s1, s2, eps, valueMin, valueMax);
-	}
-	
-	@Override
-	public DiscoveryOutcome isValueSubtle(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated, double eps, double valueMin, double valueMax) {
-		//as we compare time values against time values, the time series must be of the same size
-		if(tsOriginal.getTimeValues().size() != tsMutated.getTimeValues().size())
-	        throw new IllegalArgumentException("Time series sizes do not match");
-		DiscoveryOutcome outcome = new DiscoveryOutcome();
-	    double expectedValue = 0;
-	    double actualValue = 0;		
-		for(int i=1; i<tsOriginal.getTimeValues().size(); i++) { //i=1 as header is skipped
-			TimeValue tv1 = tsOriginal.getTimeValues().get(i);
-			TimeValue tv2 = tsMutated.getTimeValues().get(i);
-			double valueOriginal = tv1.getValue();
-			double valueMutated = tv2.getValue();
-			double valueDiff = valueOriginal - valueMutated;
-			//value subtle failure found if diff is bigger than eps and mutated value is within boundary
-			if(Math.abs(valueDiff)> eps && (valueMutated >= valueMin && valueMutated <= valueMax)) {
-				expectedValue = valueOriginal;
-				actualValue = valueMutated;
-				outcome.setHasError(true);
-				outcome.setOutcomeMsg("Value Subtle error found. Expected Value: " + expectedValue + ", Actual Value: " + actualValue);
-				return outcome;
-			}
+		@Override
+		public DiscoveryOutcome isCommission(TimeSeries tsOriginal, TimeSeries tsMutated) {
+			if (!(tsOriginal instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+				throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
+		    DiscoveryOutcome outcome = new DiscoveryOutcome();
+		    int originalSize = ((TimeSeriesValue) tsOriginal).getTimeValues().size();
+		    int mutatedSize = ((TimeSeriesValue) tsMutated).getTimeValues().size();
+		    if (originalSize < mutatedSize) {
+		    	outcome.setHasError(true);
+		    	outcome.setOutcomeMsg("Commission error found. Expected Size: " + originalSize + ", Actual Size: " + mutatedSize);
+		    }
+		    return outcome;
 		}
-		return outcome;
-	}
-	
-	@Override
-	public DiscoveryOutcome isValueSubtle_File(String tsOriginalPath, String tsMutatedPath, double eps, double valueMin, double valueMax) throws IOException {
-		TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
-		TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
-		return isValueSubtle(s1, s2, eps, valueMin, valueMax);
-	}
-	
-	@Override
-	public DiscoveryOutcome areSameSize(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
-	    DiscoveryOutcome outcome = new DiscoveryOutcome();
-	    int originalSize = tsOriginal.getTimeValues().size();
-	    int mutatedSize = tsMutated.getTimeValues().size();
-	    if (originalSize == mutatedSize)
-	    	outcome.setOutcomeMsg("The time series have the same size: " + originalSize);
-	    else 
-	    	outcome.setOutcomeMsg("The time series have different size. First time series size: " + originalSize + ", Second time series size: " + mutatedSize);
-	    return outcome;
-	}
-	
-	@Override
-	public DiscoveryOutcome areSameSize_File(String tsOriginalPath, String tsMutatedPath) throws IOException {
-		TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
-		TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
-	    return areSameSize(s1, s2);
-	}
-	
-	@Override
-	public DiscoveryOutcome isSmaller(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
-	    DiscoveryOutcome outcome = new DiscoveryOutcome();
-	    int originalSize = tsOriginal.getTimeValues().size();
-	    int mutatedSize = tsMutated.getTimeValues().size();
-	    if (originalSize < mutatedSize)
-	    	outcome.setOutcomeMsg("The first time series has smaller size than the second time series. First time series size: " + originalSize + ", Second time series size: " + mutatedSize);
-	    else 
-	    	outcome.setOutcomeMsg("The first time series has same or bigger size than the second time series. First time series size: " + originalSize + ", Second time series size: " + mutatedSize);
-	    return outcome;
-	}
-	
-	@Override
-	public DiscoveryOutcome isSmaller_File(String tsOriginalPath, String tsMutatedPath) throws IOException {
-		TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
-		TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
-	    return isSmaller(s1, s2);
-	}
-	
-	@Override
-	public DiscoveryOutcome isBigger(TimeSeriesValue tsOriginal, TimeSeriesValue tsMutated) {
-	    DiscoveryOutcome outcome = new DiscoveryOutcome();
-	    int originalSize = tsOriginal.getTimeValues().size();
-	    int mutatedSize = tsMutated.getTimeValues().size();
-	    if (originalSize > mutatedSize)
-	    	outcome.setOutcomeMsg("The first time series has bigger size than the second time series. First time series size: " + originalSize + ", Second time series size: " + mutatedSize);
-	    else 
-	    	outcome.setOutcomeMsg("The first time series has same or smaller size than the second time series. First time series size: " + originalSize + ", Second time series size: " + mutatedSize);
-	   return outcome;
-	    
-	}
-	
-	@Override
-	public DiscoveryOutcome isBigger_File(String tsOriginalPath, String tsMutatedPath) throws IOException {
-		TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
-		TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
-	    return isBigger(s1, s2);
-	}
-	
-	@Override
-	public DiscoveryOutcome hasTimeOutRange(TimeSeriesValue tsMutated, double timeMin, double timeMax) {
-	    DiscoveryOutcome outcome = new DiscoveryOutcome();
-	    for (TimeValue tv : tsMutated.getTimeValues()) {
-	        double time = tv.getTime();
-	        if (time < timeMin || time > timeMax) {
-	        	outcome.setHasError(true);
-		    	outcome.setOutcomeMsg("The time series has following time as out of range (" + timeMin + "-" + timeMax + "): " + time);
-		    	return outcome;
-	        }
-	    }
-	    return outcome;
-	}
 
-	@Override
-	public DiscoveryOutcome hasTimeOutRange_File(String tsMutatedPath, double timeMin, double timeMax) throws IOException {
-		TimeSeriesValue s = readOutTSFromFile(tsMutatedPath);
-	    return hasTimeOutRange(s, timeMin, timeMax);
-	}
-	
-	@Override
-	public DiscoveryOutcome hasValueOutRange(TimeSeriesValue tsMutated, double valueMin, double valueMax) {
-	    DiscoveryOutcome outcome = new DiscoveryOutcome();
-	    for (TimeValue tv : tsMutated.getTimeValues()) {
-	        double value = tv.getValue();
-	        if (value < valueMin || value > valueMax){
-	        	outcome.setHasError(true);
-		    	outcome.setOutcomeMsg("The time series has following value as out of range (" + valueMin + "-" + valueMax + "): " + value);
-		    	return outcome;
-	        }
-	    }
-	    return outcome;
-	}
+		
+		@Override
+		public DiscoveryOutcome isCommission_File(String tsOriginalPath, String tsMutatedPath) throws IOException {
+			TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
+			TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
+		    return isCommission(s1, s2);
+		}
+		
+		@Override
+		public DiscoveryOutcome isOmission(TimeSeries tsOriginal, TimeSeries tsMutated) {
+			if (!(tsOriginal instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+				throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
+		    DiscoveryOutcome outcome = new DiscoveryOutcome();
+		    int originalSize = ((TimeSeriesValue) tsOriginal).getTimeValues().size();
+		    int mutatedSize = ((TimeSeriesValue) tsMutated).getTimeValues().size();
+		    if (originalSize > mutatedSize) {
+		    	outcome.setHasError(true);
+		    	outcome.setOutcomeMsg("Omission error found. Expected Size: " + originalSize + ", Actual Size: " + mutatedSize);
+		    }
+		    return outcome;
+		}
+		
+		@Override
+		public DiscoveryOutcome isOmission_File(String tsOriginalPath, String tsMutatedPath) throws IOException {
+			TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
+			TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
+		    return isOmission(s1, s2);
+		}
+		
+		@Override
+		public DiscoveryOutcome isLate(TimeSeries tsOriginal, TimeSeries tsMutated, double eps) {
+			if (!(tsOriginal instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+				throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
+			//as we compare time values against time values, the time series must be of the same size
+			if(((TimeSeriesValue) tsOriginal).getTimeValues().size() != ((TimeSeriesValue) tsMutated).getTimeValues().size())
+		        throw new IllegalArgumentException("Time series sizes do not match");
+		    DiscoveryOutcome outcome = new DiscoveryOutcome();
+		    double expectedTime = 0;
+		    double actualTime = 0;
+			//for each original time, check the closest time among mutated timeseries and evaluate whether it is late according to an eps threshold
+			for(int i=1; i<((TimeSeriesValue) tsOriginal).getTimeValues().size(); i++) {//i=1 as header is skipped
+				TimeValue tv1 = ((TimeSeriesValue) tsOriginal).getTimeValues().get(i);
+				double time1 = tv1.getTime();			
+				double value1 = tv1.getValue();
+				double closestDiffTime = Double.MAX_VALUE;
+				for(int j=1; j<((TimeSeriesValue) tsMutated).getTimeValues().size(); j++) {//j=1 as header is skipped
+					TimeValue tv2 = ((TimeSeriesValue) tsMutated).getTimeValues().get(i);
+					double time2 = tv2.getTime();			
+					double value2 = tv2.getValue();
+					//if time and value are the same, no early/late
+					if(time1 == time2 && value1 == value2) {
+						closestDiffTime = 0;
+						break;
+					}
+					//if only value is the same, check closest time
+					else if (value1 == value2){
+						double timeDiff = time1 - time2;//diff between times
+						if(Math.abs(timeDiff)<=Math.abs(closestDiffTime)) {
+							closestDiffTime = timeDiff;
+							expectedTime = time1;
+							actualTime = time2; 
+						}
+						else
+							break;//the timeseries are ordered so once the diff is getting bigger the cycle can stop
+					}
+				}
+				if(closestDiffTime == 0)//no early/late detected for timeseries i, as diff time is 0
+					continue;
+				if(Math.abs(closestDiffTime)>eps && closestDiffTime<0){//if diff time bigger than epsilon and negative (mutated time is later), late detected
+					outcome.setHasError(true);
+					outcome.setOutcomeMsg("Late error found. Expected Time: " + expectedTime + ", Actual Time: " + actualTime);
+			        return outcome;
+				}
+			}	
+			return outcome;
+		}
+		
+		@Override
+		public DiscoveryOutcome isLate_File(String tsOriginalPath, String tsMutatedPath, double eps) throws IOException {
+			TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
+			TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
+		    return isLate(s1, s2, eps);
+		}
+		
+		@Override
+		public DiscoveryOutcome isEarly(TimeSeries tsOriginal, TimeSeries tsMutated, double eps) {
+			if (!(tsOriginal instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+				throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
+			//as we compare time values against time values, the time series must be of the same size
+			if(((TimeSeriesValue) tsOriginal).getTimeValues().size() != ((TimeSeriesValue) tsMutated).getTimeValues().size())
+		        throw new IllegalArgumentException("Time series sizes do not match");
+		    DiscoveryOutcome outcome = new DiscoveryOutcome();
+		    double expectedTime = 0;
+		    double actualTime = 0;
+			//for each original time, check the closest time among mutated timeserie and evaluate whether it is early according to an eps threshold
+			for(int i=1; i<((TimeSeriesValue) tsOriginal).getTimeValues().size(); i++) {//i=1 as header is skipped
+				TimeValue tv1 = ((TimeSeriesValue) tsOriginal).getTimeValues().get(i);
+				double time1 = tv1.getTime();			
+				double value1 = tv1.getValue();
+				double closestDiffTime = Double.MAX_VALUE;
+				for(int j=1; j<((TimeSeriesValue) tsMutated).getTimeValues().size(); j++) {//j=1 as header is skipped
+					TimeValue tv2 = ((TimeSeriesValue) tsMutated).getTimeValues().get(i);
+					double time2 = tv2.getTime();			
+					double value2 = tv2.getValue();
+					//if time and value are the same, no early/late
+					if(time1 == time2 && value1 == value2) {
+						closestDiffTime = 0;
+						break;
+					}
+					//if only value is the same, check closest time
+					else if (value1 == value2){
+						double timeDiff = time1 - time2;//diff between times
+						if(Math.abs(timeDiff)<=Math.abs(closestDiffTime)) {
+							closestDiffTime = timeDiff;
+							expectedTime = time1;
+							actualTime = time2; 
+						}
+						else
+							break;//the timeseries are ordered so once the diff is getting bigger the cycle can stop
+					}
+				}
+				if(closestDiffTime == 0)//no early/late detected for timeseries i, as diff time is 0
+					continue;
+				if(Math.abs(closestDiffTime)> eps && closestDiffTime>0) { //if diff time bigger than epsilon and positive (mutated time is earlier), early detected
+					outcome.setHasError(true);
+					outcome.setOutcomeMsg("Early error found. Expected Time: " + expectedTime + ", Actual Time: " + actualTime);
+			        return outcome;
+				}
+			}	
+			return outcome;
+		}
+		
+		@Override
+		public DiscoveryOutcome isEarly_File(String tsOriginalPath, String tsMutatedPath, double eps) throws IOException {
+			TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
+			TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
+		    return isEarly(s1, s2, eps);
+		}
+		
+		@Override
+		public DiscoveryOutcome isValueCoarse(TimeSeries tsOriginal, TimeSeries tsMutated, double eps, double valueMin, double valueMax) {
+			if (!(tsOriginal instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+				throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
+			//as we compare time values against time values, the time series must be of the same size
+			if(((TimeSeriesValue) tsOriginal).getTimeValues().size() != ((TimeSeriesValue) tsMutated).getTimeValues().size())
+		        throw new IllegalArgumentException("Time series sizes do not match");
+			DiscoveryOutcome outcome = new DiscoveryOutcome();
+		    double expectedValue = 0;
+		    double actualValue = 0;
+			for(int i=1; i<((TimeSeriesValue) tsOriginal).getTimeValues().size(); i++) { //i=1 as header is skipped
+				TimeValue tv1 = ((TimeSeriesValue) tsOriginal).getTimeValues().get(i);
+				TimeValue tv2 = ((TimeSeriesValue) tsMutated).getTimeValues().get(i);
+				double valueOriginal = tv1.getValue();
+				double valueMutated = tv2.getValue();
+				double valueDiff = valueOriginal - valueMutated;
+				//value subtle failure found if diff is bigger than eps and mutated value is out of boundary
+				if(Math.abs(valueDiff)> eps && (valueMutated < valueMin || valueMutated > valueMax)) {
+					expectedValue = valueOriginal;
+					actualValue = valueMutated;
+					outcome.setHasError(true);
+					outcome.setOutcomeMsg("Value Coarse error found. Expected Value: " + expectedValue + ", Actual Value: " + actualValue);
+					return outcome;
+				}
+			}	
+			return outcome;
+		}
+		
+		@Override
+		public DiscoveryOutcome isValueCoarse_File(String tsOriginalPath, String tsMutatedPath, double eps, double valueMin, double valueMax) throws IOException {
+			TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
+			TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
+			return isValueCoarse(s1, s2, eps, valueMin, valueMax);
+		}
+		
+		@Override
+		public DiscoveryOutcome isValueSubtle(TimeSeries tsOriginal, TimeSeries tsMutated, double eps, double valueMin, double valueMax) {
+			if (!(tsOriginal instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+				throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
+			//as we compare time values against time values, the time series must be of the same size
+			if(((TimeSeriesValue) tsOriginal).getTimeValues().size() != ((TimeSeriesValue) tsMutated).getTimeValues().size())
+		        throw new IllegalArgumentException("Time series sizes do not match");
+			DiscoveryOutcome outcome = new DiscoveryOutcome();
+		    double expectedValue = 0;
+		    double actualValue = 0;		
+			for(int i=1; i<((TimeSeriesValue) tsOriginal).getTimeValues().size(); i++) { //i=1 as header is skipped
+				TimeValue tv1 = ((TimeSeriesValue) tsOriginal).getTimeValues().get(i);
+				TimeValue tv2 = ((TimeSeriesValue) tsMutated).getTimeValues().get(i);
+				double valueOriginal = tv1.getValue();
+				double valueMutated = tv2.getValue();
+				double valueDiff = valueOriginal - valueMutated;
+				//value subtle failure found if diff is bigger than eps and mutated value is within boundary
+				if(Math.abs(valueDiff)> eps && (valueMutated >= valueMin && valueMutated <= valueMax)) {
+					expectedValue = valueOriginal;
+					actualValue = valueMutated;
+					outcome.setHasError(true);
+					outcome.setOutcomeMsg("Value Subtle error found. Expected Value: " + expectedValue + ", Actual Value: " + actualValue);
+					return outcome;
+				}
+			}
+			return outcome;
+		}
+		
+		@Override
+		public DiscoveryOutcome isValueSubtle_File(String tsOriginalPath, String tsMutatedPath, double eps, double valueMin, double valueMax) throws IOException {
+			TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
+			TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
+			return isValueSubtle(s1, s2, eps, valueMin, valueMax);
+		}
+		
+		@Override
+		public DiscoveryOutcome areSameSize(TimeSeries tsOriginal, TimeSeries tsMutated) {
+			if (!(tsOriginal instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+				throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
+		    DiscoveryOutcome outcome = new DiscoveryOutcome();
+		    int originalSize = ((TimeSeriesValue) tsOriginal).getTimeValues().size();
+		    int mutatedSize = ((TimeSeriesValue) tsMutated).getTimeValues().size();
+		    if (originalSize == mutatedSize)
+		    	outcome.setOutcomeMsg("The time series have the same size: " + originalSize);
+		    else 
+		    	outcome.setOutcomeMsg("The time series have different size. First time series size: " + originalSize + ", Second time series size: " + mutatedSize);
+		    return outcome;
+		}
+		
+		@Override
+		public DiscoveryOutcome areSameSize_File(String tsOriginalPath, String tsMutatedPath) throws IOException {
+			TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
+			TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
+		    return areSameSize(s1, s2);
+		}
+		
+		@Override
+		public DiscoveryOutcome isSmaller(TimeSeries tsOriginal, TimeSeries tsMutated) {
+			if (!(tsOriginal instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+				throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
+		    DiscoveryOutcome outcome = new DiscoveryOutcome();
+		    int originalSize = ((TimeSeriesValue) tsOriginal).getTimeValues().size();
+		    int mutatedSize = ((TimeSeriesValue) tsMutated).getTimeValues().size();
+		    if (originalSize < mutatedSize)
+		    	outcome.setOutcomeMsg("The first time series has smaller size than the second time series. First time series size: " + originalSize + ", Second time series size: " + mutatedSize);
+		    else 
+		    	outcome.setOutcomeMsg("The first time series has same or bigger size than the second time series. First time series size: " + originalSize + ", Second time series size: " + mutatedSize);
+		    return outcome;
+		}
+		
+		@Override
+		public DiscoveryOutcome isSmaller_File(String tsOriginalPath, String tsMutatedPath) throws IOException {
+			TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
+			TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
+		    return isSmaller(s1, s2);
+		}
+		
+		@Override
+		public DiscoveryOutcome isBigger(TimeSeries tsOriginal, TimeSeries tsMutated) {
+			if (!(tsOriginal instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+				throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
+		    DiscoveryOutcome outcome = new DiscoveryOutcome();
+		    int originalSize = ((TimeSeriesValue) tsOriginal).getTimeValues().size();
+		    int mutatedSize = ((TimeSeriesValue) tsMutated).getTimeValues().size();
+		    if (originalSize > mutatedSize)
+		    	outcome.setOutcomeMsg("The first time series has bigger size than the second time series. First time series size: " + originalSize + ", Second time series size: " + mutatedSize);
+		    else 
+		    	outcome.setOutcomeMsg("The first time series has same or smaller size than the second time series. First time series size: " + originalSize + ", Second time series size: " + mutatedSize);
+		   return outcome;
+		    
+		}
+		
+		@Override
+		public DiscoveryOutcome isBigger_File(String tsOriginalPath, String tsMutatedPath) throws IOException {
+			TimeSeriesValue s1 = readOutTSFromFile(tsOriginalPath);
+			TimeSeriesValue s2 = readOutTSFromFile(tsMutatedPath);
+		    return isBigger(s1, s2);
+		}
+		
+		@Override
+		public DiscoveryOutcome hasTimeOutRange(TimeSeries tsMutated, double timeMin, double timeMax) {
+			if (!(tsMutated instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+				throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
+		    DiscoveryOutcome outcome = new DiscoveryOutcome();
+		    for (TimeValue tv : ((TimeSeriesValue) tsMutated).getTimeValues()) {
+		        double time = tv.getTime();
+		        if (time < timeMin || time > timeMax) {
+		        	outcome.setHasError(true);
+			    	outcome.setOutcomeMsg("The time series has following time as out of range (" + timeMin + "-" + timeMax + "): " + time);
+			    	return outcome;
+		        }
+		    }
+		    return outcome;
+		}
 
-	@Override
-	public DiscoveryOutcome hasValueOutRange_File(String tsMutatedPath, double valueMin, double valueMax) throws IOException {
-		TimeSeriesValue s = readOutTSFromFile(tsMutatedPath);
-	    return hasValueOutRange(s, valueMin, valueMax);
-	}
+		@Override
+		public DiscoveryOutcome hasTimeOutRange_File(String tsMutatedPath, double timeMin, double timeMax) throws IOException {
+			TimeSeriesValue s = readOutTSFromFile(tsMutatedPath);
+		    return hasTimeOutRange(s, timeMin, timeMax);
+		}
+		
+		@Override
+		public DiscoveryOutcome hasValueOutRange(TimeSeries tsMutated, double valueMin, double valueMax) {
+			if (!(tsMutated instanceof TimeSeriesValue) || !(tsMutated instanceof TimeSeriesValue))
+				throw new ClassCastException("TimeSeries is not an instance of TimeSeriesValue");
+		    DiscoveryOutcome outcome = new DiscoveryOutcome();
+		    for (TimeValue tv : ((TimeSeriesValue) tsMutated).getTimeValues()) {
+		        double value = tv.getValue();
+		        if (value < valueMin || value > valueMax){
+		        	outcome.setHasError(true);
+			    	outcome.setOutcomeMsg("The time series has following value as out of range (" + valueMin + "-" + valueMax + "): " + value);
+			    	return outcome;
+		        }
+		    }
+		    return outcome;
+		}
+
+		@Override
+		public DiscoveryOutcome hasValueOutRange_File(String tsMutatedPath, double valueMin, double valueMax) throws IOException {
+			TimeSeriesValue s = readOutTSFromFile(tsMutatedPath);
+		    return hasValueOutRange(s, valueMin, valueMax);
+		}
+		
 	
 
 }
