@@ -7,7 +7,7 @@ import "http://www.eclipse.org/xtext/xbase/Xtype" as xtype
 import "http://www.eclipse.org/xtext/common/JavaVMTypes" as types
 
 Model returns Model:
-	'model' name=EString ':'
+	'model' name=EString ':' 
 	specification=Specification
 	'time_series' ':' timeSeries+=TimeSeries*
 	mutations+=Mutation*
@@ -31,6 +31,7 @@ ConfigDiscovery returns ConfigDiscovery:
 Mutation returns Mutation:
 	'mutation' name=EString
 	operation=XBlockExpression;
+
 
  
  

@@ -22,6 +22,7 @@ import emeliot.dsl.read.PORT_TYPE
 import emeliot.dsl.read.Configuration
 import emeliot.dsl.read.Port
 import emeliot.dsl.read.ConfigDiscovery
+import java.nio.file.Path
 
 /**
  * <p>Infers a JVM model from the source model.</p>
@@ -72,6 +73,8 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 //			superTypes += typeRef(ProteusServiceImpl).cloneWithProxies
 			typeRef(ReadFactory)
 			typeRef(TimeValue)
+			typeRef(Path)
+		
 
 			members += element.toMethod("main", typeRef(Void.TYPE)) [
 				parameters += element.toParameter("args", typeRef(String).addArrayTypeDimension)
@@ -193,7 +196,22 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 							
 							
 						«ENDFOR»
-					//SIMULATION
+						
+						
+						
+					this.runProteus(Path.of(«element.projectFile»),new ArrayList<>(List.of(«FOR d : element.configurations.filter[e|e instanceof ConfigDiscovery]»
+					"«(d as ConfigDiscovery).mutatedTimeSeries.timeSeriesPath»"
+					«ENDFOR»)));
+					
+					/*     this.runProteus(Path.of("C:\\Users\\claud\\OneDrive\\Desktop\\paperTo Submit\\Repos\\emeliot\\emeliot.dsl.parent\\emeliot.dsl\\proteus-example\\Component\\component.pdsprj"),
+					    		
+					    	new ArrayList<>(List.of(   	
+					    "C://Users//claud//OneDrive//irrigation_test//irrigationUnit1_MUT.DAT",
+					    "C://Users//claud//OneDrive//Desktop//irrigation_test//irrigationUnit2_MUT.DAT"
+					    )));
+					    */ 
+					
+					
 					//TODO Claudio and Juri
 					//DISCOVERY
 					boolean guard = false;	
