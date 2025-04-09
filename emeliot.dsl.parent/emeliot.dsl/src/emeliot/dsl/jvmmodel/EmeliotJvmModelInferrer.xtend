@@ -64,6 +64,8 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 		val className = element.name
 		
 		acceptor.accept(element.toClass(className) [
+			
+			members += element.toField('path', typeRef(Path))
 
 //			members += element.toField('path', typeRef(String))[
 //				initializer = '''"«element.timeSeries»"'''
@@ -73,7 +75,8 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 //			superTypes += typeRef(ProteusServiceImpl).cloneWithProxies
 			typeRef(ReadFactory)
 			typeRef(TimeValue)
-			typeRef(Path)
+	
+			
 		
 
 			members += element.toMethod("main", typeRef(Void.TYPE)) [
@@ -187,10 +190,10 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 							
 							«ENDIF »
 							«IF (o as ConfigMutation).timeSeries.name !== null»
-								« ((o as ConfigMutation).timeSeries.name)» = readTSFromFile("« (o as ConfigMutation).timeSeries.timeSeriesPath»");
+								« ((o as ConfigMutation).timeSeries.name)» = readInTSFromFile("« (o as ConfigMutation).timeSeries.timeSeriesPath»");
 							«ENDIF»
 							«(o as ConfigMutation).mut.name»(«(o as ConfigMutation).timeSeries.name»);	
-							writeTSToFile((TimeSeries)«(o as ConfigMutation).timeSeries.name»,"«(o as ConfigMutation).timeSeries.name»_M.txt");
+							writeInTSToFile((TimeSeries)«(o as ConfigMutation).timeSeries.name»,"«(o as ConfigMutation).timeSeries.name»_M.txt");
 							
 							
 							
@@ -199,11 +202,19 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 						
 						
 						
-					this.runProteus(Path.of(«element.projectFile»),new ArrayList<>(List.of(«FOR d : element.configurations.filter[e|e instanceof ConfigDiscovery]»
-					"«(d as ConfigDiscovery).mutatedTimeSeries.timeSeriesPath»"
+					this.runProteus(Path.of(«element.projectFile»),new ArrayList<>(List.of(«FOR i : 0 ..< element.configurations.filter[e|e instanceof ConfigDiscovery].size »
+										        "«(element.configurations.filter[e|e instanceof ConfigDiscovery].get(i) 
+										        	as ConfigDiscovery).mutatedTimeSeries.timeSeriesPath»"«IF i < element.configurations.filter[e|e instanceof ConfigDiscovery].size
+										        	 - 1», «ENDIF»										    
 					«ENDFOR»)));
 					
-					/*     this.runProteus(Path.of("C:\\Users\\claud\\OneDrive\\Desktop\\paperTo Submit\\Repos\\emeliot\\emeliot.dsl.parent\\emeliot.dsl\\proteus-example\\Component\\component.pdsprj"),
+					/*  
+					
+					
+					
+					element.configurations.filter[e|e instanceof ConfigDiscovery]
+					
+					   this.runProteus(Path.of("C:\\Users\\claud\\OneDrive\\Desktop\\paperTo Submit\\Repos\\emeliot\\emeliot.dsl.parent\\emeliot.dsl\\proteus-example\\Component\\component.pdsprj"),
 					    		
 					    	new ArrayList<>(List.of(   	
 					    "C://Users//claud//OneDrive//irrigation_test//irrigationUnit1_MUT.DAT",
@@ -236,8 +247,8 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 							«ENDIF »
 							
 							«IF (o as ConfigDiscovery).expectedTimeSeries.name !== null»
-								« ((o as ConfigDiscovery).expectedTimeSeries.name)» = readTSFromFile("« (o as ConfigDiscovery).expectedTimeSeries.timeSeriesPath»");
-								« ((o as ConfigDiscovery).mutatedTimeSeries.name)» = readTSFromFile("« (o as ConfigDiscovery).mutatedTimeSeries.timeSeriesPath»");
+								« ((o as ConfigDiscovery).expectedTimeSeries.name)» = readOutTSFromFile("« (o as ConfigDiscovery).expectedTimeSeries.timeSeriesPath»");
+								« ((o as ConfigDiscovery).mutatedTimeSeries.name)» = readOutTSFromFile("« (o as ConfigDiscovery).mutatedTimeSeries.timeSeriesPath»");
 							«ENDIF»
 							if («(o as ConfigDiscovery).discovery.name»(«(o as ConfigDiscovery).expectedTimeSeries.name»,«(o as ConfigDiscovery).mutatedTimeSeries.name»))	{
 								System.out.println("Discovery «(o as ConfigDiscovery).discovery.name» on PORT «(o as ConfigDiscovery).port» \n\ttime series EXPECTED:«(o as ConfigDiscovery).expectedTimeSeries.name»\n\tOUTPUT:«(o as ConfigDiscovery).expectedTimeSeries.name»");
