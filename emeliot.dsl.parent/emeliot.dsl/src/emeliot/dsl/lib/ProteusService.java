@@ -125,7 +125,7 @@ public class ProteusService extends EmeliotLib {
 	//it uses output ports names to save output files once the simulation is completed
 
 	@SuppressWarnings("deprecation")
-	private void runProteus(Path componentPath, List<String> outputPorts) throws Exception {
+	public void runProteus(Path componentPath, List<String> outputPorts) throws Exception {
 		//input checks
 	    Path component = Files.find(componentPath, 1, (path, attrs) -> path.toString().endsWith(".pdsprj"))
 	            .findFirst()
