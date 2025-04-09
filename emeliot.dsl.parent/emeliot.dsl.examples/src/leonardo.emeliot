@@ -8,8 +8,7 @@ model Leonardo:
 	 	Component2	 ports : 	
 	 		port c2_in INPUT 
 	 		port c2_out OUTPUT
-	 
- 	//TO BE DISCUSSED 	  
+
  time_series :
  	ts_c1 path "/Users/juridirocco/eclipse-workspace/emeliot.dsl.parent/emeliot.dsl.examples/irrigationUnit1.txt"
 	ts_c1_output path "/Users/juridirocco/eclipse-workspace/emeliot.dsl.parent/emeliot.dsl.examples/irrigationUnit1_MUT.DAT"
@@ -58,7 +57,7 @@ model Leonardo:
  		if (elemen >100)
  			return true;
  	for (Double elemen : outTS.allValues)
- 		if (elemen <0)
+ 		if (elemen <0) 
  			return true;
  	return false;
  		

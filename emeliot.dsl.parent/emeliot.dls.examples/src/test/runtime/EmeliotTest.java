@@ -75,7 +75,7 @@ public class EmeliotTest extends EmeliotLib {
     	omission(input2);	
     						
     			
-    	pathFile = readTSFromFile("C:\\Users\\claud\\Desktop\\test.txt");
+    	pathFile = readInTSFromFile("C:\\Users\\claud\\Desktop\\test.txt");
     	omission(pathFile);	
     						
     	
