@@ -154,6 +154,57 @@ ConfigInjection returns ConfigMutation:
  ```
 
 
+
+The injection functions currently supported by the tool are the following: 
+
+- `addTimeAndValue`: add a time-value pair to a time series  
+- `addRandomTimeAndValue`: add a time-value pair to a time series, where time is random  
+- `addTimeAndRandomValue`: add a time-value pair to a time series, where value is random  
+- `addRandomTimeAndRandomValue`: add a time-value pair to a time series, where time and value are random  
+- `addMultipleTimeValues`: add multiple time-value pairs to a time series  
+- `addMultipleRandomTimeValues`: add multiple time-value pairs to a time series, where time and value are random  
+- `appendTimeSeries`: append all time-value pairs from a time series to another  
+- `mergeTimeSeries`: merge all time-value pairs of two time series  
+- `replaceTimeSeries`: replace all time-value pairs of a time series to another  
+- `changeValue`: replace the value of a time-value pair from a time series with another value  
+- `changeTime`: replace the time of a time-value pair from a time series with another time  
+- `changeValueWithRandom`: replace the value of a time-value pair from a time series with a random value  
+- `changeTimeWithRandom`: replace the time of a time-value pair from a time series with a random time  
+- `changeTimeAndValue`: replace a time-value pair from a time series with another time-value pair  
+- `changeTimeWithRandomAndValue`: replace a time-value pair from a time series with another time-value pair, where time is random  
+- `changeTimeAndValueWithRandom`: replace a time-value pair from a time series with another time-value pair, where value is random  
+- `changeTimeWithRandomAndValueWithRandom`: replace a time-value pair from a time series with another time-value pair, where time and value are random  
+- `changeARandomTimeValue`: replace a random time-value pair from a time series with another time-value pair  
+- `changeARandomTimeValueWithRandomTimeValue`: replace a random time-value pair from a time series with another time-value pair, where time and value are random  
+- `changeMultipleTimeValues`: replace multiple time-value pairs from a time series with another time-value pairs  
+- `changeMultipleTimeValuesWithRandomTimeValues`: replace multiple time-value pairs from a time series with another time-value pairs, where time and value are random  
+- `changeTimeLate`: replace the time of a time-value pair from a time series with a time exceeding the upper bound time constraint  
+- `changeRandomTimeLate`: replace the time of a random time-value pair from a time series with a time exceeding the upper bound time constraint  
+- `changeMultipleTimeLate`: replace the time of multiple time-value pairs from a time series with a time exceeding the upper bound time constraint  
+- `changeTimeEarly`: replace the time of a time-value pair from a time series with a time exceeding the lower bound time constraint  
+- `changeRandomTimeEarly`: replace the time of a random time-value pair from a time series with a time exceeding the lower bound time constraint  
+- `changeMultipleTimeEarly`: replace the time of multiple time-value pairs from a time series with a time exceeding the lower bound time constraint  
+- `changeValueCoarse`: replace the value of a time-value pair from a time series with a value exceeding the value constraint  
+- `changeRandomValueCoarse`: replace the value of a random time-value pair from a time series with a value exceeding the value constraint  
+- `changeMultipleValueCoarse`: replace the value of multiple time-value pairs from a time series with a value exceeding the value constraint  
+- `changeValueSubtle`: replace the value of a time-value pair from a time series with a value within the value constraint but exceeding threshold  
+- `changeRandomValueSubtle`: replace the value of a random time-value pair from a time series with a value within the value constraint but exceeding threshold  
+- `changeMultipleValueSubtle`: replace the value of multiple time-value pairs from a time series with a value within the value constraint but exceeding threshold  
+- `removeTimeValue`: remove a time-value pair from a time series  
+- `removeRandomTimeValue`: remove a random time-value pair from a time series  
+- `removeMultipleTimeValues`: remove multiple time-value pairs from a time series  
+- `removeAllTimeValues`: remove all time-value pairs from a time series  
+- `removeTimeValuesBeforeTime`: remove all time-value pairs with time before a given time from a time series  
+- `removeTimeValuesAfterTime`: remove all time-value pairs with time after a given time from a time series  
+- `removeTimeValuesBelowValue`: remove all time-value pairs with value below a given value from a time series  
+- `removeTimeValuesAboveValue`: remove all time-value pairs with value above a given value from a time series  
+
+For each function listed above, a variant that reads from and writes to files is also available, which can be called using the suffix "_File".
+
+
+
+
+
 ## Discovery
 
 The discovery concept support the analysis of the injected time series. The final objetive is to discover if any failure occurs by comparing the injected time series with the ones obtained by the simulation.
