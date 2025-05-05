@@ -155,7 +155,7 @@ ConfigInjection returns ConfigMutation:
 
 
 
-The injection functions currently supported by the tool are the following: 
+The injection functions currently supported by the tool (**41**) are the following: 
 
 - `addTimeAndValue`: add a time-value pair to a time series  
 - `addRandomTimeAndValue`: add a time-value pair to a time series, where time is random  
@@ -199,7 +199,7 @@ The injection functions currently supported by the tool are the following:
 - `removeTimeValuesBelowValue`: remove all time-value pairs with value below a given value from a time series  
 - `removeTimeValuesAboveValue`: remove all time-value pairs with value above a given value from a time series  
 
-For each function listed above, a variant that reads from and writes to files is also available, which can be called using the suffix "_File".
+For each function listed above, a variant that reads from and writes to files is also available, which can be called using the suffix __File_.
 
 
 
@@ -226,6 +226,21 @@ ConfigDiscovery returns ConfigDiscovery:
 	'injectedSeries' mutatedTimeSeries = [TimeSeries];
   ```
 where the developer can set the expected and injected series, allowing the comparison 
+
+The discovery functions currently supported by the tool (**11**) are the following: 
+
+- `isCommission`: check if the injected time series has more time-value pairs than the the original
+- `isOmission`: check if the injected time series has fewer time-value pairs than the original
+- `isLate`: check if the injected time series has time-value pairs with time exceeding upper bound time constraint with respect to the original
+- `isEarly`: check if the injected time series has time-value pairs with time exceeding lower bound time constraint with respect to the original
+- `isValueCoarse`: check if the injected time series has time-value pairs with value exceeding value constraint with respect to the original
+- `isValueSubtle`: check if the injected time series has time-value pairs with value within value constraint but exceeding threshold with respect to the original
+- `areSameSize`: check if two time series have the same number of time-value pairs
+- `isSmaller`: check if a time series is smaller than the other one
+- `isBigger`: check if a time series is bigger than the other one
+- `hasTimeOutRange`: check if a time series has time-value pairs with time exceeding time constraints
+- `hasValueOutRange`: check if a time series has time-value pairs with value exceeding value constraints
+
 
 ## Simulation
 
