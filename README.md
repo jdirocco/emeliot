@@ -13,7 +13,9 @@ The Emeliot Domain-Specific Language (DSL) is built with Xtext and Xbase annotat
 	- [Specification](#specification)
 	- [Time Series](#time-series)
 	- [Injection](#injection)
+	- [Standard library injection utilities](#standard-library-injection-utilities)
 	- [Discovery](#discovery)
+	- [Standard library discovery utilities](#standard-library-discovery-utilities)
 	- [Simulation](#simulation)
 - [Demo](#demo)
 
@@ -159,9 +161,9 @@ ConfigInjection returns ConfigMutation:
 	'inj' mut=[Injection] ('port' port = EString)? 'timeSeries' timeSeries = [TimeSeries] 
  ```
 
+## Standard library injection utilities
 
-
-The injection functions currently supported by the DSL (**41**) are the following: 
+The injection functions, inserted in the [EmeliotStandardLibrary.java](https://github.com/jdirocco/emeliot/blob/master/emeliot.dsl.parent/emeliot.dsl/emeliotlib/emeliot/dsl/lib/EmeliotStandardLibrary.java) currently supported by the DSL (**41**) are the following: 
 
 - `addTimeAndValue`: add a time-value pair to a time series  
 - `addRandomTimeAndValue`: add a time-value pair to a time series, where time is random  
@@ -233,7 +235,10 @@ ConfigDiscovery returns ConfigDiscovery:
   ```
 where the developer can set the expected and injected series, allowing the comparison 
 
-The discovery functions currently supported by the DSL (**11**) are the following: 
+
+## Standard library discovery utilities
+
+The discovery functions currently supported by the DSL (**11**) are the following (see the [EmeliotStandardLibray.java](https://github.com/jdirocco/emeliot/blob/master/emeliot.dsl.parent/emeliot.dsl/emeliotlib/emeliot/dsl/lib/EmeliotStandardLibrary.java)): 
 
 - `isCommission`: check if the injected time series has more time-value pairs than the the original
 - `isOmission`: check if the injected time series has fewer time-value pairs than the original
