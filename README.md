@@ -199,7 +199,7 @@ The injection functions currently supported by the tool (**41**) are the followi
 - `removeTimeValuesBelowValue`: remove all time-value pairs with value below a given value from a time series  
 - `removeTimeValuesAboveValue`: remove all time-value pairs with value above a given value from a time series  
 
-For each function listed above, a variant that reads from and writes to files is also available, which can be called using the suffix __File_.
+For each function listed above, a variant that reads from and writes to files is also available, which can be called using the suffix _`_File`_.
 
 
 
@@ -241,6 +241,8 @@ The discovery functions currently supported by the tool (**11**) are the followi
 - `hasTimeOutRange`: check if a time series has time-value pairs with time exceeding time constraints
 - `hasValueOutRange`: check if a time series has time-value pairs with value exceeding value constraints
 
+For each function listed above, a variant that reads from and writes to files is also available, which can be called using the suffix _`_File`_.
+
 
 ## Simulation
 
@@ -252,6 +254,9 @@ The simulation is handled by using the last two components of the **Model** root
   ```
 
 **Note:** Currently, we supported only Proteus simulation platform, even though the source code can be easily adapted to support other simulation services. 
+
+The simulation is performed by the `runTestCase` method, which runs a Proteus istance via simulation graphs, taking input time series from files to feed input ports and saving output time series to file from output ports 
+
 
 # Demo
 
