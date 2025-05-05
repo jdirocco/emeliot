@@ -50,7 +50,11 @@ The developed DSL is composed of the following concepts:
 - **Configuration** this element ties injections with the time series (ConfigInjection) and discoveries  with expected and injected time series (ConfigDiscovery)
 
 
-In addition, the DSL is able to support the simulation of the IoT component by relying on [Proteus Design Suite platform](https://www.labcenter.com/) 
+In addition, the DSL is able to support the simulation of the IoT component by relying on [Proteus Design Suite platform](https://www.labcenter.com/). 
+
+The DSL is also equipped with utility functions to support the injection, detection, and simulation phases. These include functions such as to query (e.g., getMaxTime, isEmpty), visualize (e.g., printTimeSeries, reorderTimeSeries), and save/retrieve (e.g., writeInTSToFile, readInTSFromFile) a time series.  
+
+
 
 
 ```
@@ -133,6 +137,8 @@ EDouble returns ecore::EDouble:
 Currently, we support only double values even though the DSL can be easily extended to support addition data types.
 
 
+
+
 ## Injection
 
 The injection concept allows developers to modify the time series that feed the specified system. In particular, developers can define their own injection rules by relying on the StadardLibrary (see more [here](here)) 
@@ -155,7 +161,7 @@ ConfigInjection returns ConfigMutation:
 
 
 
-The injection functions currently supported by the tool (**41**) are the following: 
+The injection functions currently supported by the DSL (**41**) are the following: 
 
 - `addTimeAndValue`: add a time-value pair to a time series  
 - `addRandomTimeAndValue`: add a time-value pair to a time series, where time is random  
@@ -227,7 +233,7 @@ ConfigDiscovery returns ConfigDiscovery:
   ```
 where the developer can set the expected and injected series, allowing the comparison 
 
-The discovery functions currently supported by the tool (**11**) are the following: 
+The discovery functions currently supported by the DSL (**11**) are the following: 
 
 - `isCommission`: check if the injected time series has more time-value pairs than the the original
 - `isOmission`: check if the injected time series has fewer time-value pairs than the original
