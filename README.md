@@ -10,11 +10,11 @@ The Emeliot Domain-Specific Language (DSL) is built with Xtext and Xbase annotat
 - [How to run](#how-to-run)
 - [Project structure](#project-structure)
 - [Modeling language](#modeling-language)
-  - [Specification](#specification)
-  - [Time Series](#time-series)
-  - [Injection](#injection)
-  - [Discovery](#discovery)
-  - [Simulation](#simulation)
+	- [Specification](#specification)
+	- [Time Series](#time-series)
+	- [Injection](#injection)
+	- [Discovery](#discovery)
+	- [Simulation](#simulation)
 - [Demo](#demo)
 
 
@@ -87,7 +87,7 @@ Specification returns Specification:
 components' ':' components+=Component*;
   ```
 
-where a component is defined as follows:
+where a component has a list of *ports* defined as follows:
 
 ```	
 Component returns Component:
@@ -101,17 +101,15 @@ enum PORT_TYPE returns PORT_TYPE:
 EString returns ecore::EString:
 	STRING | ID;
 
-EDouble returns ecore::EDouble:
-	'-'? INT? '.' INT (('E' | 'e') '-'? INT)?;	
 
 Port returns Port:
 	'port' name=EString type=PORT_TYPE;
   ```
-
+In particular, we define the type of ports using an enumeration. While this is a simplification of real-world IoT component, it provides enough information for supporting the FLA process.
 
 ## Time Series
 
-
+The Time series concept is the core element of the DSL. This allows to run the simulation and a set of injections, supporting different kind of analysis.
 ```	
 TimeSeries returns TimeSeries:
 	name=EString
@@ -132,16 +130,22 @@ EDouble returns ecore::EDouble:
 	'-'? INT? '.' INT (('E' | 'e') '-'? INT)?;	
 
 ```
+Currently, we support only double values even though the DSL can be easily extended to support addition data types.
 
 
 ## Injection
 
+The injection concept allows developers to modify the time series that feed the specified system. In particular, developers can define their own injection rules by relying on the StadardLibrary (see more [here](here)) 
 
 ```	
 Injection returns Injection:
 	'injection' name=EString
 	operation=XBlockExpression;
 ```
+
+In particular, the operation allow to write Java code leveraging the Xbase grammar.
+
+
 A particular injection is mapped to a **Port** and the corresponding **Time series** using the **ConfigInjection**
 
 ```	
@@ -152,7 +156,7 @@ ConfigInjection returns ConfigMutation:
 
 ## Discovery
 
-
+The discovery concept support the analysis of the injected time series. The final objetive is to discover if any failure occurs by comparing the injected time series with the ones obtained by the simulation.
 
 ```	
 Discovery returns Discovery:
@@ -170,6 +174,7 @@ ConfigDiscovery returns ConfigDiscovery:
 	'expectedSeries' expectedTimeSeries = [TimeSeries] 
 	'injectedSeries' mutatedTimeSeries = [TimeSeries];
   ```
+where the developer can set the expected and injected series, allowing the comparison 
 
 ## Simulation
 
