@@ -52,7 +52,7 @@ The developed DSL is composed of the following concepts:
 
 In addition, the DSL is able to support the simulation of the IoT component by relying on [Proteus Design Suite platform](https://www.labcenter.com/). 
 
-The DSL is also equipped with utility functions to support the injection, detection, and simulation phases. These include functions such as to query (e.g., `getMaxTime`, `isEmpty`), visualize (e.g., `printTimeSeries`, `reorderTimeSeries`), and save/retrieve (e.g., `writeInTSToFile`, `readInTSFromFile`) a time series.  
+The DSL is also equipped with utility functions to support injection, discovery, and simulation. These include functions such as to query (e.g., `getMaxTime`, `isEmpty`), visualize (e.g., `printTimeSeries`, `reorderTimeSeries`), and save/retrieve (e.g., `writeInTSToFile`, `readInTSFromFile`) a time series.  
 
 
 
