@@ -261,8 +261,7 @@ The simulation is handled by using the last two components of the **Model** root
 
 **Note:** Currently, we supported only Proteus simulation platform, even though the source code can be easily adapted to support other simulation services. 
 
-The simulation is performed by the `runTestCase` method, which runs a Proteus istance via simulation graphs, taking input time series from files to feed input ports and saving output time series to file from output ports 
-
+The simulation is carried out by the `runTestCase` method, which runs a Proteus instance through simulation graphs. The method reads input time series from files to feed the target Proteus project and writes the output time series to files.
 
 # Demo
 
