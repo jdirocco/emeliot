@@ -36,9 +36,16 @@ To open the EMF editor and generate the code and the DSL, you have to download:
 
 # Project structure
 
-The project is structured as follows:
-
-TODO
+```└── emeliot.dsl.parent
+    ├── emeliot.dsl
+    ├── emeliot.dsl.examples
+    ├── emeliot.dsl.ide
+    ├── emeliot.dsl.target
+    ├── emeliot.dsl.tests
+    ├── emeliot.dsl.ui
+    ├── emeliot.dsl.ui.tests
+    └── pom.xml
+```
 
 # Modeling language
 
@@ -82,6 +89,7 @@ During the specification, the system will provide:
 
 
 ## Specification
+<img width="1102" alt="image" src="https://github.com/user-attachments/assets/5a0b5143-24bb-47d2-8ba9-e590fe1cf67c" />
 
 Developers can design their own IoT system by defining a set of *components*.
 
@@ -114,6 +122,7 @@ Port returns Port:
 In particular, we define the type of ports using an enumeration. While this is a simplification of real-world IoT component, it provides enough information for supporting the FLA process.
 
 ## Time Series
+<img width="611" alt="image" src="https://github.com/user-attachments/assets/5809ddc8-a340-4e64-a69c-471a682fe574" />
 
 The Time series concept is the core element of the DSL. This allows to run the simulation and a set of injections, supporting different kind of analysis.
 ```	
