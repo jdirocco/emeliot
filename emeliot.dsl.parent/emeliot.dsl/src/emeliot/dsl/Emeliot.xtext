@@ -10,29 +10,47 @@ Model returns Model:
 	'model' name=EString ':' 
 	specification=Specification
 	'time_series' ':' timeSeries+=TimeSeries*
-	mutations+=Mutation*
+	injections+=Injection*
 	discoveries+=Discovery*
 	'config' ':' configurations+=Configuration*
 	'simultation_platfrom' ':' simulationPlatform=EString
 	'project_file' ':' projectFile=EString;
+	
+	
+enum PORT_TYPE returns PORT_TYPE:
+	INPUT='INPUT' | OUTPUT='OUTPUT';
+	
+EString returns ecore::EString:
+	STRING | ID;
+
+EDouble returns ecore::EDouble:
+	'-'? INT? '.' INT (('E' | 'e') '-'? INT)?;	
+
+Port returns Port:
+	'port' name=EString type=PORT_TYPE;
+
+	
+Component returns Component:
+	{Component}
+	name=EString
+	'ports' ':' ports+=Port*;
+	
 
 Configuration returns Configuration:
-	ConfigMutation | ConfigDiscovery;
+	ConfigInjection| ConfigDiscovery;
 
-ConfigMutation returns ConfigMutation:
-	'mut' mut=[Mutation] ('port' port = EString)? 'timeSeries' timeSeries = [TimeSeries] ;
+ConfigInjection returns ConfigMutation:
+	'inj' mut=[Injection] ('port' port = EString)? 'timeSeries' timeSeries = [TimeSeries] ;
 
 ConfigDiscovery returns ConfigDiscovery:
 	'discovery' discovery=[Discovery] ('port' port = EString)?
-	'expectedSeries' expectedTimeSeries = [TimeSeries] // produced by Protheus on original input without mutation
-	'mutatedSeries' mutatedTimeSeries = [TimeSeries] // produced by Prothues on mutated input
+	'expectedSeries' expectedTimeSeries = [TimeSeries] 
+	'injectedSeries' mutatedTimeSeries = [TimeSeries] 
 ;
 
-Mutation returns Mutation:
-	'mutation' name=EString
+Injection returns Injection:
+	'injection' name=EString
 	operation=XBlockExpression;
-
-
  
  
 TimeSeries returns TimeSeries:
@@ -40,35 +58,19 @@ TimeSeries returns TimeSeries:
 	('path' timeSeriesPath=STRING)?
 	('[' timeValues+=TimeValue ("," timeValues+=TimeValue)* ']')?;
 
-//TimeSeriesPath returns TimeSeriesPath:
-//	name=EString
-//	'path' timeSeriesPath=STRING;
-//	
-//TimeSeriesValue returns TimeSeriesValue:
-//	{TimeSeriesValue} name=EString
-//	('[' timeValues+=TimeValue ("," timeValues+=TimeValue)* ']')?;
 
 TimeValue returns TimeValue:
-	{TimeValue} // name=EString
+	{TimeValue} 
 	'(' time=EDouble ':' value=(EDouble) ')';
 
-EString returns ecore::EString:
-	STRING | ID;
+
 
 Specification returns Specification:
 	{Specification}
 	'specification'
 	('projectName' projectName=EString)?
-	// ('import' '{' ^import+=Import ("," ^import+=Import)* '}')?
+	
 	'components' ':' components+=Component*;
-
-Component returns Component:
-	{Component}
-	name=EString
-	'ports' ':' ports+=Port*;
-
-Port returns Port:
-	'port' name=EString type=PORT_TYPE;
 
 Discovery returns Discovery:
 	{Discovery}
@@ -76,32 +78,6 @@ Discovery returns Discovery:
 	name=EString
 	expression=XBlockExpression;
 
-Import returns Import:
-	{Import}
-	'Import'
-	'{'
-	('qualifiedName' qualifiedName=EString)?
-	'}';
 
-enum PORT_TYPE returns PORT_TYPE:
-	INPUT='INPUT' | OUTPUT='OUTPUT';
 
-ELong returns ecore::ELong:
-	'-'? INT;
 
-EDouble returns ecore::EDouble:
-	'-'? INT? '.' INT (('E' | 'e') '-'? INT)?;
-
-IntegerType returns IntegerType:
-	{IntegerType}
-	value=EInt;
-
-BooleanType returns BooleanType:
-	{BooleanType}
-	value=EBoolean;
-
-EInt returns ecore::EInt:
-	'-'? INT;
-
-EBoolean returns ecore::EBoolean:
-	'true' | 'false';

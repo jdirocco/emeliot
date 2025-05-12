@@ -88,7 +88,7 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 	} catch(Exception e){e.printStackTrace();}'''
 			]
 			members += element.toField("factory", typeRef(ReadFactory))
-			for (mut : element.mutations) {
+			for (mut : element.injections) {
 
 				members += mut.toMethod(mut.name, typeRef(Void.TYPE)) [
 					body = mut.operation				
@@ -247,8 +247,8 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 							«ENDIF »
 							
 							«IF (o as ConfigDiscovery).expectedTimeSeries.name !== null»
-								« ((o as ConfigDiscovery).expectedTimeSeries.name)» = readOutTSFromFile("« (o as ConfigDiscovery).expectedTimeSeries.timeSeriesPath»");
-								« ((o as ConfigDiscovery).mutatedTimeSeries.name)» = readOutTSFromFile("« (o as ConfigDiscovery).mutatedTimeSeries.timeSeriesPath»");
+								« ((o as ConfigDiscovery).expectedTimeSeries.name)» = readInTSFromFile("« (o as ConfigDiscovery).expectedTimeSeries.timeSeriesPath»");
+								« ((o as ConfigDiscovery).mutatedTimeSeries.name)» = readInTSFromFile("« (o as ConfigDiscovery).mutatedTimeSeries.timeSeriesPath»");
 							«ENDIF»
 							if («(o as ConfigDiscovery).discovery.name»(«(o as ConfigDiscovery).expectedTimeSeries.name»,«(o as ConfigDiscovery).mutatedTimeSeries.name»))	{
 								System.out.println("Discovery «(o as ConfigDiscovery).discovery.name» on PORT «(o as ConfigDiscovery).port» \n\ttime series EXPECTED:«(o as ConfigDiscovery).expectedTimeSeries.name»\n\tOUTPUT:«(o as ConfigDiscovery).expectedTimeSeries.name»");
