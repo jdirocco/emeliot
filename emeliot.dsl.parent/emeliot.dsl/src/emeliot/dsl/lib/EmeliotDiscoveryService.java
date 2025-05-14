@@ -1,6 +1,7 @@
 package emeliot.dsl.lib;
 
 import java.io.IOException;
+import java.util.List;
 
 import emeliot.dsl.read.TimeSeries;
 
@@ -215,7 +216,20 @@ public interface EmeliotDiscoveryService {
 	 * @throws IOException if an I/O error occurs during file operations.
 	 */
 	public DiscoveryOutcome hasValueOutRange_File(String tsMutatedPath, double valueMin, double valueMax) throws IOException;
-	
+	/**
+	 * Serialize to a json file the Discovery outcome
+	 * 
+	 * @param outocome the discovery analysis result 
+	 * @param filename the output absolute path  
+	 */
+	public void serializeDiscovery(DiscoveryOutcome outcome, String filename);
+	/**
+	 * Serialize to a json file the Discovery outcome
+	 * 
+	 * @param outocome the discovery analysis result 
+	 * @param filename the output absolute path  
+	 */
+	public void serializeDiscovery(List<DiscoveryOutcome> outcomes, String filename);
 	
 
 }

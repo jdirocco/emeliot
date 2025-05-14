@@ -11,6 +11,8 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import com.google.gson.Gson;
+
 import emeliot.dsl.read.ReadFactory;
 import emeliot.dsl.read.TimeSeries;
 import emeliot.dsl.read.TimeValue;
@@ -2045,6 +2047,21 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 		public DiscoveryOutcome hasValueOutRange_File(String tsMutatedPath, double valueMin, double valueMax) throws IOException {
 			TimeSeries s = readOutTSFromFile(tsMutatedPath);
 		    return hasValueOutRange(s, valueMin, valueMax);
+		}
+
+		@Override
+		public void serializeDiscovery(DiscoveryOutcome outcome, String filename) {
+	        Gson gson = new Gson();
+	        String json = gson.toJson(outcome);
+	        System.out.println(json);
+		}
+
+		@Override
+		public void serializeDiscovery(List<DiscoveryOutcome> outcomes, String filename) {
+	        Gson gson = new Gson();
+	        String json = gson.toJson(outcomes);
+	        System.out.println(json);
+			
 		}
 		
 		

@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import emeliot.dsl.read.ReadFactory;
 import emeliot.dsl.read.TimeSeries;
 import emeliot.dsl.read.TimeValue;
+import emeliot.dsl.lib.DiscoveryOutcome;
 
 public class ProteusService extends EmeliotLib {
 

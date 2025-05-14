@@ -23,6 +23,7 @@ import emeliot.dsl.read.Configuration
 import emeliot.dsl.read.Port
 import emeliot.dsl.read.ConfigDiscovery
 import java.nio.file.Path
+import emeliot.dsl.lib.DiscoveryOutcome
 
 /**
  * <p>Infers a JVM model from the source model.</p>
@@ -75,6 +76,7 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 //			superTypes += typeRef(ProteusServiceImpl).cloneWithProxies
 			typeRef(ReadFactory)
 			typeRef(TimeValue)
+			typeRef(DiscoveryOutcome)
 	
 			
 		
@@ -134,8 +136,6 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 			
 			for (config : element.configurations.filter[e|e instanceof ConfigMutation]) {
 				var mutation =  config as ConfigMutation
-				
-				
 				var mut = mutation.mut
 				
 				
