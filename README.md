@@ -195,12 +195,12 @@ The injection functions, inserted in the [EmeliotStandardLibrary.java](https://g
 - `changeARandomTimeValueWithRandomTimeValue`: replace a random time-value pair from a time series with another time-value pair, where time and value are random  
 - `changeMultipleTimeValues`: replace multiple time-value pairs from a time series with another time-value pairs  
 - `changeMultipleTimeValuesWithRandomTimeValues`: replace multiple time-value pairs from a time series with another time-value pairs, where time and value are random  
-- `changeTimeLate`: replace the time of a time-value pair from a time series with a time exceeding the upper bound time constraint  
-- `changeRandomTimeLate`: replace the time of a random time-value pair from a time series with a time exceeding the upper bound time constraint  
-- `changeMultipleTimeLate`: replace the time of multiple time-value pairs from a time series with a time exceeding the upper bound time constraint  
-- `changeTimeEarly`: replace the time of a time-value pair from a time series with a time exceeding the lower bound time constraint  
-- `changeRandomTimeEarly`: replace the time of a random time-value pair from a time series with a time exceeding the lower bound time constraint  
-- `changeMultipleTimeEarly`: replace the time of multiple time-value pairs from a time series with a time exceeding the lower bound time constraint  
+- `changeTimeLate`: replace the time of a time-value pair from a time series with a time within the upper bound time constraint but exceeding upper threshold  
+- `changeRandomTimeLate`: replace the time of a random time-value pair from a time series with a time within the upper bound time constraint but exceeding upper threshold 
+- `changeMultipleTimeLate`: replace the time of multiple time-value pairs from a time series with a time within the upper bound time constraint but exceeding upper threshold  
+- `changeTimeEarly`: replace the time of a time-value pair from a time series with a time within the lower bound time constraint but exceeding lower threshold  
+- `changeRandomTimeEarly`: replace the time of a random time-value pair from a time series with a time within the lower bound time constraint but exceeding lower threshold 
+- `changeMultipleTimeEarly`: replace the time of multiple time-value pairs from a time series with a time within the lower bound time constraint but exceeding lower threshold 
 - `changeValueCoarse`: replace the value of a time-value pair from a time series with a value exceeding the value constraint  
 - `changeRandomValueCoarse`: replace the value of a random time-value pair from a time series with a value exceeding the value constraint  
 - `changeMultipleValueCoarse`: replace the value of multiple time-value pairs from a time series with a value exceeding the value constraint  
@@ -251,8 +251,8 @@ The discovery functions currently supported by the DSL (**11**) are the followin
 
 - `isCommission`: check if the injected time series has more time-value pairs than the the original
 - `isOmission`: check if the injected time series has fewer time-value pairs than the original
-- `isLate`: check if the injected time series has time-value pairs with time exceeding upper bound time constraint with respect to the original
-- `isEarly`: check if the injected time series has time-value pairs with time exceeding lower bound time constraint with respect to the original
+- `isLate`: check if the injected time series has time-value pairs with time exceeding threshold with respect to the original
+- `isEarly`: check if the injected time series has time-value pairs with time exceeding threshold with respect to the original
 - `isValueCoarse`: check if the injected time series has time-value pairs with value exceeding value constraint with respect to the original
 - `isValueSubtle`: check if the injected time series has time-value pairs with value within value constraint but exceeding threshold with respect to the original
 - `areSameSize`: check if two time series have the same number of time-value pairs
