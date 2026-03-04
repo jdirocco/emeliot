@@ -1718,20 +1718,22 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 
 	//TODO: DISCOVERY OPERATORS	
+
 		@Override
 		public DiscoveryOutcome isCommission(TimeSeries tsOriginal, TimeSeries tsMutated) {
 			if (!(tsOriginal instanceof TimeSeries) || !(tsMutated instanceof TimeSeries))
 				throw new ClassCastException("TimeSeries is not an instance of TimeSeries");
 		    DiscoveryOutcome outcome = new DiscoveryOutcome();
-		    int originalSize = ((TimeSeries) tsOriginal).getTimeValues().size();
-		    int mutatedSize = ((TimeSeries) tsMutated).getTimeValues().size();
-		    if (originalSize < mutatedSize) {
-		    	outcome.setHasError(true);
-		    	outcome.setOutcomeMsg("Commission error found. Expected Size: " + originalSize + ", Actual Size: " + mutatedSize);
+		    Set<TimeValue> originalSet = new HashSet<>(tsOriginal.getTimeValues());
+		    for (TimeValue tv : tsMutated.getTimeValues()) {
+		        if (!originalSet.contains(tv)) {
+		            outcome.setHasError(true);
+		            outcome.setOutcomeMsg("Commission error found. Unexpected element in mutated time series: " + tv);
+		            return outcome;
+		        }
 		    }
 		    return outcome;
 		}
-
 		
 		@Override
 		public DiscoveryOutcome isCommission_File(String tsOriginalPath, String tsMutatedPath) throws IOException {
@@ -1745,11 +1747,13 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 			if (!(tsOriginal instanceof TimeSeries) || !(tsMutated instanceof TimeSeries))
 				throw new ClassCastException("TimeSeries is not an instance of TimeSeries");
 		    DiscoveryOutcome outcome = new DiscoveryOutcome();
-		    int originalSize = ((TimeSeries) tsOriginal).getTimeValues().size();
-		    int mutatedSize = ((TimeSeries) tsMutated).getTimeValues().size();
-		    if (originalSize > mutatedSize) {
-		    	outcome.setHasError(true);
-		    	outcome.setOutcomeMsg("Omission error found. Expected Size: " + originalSize + ", Actual Size: " + mutatedSize);
+		    Set<TimeValue> mutatedSet = new HashSet<>(tsMutated.getTimeValues());
+		    for (TimeValue tv : tsOriginal.getTimeValues()) {
+		        if (!mutatedSet.contains(tv)) {
+		            outcome.setHasError(true);
+		            outcome.setOutcomeMsg("Omission error found. Missing element in mutated time series: " + tv);
+		            return outcome;
+		        }
 		    }
 		    return outcome;
 		}
