@@ -249,8 +249,8 @@ where the developer can set the expected and injected series, allowing the compa
 
 The discovery functions currently supported by the DSL (**11**) are the following (see the [EmeliotStandardLibray.java](https://github.com/jdirocco/emeliot/blob/master/emeliot.dsl.parent/emeliot.dsl/emeliotlib/emeliot/dsl/lib/EmeliotStandardLibrary.java)): 
 
-- `isCommission`: check if the injected time series has more time-value pairs than the the original
-- `isOmission`: check if the injected time series has fewer time-value pairs than the original
+- `isCommission`: check if the injected time series has additional time-value pairs than the the original
+- `isOmission`: check if the injected time series has missing time-value pairs than the original
 - `isLate`: check if the injected time series has time-value pairs with time exceeding threshold with respect to the original
 - `isEarly`: check if the injected time series has time-value pairs with time exceeding threshold with respect to the original
 - `isValueCoarse`: check if the injected time series has time-value pairs with value exceeding value constraint with respect to the original
