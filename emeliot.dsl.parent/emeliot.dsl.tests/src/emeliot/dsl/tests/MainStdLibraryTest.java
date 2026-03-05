@@ -15,7 +15,9 @@ public class MainStdLibraryTest {
 
 		ReadFactory factory = ReadFactory.eINSTANCE;
 		EmeliotLib e = new ProteusService();
-		testAddOperators(factory, e);
+		
+		
+		/*testAddOperators(factory, e);
 		testEditOperators(factory, e);
 		testRemoveOperators(factory, e);
 		testAuxOperators(factory, e);
@@ -24,7 +26,11 @@ public class MainStdLibraryTest {
 		testRemoveOperatorsFiles(e);
 		testAuxOperatorsFiles(e);
 		testDiscoveryOperators(factory, e);
-		testDiscoveryOperatorsFiles(e);
+		testDiscoveryOperatorsFiles(e);*/
+		
+		testIntervalOperators(factory, e);
+		
+		
 	}
 
 	public static void testAddOperators(ReadFactory factory, EmeliotLib e) {
@@ -371,7 +377,6 @@ public class MainStdLibraryTest {
 	public static TimeSeries createTimeSerie(ReadFactory factory, EmeliotLib e) {
 		TimeSeries ts = factory.createTimeSeries();
 		int time = 5;
-
 		double value = 10;
 		e.addTimeAndValue(ts, time, value);
 		time = 3;
@@ -579,5 +584,106 @@ public class MainStdLibraryTest {
 		e.addTimeAndValue(ts, time, value);
 		return ts;
 	}
+	
+	
+	public static TimeSeries createTimeSerieWitIntervals(ReadFactory factory, EmeliotLib e) {
+		TimeSeries ts = factory.createTimeSeries();
+		double time = 5.0;
+		double value = 10;
+		e.addTimeAndValue(ts, time, value);
+		time = 10;
+		value = 10;
+		e.addTimeAndValue(ts, time, value);
+		time = 10.1;
+		value = 0;
+		e.addTimeAndValue(ts, time, value);
+		time = 20;
+		value = 0;
+		e.addTimeAndValue(ts, time, value);
+		time = 20.1;
+		value = 5;
+		e.addTimeAndValue(ts, time, value);
+		time = 30;
+		value = 5;
+		e.addTimeAndValue(ts, time, value);
+		time = 30.1;
+		value = 10;
+		e.addTimeAndValue(ts, time, value);
+		time = 40;
+		value = 10;
+		e.addTimeAndValue(ts, time, value);
+		return ts;
+	}
+	
+	
+	public static void testIntervalOperators(ReadFactory factory, EmeliotLib e) {
+
+	    System.out.println("TEST GET ALL INTERVALS");
+	    IntervalOperationsTest.testGetIntervalsInTimeseries(factory, e);
+	    System.out.println("=================================");
+
+	    System.out.println("TEST COUNT INTERVALS");
+	    IntervalOperationsTest.testCountIntervalsInTimeseries(factory, e);
+	    System.out.println("=================================");
+
+	    System.out.println("TEST GET INTERVALS WITH VALUE");
+	    IntervalOperationsTest.testGetIntervalsWithValueInTimeseries(factory, e);
+	    System.out.println("=================================");
+
+	    System.out.println("TEST GET INTERVAL AT");
+	    IntervalOperationsTest.testGetIntervalAt(factory, e);
+	    System.out.println("=================================");
+
+	    System.out.println("TEST GET FIRST TIME IN INTERVAL");
+	    IntervalOperationsTest.testGetFirstTimeInInterval(factory, e);
+	    System.out.println("=================================");
+
+	    System.out.println("TEST GET LAST TIME IN INTERVAL");
+	    IntervalOperationsTest.testGetLastTimeInInterval(factory, e);
+	    System.out.println("=================================");
+	    
+	    System.out.println("TEST GET VALUE IN INTERVAL");
+	    IntervalOperationsTest.testGetValueInInterval(factory, e);
+	    System.out.println("=================================");
+
+	    System.out.println("TEST GET TIMEVALUE AT");
+	    IntervalOperationsTest.testGetTimeValueAt(factory, e);
+	    System.out.println("=================================");
+
+	    System.out.println("TEST ADD INTERVAL");
+	    IntervalOperationsTest.testAddIntervalToTimeseries(factory, e);
+	    System.out.println("=================================");
+
+	    System.out.println("TEST REMOVE INTERVAL AT");
+	    IntervalOperationsTest.testRemoveIntervalAt(factory, e);
+	    System.out.println("=================================");
+
+	    System.out.println("TEST REMOVE RANDOM INTERVAL");
+	    IntervalOperationsTest.testRemoveRandomIntervalFromTimeseries(factory, e);
+	    System.out.println("=================================");
+
+	    System.out.println("TEST REMOVE FIRST TIMEVALUE FROM INTERVAL");
+	    IntervalOperationsTest.testRemoveFirstTimeValueFromIntervalAt(factory, e);
+	    System.out.println("=================================");
+
+	    System.out.println("TEST REMOVE LAST TIMEVALUE FROM INTERVAL");
+	    IntervalOperationsTest.testRemoveLastTimeValueFromIntervalAt(factory, e);
+	    System.out.println("=================================");
+
+	    System.out.println("TEST CHANGE FIRST VALUE FROM INTERVAL");
+	    IntervalOperationsTest.testChangeFirstValueFromIntervalAt(factory, e);
+	    System.out.println("=================================");
+
+	    System.out.println("TEST CHANGE LAST VALUE FROM INTERVAL");
+	    IntervalOperationsTest.testChangeLastValueFromIntervalAt(factory, e);
+	    System.out.println("=================================");
+	}
+	
+	
+	
+	
+	
+	
+	
 
 }

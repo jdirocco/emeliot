@@ -6,9 +6,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
@@ -1675,7 +1677,6 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 		Files.write(Paths.get(filePath), lines, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 	}
 
-
 	
 	@Override
 	public TimeSeries readOutTSFromFile(String filePath) throws IOException {
@@ -1715,6 +1716,287 @@ public abstract class EmeliotLib implements EmeliotService, EmeliotMutationServi
 	
 	
 	
+	
+	
+	
+	//TODO: INTERVAL OPERATIONS
+	
+	@Override
+    public List<List<TimeValue>> getIntervalsInTimeseries(TimeSeries ts) {
+		if (!(ts instanceof TimeSeries))
+			throw new ClassCastException("TimeSeries is not an instance of TimeSeries");
+        List<List<TimeValue>> intervals = new ArrayList<>();
+        List<TimeValue> current = new ArrayList<>();
+        Double currentValue = null;
+        for (TimeValue tv : ts.getTimeValues()) {
+            if (currentValue == null)
+            	currentValue = tv.getValue();
+            if (tv.getValue() == currentValue)
+                current.add(tv);
+            else {
+                intervals.add(new ArrayList<>(current));
+                current.clear();
+                current.add(tv);
+            }
+            currentValue = tv.getValue();
+        }
+        if (!current.isEmpty()) 
+        	intervals.add(new ArrayList<>(current));
+        return intervals;
+    }
+    
+	@Override
+	public List<List<TimeValue>> getIntervalsInTimeseries_File(String tsInputPath) throws IOException {
+	    TimeSeries s = readInTSFromFile(tsInputPath);
+	    return getIntervalsInTimeseries(s);
+	}
+	
+	@Override
+    public int countIntervalsInTimeseries(TimeSeries ts) {
+    	return getIntervalsInTimeseries(ts).size();
+    }
+	
+	@Override
+	public int countIntervalsInTimeseries_File(String tsInputPath) throws IOException {
+	    TimeSeries s = readInTSFromFile(tsInputPath);
+	    return countIntervalsInTimeseries(s);
+	}
+	
+	@Override
+    public List<List<TimeValue>> getIntervalsWithValueInTimeseries(TimeSeries ts, double value) {
+        List<List<TimeValue>> result = new ArrayList<>();
+        for (List<TimeValue> interval : getIntervalsInTimeseries(ts)) {
+            if (!interval.isEmpty() && interval.get(0).getValue() == value) {
+                result.add(interval);
+            }
+        }
+        return result;
+    }
+    
+	@Override
+	public List<List<TimeValue>> getIntervalsWithValueInTimeseries_File(String tsInputPath, double value) throws IOException {
+	    TimeSeries s = readInTSFromFile(tsInputPath);
+	    return getIntervalsWithValueInTimeseries(s, value);
+	}
+		
+	@Override	
+    public List<TimeValue> getIntervalAt(TimeSeries ts, int intervalPos) {
+    	List<List<TimeValue>> intervals = getIntervalsInTimeseries(ts);
+    	 if ((intervalPos-1) < 0 || (intervalPos-1) >= intervals.size())
+    	        throw new IllegalArgumentException("Interval position out of bounds");
+    	    return intervals.get(intervalPos-1);
+	}
+    
+	@Override
+	public List<TimeValue> getIntervalAt_File(String tsInputPath, int intervalPos) throws IOException {
+	    TimeSeries s = readInTSFromFile(tsInputPath);
+	    return getIntervalAt(s, intervalPos);
+	}
+	
+    @Override
+    public double getFirstTimeInInterval(List<TimeValue> interval) {
+    	if(interval.isEmpty())
+	        throw new IllegalArgumentException("Interval is empty");
+    	return interval.get(0).getTime();
+    }
+	
+    @Override
+    public double getLastTimeInInterval(List<TimeValue> interval) {
+    	if(interval.isEmpty())
+	        throw new IllegalArgumentException("Interval is empty");
+    	return interval.get(interval.size() - 1).getTime();
+    }
+    
+    @Override
+    public double getValueInInterval(List<TimeValue> interval) {
+    	if(interval.isEmpty())
+	        throw new IllegalArgumentException("Interval is empty");
+    	return interval.get(interval.size() - 1).getValue();
+    }
+    
+    @Override
+    public TimeValue getTimeValueAt(List<TimeValue> interval, int pos) {
+    	if(interval.isEmpty())
+	        throw new IllegalArgumentException("Interval is empty");
+   	 if ((pos-1) < 0 || (pos-1) >= interval.size())
+	        throw new IllegalArgumentException("Timevalue position out of bounds");
+    	return interval.get(pos-1);
+    }
+	
+	@Override
+    public void addIntervalToTimeseries(TimeSeries ts, double startTime, double endTime, double value) {
+		if (!(ts instanceof TimeSeries))
+			throw new ClassCastException("TimeSeries is not an instance of TimeSeries");
+	    if (startTime >= endTime)
+	        throw new IllegalArgumentException("Interval time is not correct: start time must be lower than end time");
+		addTimeAndValue(ts, startTime, value);
+		addTimeAndValue(ts, endTime, value);
+    }
+	
+	@Override
+	public void addIntervalToTimeseries_File(String tsInputPath, String tsOutputPath, double startTime, double endTime, double value) throws IOException {
+	    TimeSeries s = readInTSFromFile(tsInputPath);
+	    addIntervalToTimeseries(s, startTime, endTime, value);
+	    writeInTSToFile(((TimeSeries) s), tsOutputPath);
+	}
+	
+	@Override
+	public void removeIntervalAt(TimeSeries ts, int intervalPos) {
+	    List<List<TimeValue>> intervals = getIntervalsInTimeseries(ts);
+	    if ((intervalPos - 1) < 0 || (intervalPos - 1) >= intervals.size())
+	        throw new IllegalArgumentException("Interval position out of bounds");
+	    ts.getTimeValues().removeAll(intervals.get(intervalPos - 1));
+	}
+	
+	@Override
+	public void removeIntervalAt_File(String tsInputPath, String tsOutputPath, int intervalPos) throws IOException {
+	    TimeSeries s = readInTSFromFile(tsInputPath);
+	    removeIntervalAt(s, intervalPos);
+	    writeInTSToFile(((TimeSeries) s), tsOutputPath);
+	}
+	
+	@Override
+	public void removeRandomIntervalFromTimeseries(TimeSeries ts) {
+	    List<List<TimeValue>> intervals = getIntervalsInTimeseries(ts);
+	    int intervalPos = new Random().nextInt(intervals.size());
+	    ts.getTimeValues().removeAll(intervals.get(intervalPos));
+	}
+	
+	@Override
+	public void removeRandomIntervalFromTimeseries_File(String tsInputPath, String tsOutputPath) throws IOException {
+	    TimeSeries s = readInTSFromFile(tsInputPath);
+	    removeRandomIntervalFromTimeseries(s);
+	    writeInTSToFile(((TimeSeries) s), tsOutputPath);
+	}
+	    
+	@Override
+    public void removeFirstTimeValueFromInterval(TimeSeries ts, List<TimeValue> interval) {
+    	if(interval.isEmpty())
+	        throw new IllegalArgumentException("Interval is empty");
+        TimeValue tv = interval.get(0);
+        removeTimeValue(ts, tv.getTime(), tv.getValue());
+    }
+	
+	@Override
+    public void removeFirstTimeValueFromInterval_File(String tsInputPath, String tsOutputPath, List<TimeValue> interval) throws IOException {
+	    TimeSeries s = readInTSFromFile(tsInputPath);
+	    removeFirstTimeValueFromInterval(s, interval);
+	    writeInTSToFile(((TimeSeries) s), tsOutputPath);
+    }
+	
+	@Override
+    public void removeLastTimeValueFromInterval(TimeSeries ts, List<TimeValue> interval) {
+    	if(interval.isEmpty())
+	        throw new IllegalArgumentException("Interval is empty");
+        TimeValue tv = interval.get(interval.size() - 1);
+        removeTimeValue(ts, tv.getTime(), tv.getValue());
+    }
+	
+	@Override
+    public void removeLastTimeValueFromInterval_File(String tsInputPath, String tsOutputPath, List<TimeValue> interval) throws IOException {
+	    TimeSeries s = readInTSFromFile(tsInputPath);
+	    removeLastTimeValueFromInterval(s, interval);
+	    writeInTSToFile(((TimeSeries) s), tsOutputPath);
+    }
+	
+	
+	@Override
+    public void removeFirstTimeValueFromIntervalAt(TimeSeries ts, int intervalPos) {
+        List<TimeValue> interval = getIntervalAt(ts, intervalPos);
+        removeFirstTimeValueFromInterval(ts, interval);
+    }
+	
+	@Override
+    public void removeFirstTimeValueFromIntervalAt_File(String tsInputPath, String tsOutputPath, int intervalPos) throws IOException {
+	    TimeSeries s = readInTSFromFile(tsInputPath);
+	    removeFirstTimeValueFromIntervalAt(s, intervalPos);
+	    writeInTSToFile(((TimeSeries) s), tsOutputPath);
+    }
+	
+	@Override
+    public void removeLastTimeValueFromIntervalAt(TimeSeries ts, int intervalPos) {
+        List<TimeValue> interval = getIntervalAt(ts, intervalPos);
+        removeLastTimeValueFromInterval(ts, interval);
+    }
+	
+	@Override
+    public void removeLastTimeValueFromIntervalAt_File(String tsInputPath, String tsOutputPath, int intervalPos) throws IOException {
+	    TimeSeries s = readInTSFromFile(tsInputPath);
+	    removeLastTimeValueFromIntervalAt(s, intervalPos);
+	    writeInTSToFile(((TimeSeries) s), tsOutputPath);
+    }
+		
+    @Override
+    public void changeFirstValueFromInterval(TimeSeries ts, List<TimeValue> interval, double value) {
+    	if(interval.isEmpty())
+	        throw new IllegalArgumentException("Interval is empty");
+        TimeValue first = getTimeValueAt(interval, 1);
+        changeValue(ts, first.getTime(), value);        
+    }
+    
+    @Override
+    public void changeFirstValueFromIntervalAt(TimeSeries ts, double value, int intervalPos) {
+        List<TimeValue> interval = getIntervalAt(ts, intervalPos);
+        changeFirstValueFromInterval(ts, interval, value); 
+    }
+    
+    @Override
+    public void changeFirstValueFromIntervalAt_File(String tsInputPath, String tsOutputPath, double value, int intervalPos) throws IOException {
+	    TimeSeries s = readInTSFromFile(tsInputPath);
+        changeFirstValueFromIntervalAt(s, value, intervalPos); 
+	    writeInTSToFile(((TimeSeries) s), tsOutputPath);
+    }
+    
+    @Override
+    public void changeLastValueFromInterval(TimeSeries ts, List<TimeValue> interval, double value) {
+    	if(interval.isEmpty())
+	        throw new IllegalArgumentException("Interval is empty");
+        TimeValue last = getTimeValueAt(interval, interval.size());
+        changeValue(ts, last.getTime(), value);        
+    }
+   
+    @Override
+    public void changeLastValueFromIntervalAt(TimeSeries ts, double value, int intervalPos) {
+        List<TimeValue> interval = getIntervalAt(ts, intervalPos);
+        changeLastValueFromInterval(ts, interval, value); 
+    }
+    
+    @Override
+    public void changeLastValueFromIntervalAt_File(String tsInputPath, String tsOutputPath, double value, int intervalPos) throws IOException {
+	    TimeSeries s = readInTSFromFile(tsInputPath);
+	    changeLastValueFromIntervalAt(s, value, intervalPos);
+	    writeInTSToFile(((TimeSeries) s), tsOutputPath);
+    }
+    
+    
+    
+    
+
+
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 	
 
 	//TODO: DISCOVERY OPERATORS	
