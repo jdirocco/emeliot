@@ -1,4 +1,14 @@
 cff-version: 1.0.0
+authors:
+- family-names: "Di Rocco"
+  given-names: "Juri"
+  
+- family-names: "Clerissi"
+  given-names: "Diego"
+
+- family-names: "Di Sipio "
+  given-names: "Claudio"
+  
 title: "FATE-DSL replication package"
 version: 1.0.0
 date-released: 2026-03-10
