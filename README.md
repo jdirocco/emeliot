@@ -172,7 +172,7 @@ ConfigInjection returns ConfigMutation:
 
 ## Standard library injection utilities
 
-The injection functions, inserted in the [EmeliotStandardLibrary.java](https://github.com/jdirocco/emeliot/blob/master/emeliot.dsl.parent/emeliot.dsl/emeliotlib/emeliot/dsl/lib/EmeliotStandardLibrary.java) currently supported by the DSL (**41**) are the following: 
+The injection functions, inserted in the [EmeliotStandardLibrary.java](https://github.com/jdirocco/emeliot/blob/master/emeliot.dsl.parent/emeliot.dsl/emeliotlib/emeliot/dsl/lib/EmeliotStandardLibrary.java) currently supported by the DSL (**44**) are the following: 
 
 - `addTimeAndValue`: add a time-value pair to a time series  
 - `addRandomTimeAndValue`: add a time-value pair to a time series, where time is random  
@@ -207,9 +207,9 @@ The injection functions, inserted in the [EmeliotStandardLibrary.java](https://g
 - `changeValueSubtle`: replace the value of a time-value pair from a time series with a value within the value constraint but exceeding threshold  
 - `changeRandomValueSubtle`: replace the value of a random time-value pair from a time series with a value within the value constraint but exceeding threshold  
 - `changeMultipleValueSubtle`: replace the value of multiple time-value pairs from a time series with a value within the value constraint but exceeding threshold  
-- `removeTimeValue`: remove a time-value pair from a time series  
+- `removeTimeValue`: remove a time-value pair from a time series (two overloaded methods)
 - `removeRandomTimeValue`: remove a random time-value pair from a time series  
-- `removeMultipleTimeValues`: remove multiple time-value pairs from a time series  
+- `removeMultipleTimeValues`: remove multiple time-value pairs from a time series  (three overloaded methods) 
 - `removeAllTimeValues`: remove all time-value pairs from a time series  
 - `removeTimeValuesBeforeTime`: remove all time-value pairs with time before a given time from a time series  
 - `removeTimeValuesAfterTime`: remove all time-value pairs with time after a given time from a time series  
