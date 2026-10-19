@@ -22,6 +22,7 @@
 	</properties>
 	<modules>
 		<module>emeliot.dsl</module>
+		<module>emeliot.dsl.platform.javasim</module>
 		<module>emeliot.dsl.ide</module>
 		<module>emeliot.dsl.ui</module>
 		<module>emeliot.dsl.target</module>

@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: FATE-DSL Java simulation platform
+Bundle-SymbolicName: emeliot.dsl.platform.javasim;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Automatic-Module-Name: emeliot.dsl.platform.javasim
+Bundle-RequiredExecutionEnvironment: JavaSE-21
+Require-Bundle: emeliot.dsl;bundle-version="1.0.0",
+ org.eclipse.emf.ecore,
+ org.eclipse.emf.common
+Export-Package: emeliot.dsl.platform.javasim

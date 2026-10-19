@@ -1,0 +1,309 @@
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figs/DSL-FLA-DSL_approach.drawio.pdf}
+    \caption{The \tool approach.}
+    \label{fig:approach-overview}
+\end{figure}
+
+%This section introduces \tool, a DSL designed to specify IoT systems and perform time series injections, simulations, and failure discovery. 
+\revision{This section introduces the modeling concepts underlying \tool and their implementation. \tool provides domain-specific abstractions to represent the elements involved in failure propagation analysis, including IoT system specifications, failure injections, and failure discovery rules. These abstractions are subsequently realized through the language implementation and runtime infrastructure described in the following subsections.}
+\tool represents IoT systems and components as units that consume and produce time series, that is, sequences of typed values each associated with a timestamp. This abstraction captures the essence of IoT behavior, where not only the individual inputs matter, but also their temporal structure, ordering, and timing.   
+As highlighted in Figure \ref{fig:approach-overview}, the main purpose of our approach is to automate most of the \newtext{failure analysis}%approach
+, spanning from rule definition to discovery. 
+
+While the implementation targets a specific simulation platform (i.e., Proteus \citep{proteus}), the approach is platform-agnostic and can manipulate different time series across various IoT system classes, including safety-critical systems. \tool offers developers various constructs for defining injections to inject failures by manipulating time series (e.g., adding random values or computing averages) and allows for the definition and reuse of both atomic and complex discovery operations, as well as providing a Standard Library module equipped with utility functions to support both injections and discoveries.
+
+\subsection{Metamodel and language implementation} 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figs/emeliot class diagram2.jpg}
+    \caption{The \tool metamodel excerpt.}
+    \label{fig:ememliotMM-excerpt}
+\end{figure}
+
+An overview of the concepts implemented by the language is shown in Figure~\ref{fig:ememliotMM-excerpt}. The metamodel supports the refinement of FLA rules by capturing both the structural elements of IoT systems and the artifacts necessary for failure injection, observation, and rule inference.
+
+At the center of the metamodel is the \texttt{SUT} metaclass, which represents the system under testing. A \texttt{SUT} is characterized by attributes such as \texttt{name}, \texttt{simulationPlatform}, and \texttt{projectFile}, and it is associated with multiple \texttt{injections}, \texttt{discoveries}, and \texttt{configurations} that guide its testing and analysis process.
+
+The system structure is described by the \texttt{Specification} metaclass, which groups multiple \texttt{Component} instances through the \texttt{components} reference. Each \texttt{Component}, identified by a \texttt{name}, may contain several \texttt{Port}s, referenced via the \texttt{ports} association. A \texttt{Port} has a \texttt{name} and a \texttt{type}, the latter defined by the \texttt{PORT\_TYPE} enumeration, which distinguishes between \texttt{INPUT} and \texttt{OUTPUT} ports. In addition, we modeled the concept of time series as follows. Each \texttt{TimeSeries} captures the evolution of a signal or system output over time and includes a \texttt{name} %\LEO{questo concetto sporca un po' il modello con una informazioni che sembrerebbe essere molto implementativa. Inoltre non e' chiarissimo il ruolo visto che comunque ci sono le TimeValue instances associate alla time series. Perche' serve anche un path? Se e' il file con i valori, non dovrebbe essere alternativo all'avere TimeValue nel modello?}
+, and a sequence of \texttt{TimeValue} instances. Each \texttt{TimeValue} denotes a pair of \texttt{time} and \texttt{value}, both of type \texttt{EDouble}, enabling fine-grained traceability of dynamic behaviors.
+An excerpt is provided in Listing \ref{lst:spec}
+
+
+\begin{lstlisting}[style=JavaStyle,caption={Specification of the components, ports and time series.},label=lst:spec]
+model IrrigationUnit :
+ specification
+ 	components :
+	 	Component1	 ports :
+	 		port c1_in INPUT
+	 		port c1_out OUTPUT
+
+	 	Component2	 ports :
+	 		port c2_in INPUT
+	 		port c2_out OUTPUT
+
+ time_series :
+ 	ts_c1 path "path/to/input data"
+	ts_c1_output path "path/to/results"	
+	ts_c2 path "path/to/input data"
+	ts_c2_output path "path/to/mutated data"
+	ts_c2_expected path "path/to/real data"
+\end{lstlisting}
+
+
+
+%To simulate failures and study their propagation, the metamodel defines the \texttt{Injection} and \texttt{Discovery} metaclasses. An \texttt{Injection} models the act of perturbing the system, defined by its \texttt{name} and an \texttt{operation} expressed as an \texttt{XExpression}. Conversely, a \texttt{Discovery} represents an analysis operation that aims to derive or validate failure propagation rules, based on an \texttt{expression} that interprets observed behavior.
+
+\revision{The metamodel therefore provides an explicit representation of the main concepts involved in FPA. In particular, it separates the structural description of the \texttt{SUT} from the injection rules used to perturb its behavior and the discovery rules used to assess failure propagation. This separation makes these concerns explicit at the modeling level and allows injection and discovery logic to be defined, composed, and reused 
+before their technical execution.}
+%independently of their technical execution.}
+
+
+
+
+
+The \tool has been implemented with Xtext~\citep{10.5555/3074444}, a popular Eclipse framework for the development of programming languages and domain-specific languages. Given a language grammar definition, Xtext generates the infrastructure for the compiler and complete IDE support based on Eclipse (e.g., editor with syntax highlighting, code completion, error reporting, and incremental building).
+
+A \tool program includes a set of instructions that describe injections and failure-discovery rules to be executed by reusing operations defined in built-in libraries, which implement functions of common use for the manipulation of time series. When the \tool program is saved, and the compiler does not detect errors, the Java code corresponding to the \tool program is generated. The resulting Java application manipulates the input time series, runs the simulation platform, and identifies potential failures according to the rules defined in the \tool program. Since the generated code uses the \tool Java runtime APIs, it can be called from any Java program.
+
+\tool integrates Xbase~\citep{efftinge2012xbase} to provide an expression language with a Java--like syntax for writing \tool programs. Xbase is an extensible and reusable expression framework designed for incorporation into Xtext-based languages and is fully compatible with the Java type system. Through this integration, expressions written in the DSL can reference existing Java types and invoke Java libraries without additional adaptation. This interoperability is enabled through the standard Java classpath mechanism: any library available on the project classpath becomes immediately accessible within the tool’s programs. As a result, domain-specific constructs offered by the DSL can be combined with general-purpose Java code, allowing developers to express complex injection and discovery operations while remaining within a unified language environment.
+
+
+\subsection{Architecture}
+
+
+
+The \tool framework implements a model-driven engineering approach that separates domain logic from platform-specific execution through a layered runtime architecture (Figure~\ref{fig:extensibility}). The architecture consists of four main layers: \textit{service interfaces}, \textit{base layer}, \textit{platform implementations}, and \textit{code generation}, enabling automated test case generation and simulation-based validation. 
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figs/Architecture.png}
+    \caption{Runtime architecture and platform extensibility.}
+    \label{fig:extensibility}
+\end{figure}
+\subsubsection{Service Layer}
+
+As shown at the top of Figure~\ref{fig:extensibility}, the runtime architecture is built upon three core service interfaces that define contracts for platform implementations: \emph{i)} \texttt{EmeliotService} provides approximately 50 query and manipulation operations for time series, including \texttt{getAllTimes()}, \texttt{getValueAt()}, \texttt{readInTSFromFile()}, and \texttt{writeInTSToFile()}; \emph{ii)} \texttt{EmeliotMutationService} offers over 100 fault injection operators such as \texttt{addTimeAndValue()}, \texttt{changeValue()}, etc.; \emph{iii)} \texttt{Emeliot\-DiscoveryService} implements approximately 20 failure detection operators including \texttt{isValueCoarse()}, and \texttt{hasValueOutRange()}, etc.
+
+
+\subsubsection{Platform-Specific Implementations and Extensibility}
+The separation of concerns presented in the previous subsection ensures that domain logic (failure injection and detection) remains independent of platform-specific execution details. 
+Each simulation platform is supported through a dedicated service class that extends \texttt{StandardLib}, thereby inheriting the implementation of all service interfaces. As shown in the note on the right side of Figure~\ref{fig:extensibility}, the current implementation provides full integration with Proteus through the \texttt{ProteusService} class. This class adapts file I/O operations to Proteus-specific formats (space-separated input files, CSV output with headers), manages simulation state through backup/restore mechanisms for repeatable test execution, and orchestrates the complete workflow from time series injection to discovery evaluation.
+
+The architecture achieves simulation platform extensibility through the \texttt{Platform} configuration parameter. The platform selection logic (illustrated in the note attached to \texttt{EmeliotJvmModelInferrer} in Figure~\ref{fig:extensibility}) dynamically determines which platform service the generated class will extend. This design enables future extensions to alternative simulators such as ModelSim, HIL testbeds, or digital twin environments (shown as ``Other Platforms'' in the diagram) by implementing the three service interfaces and updating the platform selection logic. Notably, \textit{existing \tool models require no modification} - only the \texttt{simulationPlatform} parameter needs to be changed, demonstrating true platform independence at the DSL level.
+
+
+\subsubsection{Code Generation and Transformation}
+The \texttt{EmeliotJvmModelInferrer} component (shown on the left in Figure~\ref{fig:extensibility}) implements a model-to-text transformation that generates executable Java classes from \tool specifications. For each model, the inferrer synthesizes an executable class (shown at the bottom of Figure~\ref{fig:extensibility} as \texttt{IrrigationUnit\_S1}) that conditionally inherits from the appropriate platform service based on the \texttt{simulationPlatform} parameter. As illustrated by the dashed arrow labeled ``when platform=proteus'', the generated class inherits all approximately 170 operations from the selected platform service. The code generation leverages Xtext's \texttt{JvmTypesBuilder} to ensure type-safe integration between DSL expressions and generated Java code, while preserving full IDE support (content assist, validation, debugging) within injection and discovery blocks.
+
+
+
+\subsection{Injection Phase}
+\label{sec:injection}
+
+
+\tool relies on \texttt{EmeliotLib} for implementing injections that simulate failures by manipulating time series. From an implementation perspective, injections are Java methods defined in the \texttt{EmeliotMutationService} interface\footnote{\url{https://github.com/jdirocco/emeliot/blob/master/emeliot.dsl.parent/emeliot.dsl/src/emeliot/dsl/lib/EmeliotMutationService.java}} that take as input a time series (i.e., a sequence of time-value pairs), along with additional parameters specific to each injection, and perform mutations on the provided time series.
+
+The current implementation provides 44 injection operators that, given a time series with values collected from a failure-free scenario, alter one or more of these values to obtain a time series with incorrect values (e.g., missing values) that can be used as input to an IoT component to study how and if the input failure propagates to the output.  
+Operators are organized into three categories, covering the majority of the state-of-the-art~\citep{gomez-abajo_wodel-test_2021,cotroneo_profipy_2020}:
+\begin{itemize}
+    \item \textbf{Add operators} (9 operators): inject new time-value pairs into a time series, including single insertions (\texttt{e.g., addTimeAndValue}), bulk insertions (\texttt{e.g., addMultipleTimeValues}), and structural operations (\texttt{e.g., appendTimeSeries}).
+    \item \textbf{Edit operators} (24 operators): modify existing time-value pairs through value mutations (\texttt{e.g., changeValue}), time mutations (\texttt{e.g., changeTime}), combined mutations (\texttt{e.g., changeTimeAndValue}), and bulk operations (\texttt{e.g., setAllTimesToTime}).
+    \item \textbf{Remove operators} (11 operators): delete time-value pairs by index (\texttt{e.g., removeTimeValue}), randomly (\texttt{e.g., removeRandomTimeValue}), in bulk (\texttt{e.g., removeMultipleTimeValues}), or conditionally (\texttt{e.g., removeTimeValuesBeforeTime}).
+\end{itemize}
+Each operator is also provided in a file-based variant (suffixed with \texttt{\_File}) that reads from and writes to file paths, yielding a total of 106 method signatures. In our prior work, we identified six categories of failure~\citep{10350526}. The injection operators are designed to be \textit{failure-type agnostic}: rather than providing pre-composed operators tied to specific failure types, \tool offers fine-grained primitives that can be freely combined - using the embedded Xbase expression language - to encode arbitrary failure scenarios. %This composability allows developers to express complex, multi-step injections by chaining atomic operators with control flow logic (e.g., conditionals, loops, variable bindings), as illustrated in Listing~\ref{lst:dslSpec}.
+
+Formally, each operator transforms a time series $TS = \{t_0 v_0, \ldots, t_n v_n\}$ according to a specific mutation semantics%\LEO{Credo non abbiamo mai definito $t_i$ e $v_i$ di che tipo siano, se non erro integer e real... ma non lo aggiungo io per non sbaglare. Seppure ovvio dalla scelta delle lettere, dovremmo anche dire che $t_i$ e' timestamp e $v_i$ valore. Inoltre aggiungerei la proprieta' che $t_i \leq t_{i+1}$} 
+\newtext{, where $t_i$ represents a timestamp, $v_i$ represents a value, both $t_i$ and $v_i$ are real numbers, and $t_i < t_{i+1}$ for all $i$.}
+
+For instance, \texttt{addRandomTimeAndRandomValue} produces $TS' = \{t_0 v_0, \ldots, t_k v_k, \ldots, t_{n+1} v_{n+1}\}$ by inserting a randomly generated pair $t_k v_k$ \revision{(with $k > 0$)} within specified ranges, simulating a \textit{commission} failure, that is a failure due to unexpected values present in a time series~\citep{10350526}. Conversely, \texttt{changeTimeLate} transforms a pair $t_k v_k$ into $(t_k + t_\varepsilon) v_k$, where $t_\varepsilon > \varepsilon \land (t_k + t_\varepsilon) \leq t_{max}$, simulating a \textit{late} failure, that is, a failure where a value occurs too late in the sequences, according to the domain value $\epsilon$ that indicates time gaps that are not tolerable by the system. Operators can also affect multiple elements simultaneously: \texttt{removeTimeValuesAfterTime} deletes all pairs whose time exceeds a given threshold, simulating an \textit{omission} failure, that is, a failure due to missing values in the time series. %Concrete applications of these operators to an IoT scenario are presented in Section~\ref{sec:running-example}.
+
+Notably, configuring these operators requires domain-specific knowledge to implement meaningful mutations. Therefore, developers with limited expertise in the field can leverage the higher-level DSL constructs provided by \tool, which guide the composition of injection operators through structured abstractions.
+Additionally, the injection operators are complemented by approximately 120 utility functions defined in the \texttt{EmeliotService} interface, which provide time series reordering, I/O operations, navigation (e.g., \texttt{getNextTimeValue}, \texttt{getPreviousTime}), range queries (e.g., \texttt{getTimesInRange}, \texttt{getValuesInRange}), and aggregate operations (e.g., \texttt{getMaxValue}, \texttt{getMinTime}).
+
+As a concrete example, we discuss possible injections that have been applied to the running example. Listing \ref{lst:injections} defines three injections of increasing complexity that illustrate how the operators can be used in practice. The \texttt{simpleMutation} uses a single \textit{add operator} (\texttt{addTimeAndValue}) to insert a new irrigation event at time 12.0 with value 14, simulating a \textit{commission} failure in which the system receives an unexpected irrigation request. The \texttt{usingCheckOnExistingValue} mutation demonstrates composability: it first queries the time series using the utility function \texttt{getMaxValue} and then conditionally selects between an \textit{add operator} (\texttt{addMultipleRandomTimeValues}) and an \textit{edit operator} (\texttt{changeTimeAndValue}) based on the result, enabling domain-aware injections that adapt to the current state of the system. The \texttt{complexMutation} further illustrates the power of Xbase integration by using Java's \texttt{LocalDate} API to vary the injection strategy: on Fridays, it chains three operators (\texttt{setAllTimesToTime}, \texttt{addMultipleRandomTimeValues}, \texttt{changeARandomTimeValue}) to simulate a compound failure affecting both timing and values, while on other days it applies \texttt{changeMultipleTimeLate} to simulate \textit{late} failures across multiple time points.
+
+
+
+\begin{lstlisting}[style=JavaStyle,caption=Specification of the injections.,label=lst:injections]
+
+ injection simpleMutation {
+ 	addTimeAndValue(inTS, 12.0, 14)
+ }
+  injection usingCheckOnExistingValue  {
+ 	var mv = getMaxValue(inTS)
+ 	if (mv > 100)
+ 		addMultipleRandomTimeValues(inTS,4,7,1,2,4)
+ 	else
+ 		changeTimeAndValue(inTS, 5, 3, 43)
+ }
+ injection complexMutation  {
+ 	var currentDate = java.time.LocalDate.now();
+ 	if (currentDate.dayOfWeek == java.time.DayOfWeek.FRIDAY){
+		setAllTimesToTime(inTS, 6)
+		addMultipleRandomTimeValues(inTS,1,2,0.1,0.3,1)
+ 		changeARandomTimeValue(inTS, 100, 140)
+ 	}
+ 	else {
+ 		var tm = new java.util.ArrayList(java.util.List.of(2.0,3.0,4.0,5.0,6.0,7.0));
+ 		changeMultipleTimeLate(inTS, 0.5, tm,5);
+ 	}
+ }
+\end{lstlisting}
+
+%=============================================================================
+\subsection{Discovery Phase}
+\label{sec:discovery}
+%=============================================================================
+After the definition of the injection rules, \tool can be used to analyze the behavior of the system under test (i.e., the output time series) in order to derive or validate failure propagation rules through discovery operators. 
+Discovery operators are Java methods defined in the \texttt{EmeliotDiscoveryService}\footnote{\url{https://github.com/jdirocco/emeliot/blob/master/emeliot.dsl.parent/emeliot.dsl/src/emeliot/dsl/lib/EmeliotDiscoveryService.java}} interface that take as input time series representing the original and mutated behaviors of a system (i.e., the ideal scenario in which no injections occurred and the mutated scenario following an injection phase), along with additional parameters specific to each discovery type. The output of a discovery rule consists of a possibly empty list of occurrences of the type of failure detected by the discovery rule. %\LEO{Ho scritto che l'output e' una lista, ma ho il dubbio che in realtà sia la prima occorrenza di quel failure type. Vi chiedo di correggere nel caso.}\DIEGO{le prebuilt sono 'singola occorrenza' ma non so se vogliamo lasciare lista dato che via dsl si può comunque trovare tutto}
+\revision{In this way, discovery operators identify potential failures by comparing the original and mutated behaviors. For instance, an omission failure can be discovered when a mutated time series, obtained by simulating a system whose input has been modified through an injection that removes a element, contains fewer time-value pairs than the time series produced by the original, unmodified input.}
+
+\newtext{The current implementation provides 11 discovery operators which identify specific failure modes by comparing original and mutated time series:
+Formally, each operator compares an original time series $TS = \{t_0 v_0, \ldots, t_n v_n\}$ with a mutated one $TS' = \{t'_0 v'_0, \ldots, t'_m v'_m\}$, as follows: %and returns a \texttt{DiscoveryOutcome}
+%organized into three categories\LEO{Se tutti questi operatori hanno l'obiettivo di trovare fallimento, dovrebbero tutti avere failure nel nome, altrimenti la parte size e range sembrano delle funzioni di utilita' e non dei failure detector. Se invece fossero funzioni di utilita' andrebbero distinte dai faillure type detector e presentate come una cosa a parte}
+%\DIEGO{potremmo metterle tutte in un unico elenco? nel repo è così}
+%:
+% \begin{itemize}
+%     \item \textbf{Failure type detection} (6 operators): identify specific failure modes by comparing mutated and original time series. These include \texttt{isCommission} (detects additional time-value pairs), \texttt{isOmission} (detects missing time-value pairs), \texttt{isLate} (detects forward timing shifts beyond a threshold $\varepsilon$), \texttt{isEarly} (detects backward timing shifts beyond $\varepsilon$), \texttt{isValueCoarse} (detects value deviations outside the accepted domain range), and \texttt{isValueSubtle} (detects value deviations within the domain range but exceeding $\varepsilon$).
+%     \item \textbf{Size comparison} (3 operators): perform structural comparisons between time series. These include \texttt{areSameSize} (checks equal cardinality), \texttt{isSmaller} (checks whether the original has fewer elements than the mutated), and \texttt{isBigger} (checks the converse).
+%     \item \textbf{Range validation} (2 operators): verify that time series elements fall within specified bounds, including \texttt{hasTimeOutRange} (checks whether any time value lies outside $[t_{min}, t_{max}]$) and \texttt{hasValueOutRange} (checks whether any value lies outside $[v_{min}, v_{max}]$).
+% \end{itemize}
+\begin{itemize}
+    \item \texttt{isOmission} detects missing time-value pairs from a mutated time series, indicating data loss. Formally, $\exists (t_i v_i) \in TS \;\text{s.t.}\; (t_i v_i) \notin TS'$; 
+    \item \texttt{isCommission} detects additional time-value pairs in a mutated time series, indicating unexpected data. Formally, $\exists (t_i v_i) \in TS' \;\text{s.t.}\; (t_i v_i) \notin TS$;
+    \item \texttt{isLate} detects forward time shifts in a mutated time series that deviate from the original times beyond a threshold $\varepsilon$, indicating delayed events. Formally, $\exists (t_i, v_i) \in TS, (t_i', v_i) \in TS' \;\text{s.t.}\; (t_i' - t_i) > \varepsilon$;
+    \item \texttt{isEarly} detects backward time shifts in a mutated time series that deviate from the original times beyond a threshold $\varepsilon$, indicating anticipated events. Formally, $\exists (t_i, v_i) \in TS, (t_i', v_i) \in TS' \;\text{s.t.}\; (t_i - t_i') > \varepsilon$;
+    \item \texttt{isValueCoarse} detects values in a mutated time series that deviate from the original values and lie outside the value domain range, indicating coarse value anomalies. Formally, $\exists (t_i v_i) \in TS (t_i v_i') \in TS' \;\text{s.t.}\; (v_{min} \le v_i \le v_{max}) \land (v_i' < v_{min} \lor v_i' > v_{max}) $ for domain range $[v_{min}, v_{max}]$;
+    \item \texttt{isValueSubtle} detects values in a mutated time series that lie within the value domain range but deviate from the original values beyond a threshold $\varepsilon$, indicating subtle value anomalies. Formally, $\exists (t_i, v_i) \in TS, (t_i, v_i') \in TS' \;\text{s.t.}\; (v_{min} \le v_i' \le v_{max}) \;\wedge\; |v_i - v_i'| > \varepsilon$, for domain range $[v_{min}, v_{max}]$;
+    \item \texttt{areSameSize} detects whether the original and mutated time series have the same number of time-value pairs. Formally, $|TS| = |TS'|$;
+    \item \texttt{isSmaller} detects whether the original time series has fewer time-value pairs than the mutated time series. Formally, $|TS| < |TS'|$;
+    \item \texttt{isBigger} detects whether the original time series has more time-value pairs than the mutated time series. Formally, $|TS| > |TS'|$;
+    \item \texttt{hasTimeOutRange} detects times in a mutated time series that lie outside the time domain range, indicating temporal anomalies. Formally, $\exists (t_i v_i) \in TS' \;\text{s.t.}\; t_i < t_{min} \lor t_i > t_{max} $ for a domain range $[t_{min}, t_{max}]$;
+    \item \texttt{hasValueOutRange} detects values in a mutated time series that lie outside the value domain range, indicating value anomalies. Formally, $\exists (t_i v_i) \in TS' \;\text{s.t.}\; v_i < v_{min} \lor v_i > v_{max} $ for a domain range $[v_{min}, v_{max}]$.
+\end{itemize}
+}
+
+
+
+
+
+
+As with injections, each operator is also provided in a file-based variant (suffixed with \texttt{\_File}), yielding a total of \newtext{22} method signatures. Additionally, 2 overloaded \texttt{serializeDiscovery} methods support serialization of single or multiple results to JSON files.
+
+Each discovery operator returns a \texttt{DiscoveryOutcome} object that encapsulates the result of the analysis. A \texttt{DiscoveryOutcome} contains a boolean \texttt{hasError} flag indicating whether a failure was detected, and an \texttt{outcomeMsg} string providing a human-readable description of the detected failure (defaulting to \texttt{"No error found"} when no anomaly is identified). This structured representation enables systematic processing of results: outcomes can be serialized to JSON files for integration with continuous testing pipelines, or programmatically inspected within composite discovery expressions.
+
+
+
+
+
+%\LEO{Questo paragrafo e' "strano" perche' da ua definizione formale solo di alcuni operatori. Perchè solo questi e non anche gli altri? Se mettiamo una definizione formale di tutti gli operatori, credo allora la definizione vada integrata nella lista sopra. Ogni volta che presentiamo un operatore lo definiamo prima informalmente e poi rigorosamente. Altrimenti, potremmo non definirne alcuno in forma rigorosa (anche se sarebbe forse meglio farlo). Questa via di mezzo secondo me non va bene.} 
+
+
+%Formally, each operator compares an original time series $TS = \{t_0 v_0, \ldots, t_n v_n\}$ with a mutated one $TS' = \{t'_0 v'_0, \ldots, t'_m v'_m\}$ and returns a \texttt{DiscoveryOutcome}. For instance, \texttt{isOmission} detects whether 
+%$|TS'| < |TS|$
+%\newtext{$\exists t_i v_i \in TS \;\text{s.t.}\; t_i v_i \notin TS'$}, indicating that time-value pairs were lost during simulation, which corresponds to an \textit{omission} failure.
+%\DIEGO{ho riformulato come esistenziale, altrimenti coincideva con isSmaller. ho allineato anche il codice}. 
+%The \texttt{hasTimeOutRange} operator verifies that all times in a series fall within $[t_{min}, t_{max}]$, detecting temporal anomalies that may indicate \textit{late} or \textit{early} failures. The \texttt{isValueCoarse} operator checks whether the value $v'$ at time $t$ in the mutated series violates the accepted range, i.e., $(v' < a) \lor (v' > b)$ for a domain range $[a, b]$.
+
+
+
+
+
+
+A key design feature of the discovery phase is \textit{composability}. Similarly to injections, developers can combine atomic discovery operators using the embedded Xbase expression language to define complex, composite discovery rules. This composability allows the discovery of failure modes that may differ from those initially expected, enabling exploratory analysis beyond predefined failure categories. %Concrete examples of composite discovery rules applied to an IoT scenario are presented in Section~\ref{sec:running-example}.
+
+Listing \ref{lst:discovery} defines three discovery rules that illustrate how the operators are applied to detect failures in the irrigation output. The \texttt{Omission} discovery directly applies the atomic \texttt{isOmission} operator to check whether the output time series from port \texttt{c1\_out} has \newtext{missing} %fewer 
+elements \newtext{compared to} %than
+\newtext{the expected ones}, which in the irrigation context would indicate that a scheduled irrigation event did not occur. The \texttt{CustomFailure} discovery demonstrates \textit{composability}: it combines \texttt{isSmaller} %(a \textit{size comparison} operator) 
+with \revision{\texttt{outOfRange}} %(a \textit{range validation} operator) 
+using a logical disjunction, thereby detecting either missing irrigation events or irrigation \revision{timings} %values 
+outside the expected %voltage 
+\revision{time} range on port \texttt{c2\_out}. The \texttt{outOfRange} discovery uses \texttt{hasTimeOutRange} to verify that all activation timings in the output fall within the interval $[0.0, 3.0]$, flagging any temporal anomaly. These examples show how atomic operators can be reused across ports and composed into increasingly specific failure detection rules tailored to the domain.
+
+\begin{lstlisting}[style=JavaStyle,caption=Specification of the discovery rules.,label=lst:discovery]
+ discovery Omission {
+ 	return isOmission(outTS, expectedTS);
+ }
+ discovery CustomFailure {
+ 	return isSmaller(outTS, expectedTS) || outOfRange(outTS, expectedTS);
+ }
+ discovery outOfRange{
+ 	return hasTimeOutRange(outTS, 0.0, 3.0)
+ }
+\end{lstlisting}
+
+
+\subsection{Configuring injections and discoveries}
+
+System executions are described using the \texttt{Configuration} metaclass. To enable rule refinement, the metamodel \newtext{of Figure~\ref{fig:ememliotMM-excerpt}} introduces \texttt{ConfigInjection} and \texttt{Config\-Discovery} as specialized views on configurations. A \texttt{ConfigInjection} refers to a modified configuration obtained by applying a specific \texttt{Injection}; it holds a reference to the corresponding \texttt{injection}, the target \texttt{port}, and the \texttt{timeSeries} to mutate. In parallel, a \texttt{ConfigDiscovery} links a \texttt{Discovery} with a configuration and captures both the \texttt{expectedTimeSeries} (original behavior) and \texttt{injectedTimeSeries} (mutated behavior) that the rule attempts to explain or validate. Listing \ref{lst:configuration} depicts how the previously defined injections and discoveries can be configured for the running example. 
+
+\begin{lstlisting}[style=JavaStyle,caption=Configuration of injections and discoveries.,label=lst:configuration]
+
+config :
+	inj simpleInjection port 'cp1p1' timeSeries ts_c1
+	inj simpleInjection port 'cp1p1' timeSeries ts_c2
+	discovery Omission port 'c1_out' 
+            expectedSeries ts_c1_expected mutatedSeries ts_c1_output
+	discovery CustomFailure port 'c2_out' 
+            expectedSeries ts_c2_expected mutatedSeries ts_c2_output
+\end{lstlisting}
+
+
+
+
+\subsection{Simulation} 
+
+
+The last phase of the pipeline consists of running the injections, observing their behavior, and applying the discovery rules. To this end, we run the simulation using the isolated Proteus component as discussed in Section \ref{sec:motivation}. To run the simulation seamlessly, we develop a set of dedicated Java functions that are used to 
+%start the simulation, interact with the system, 
+\newtext{interact with Proteus user interface to initialize the running example, start the simulation with the injected time series, and produce persistent files of the simulation results needed for the discovery phase.}
+%and produce the execution results needed for the discovery. 
+While we acknowledge that this is an \textit{ad-hoc} solution for the target platform, \tool provides the capabilities of extending to other simulation platforms. In this respect, developers have only to implement the interaction logic and call their component directly from the DSL specification, i.e., change the \texttt{simulationPlatform} string accordingly. 
+%\subsection{Explanatory example}
+%\label{sec:running-example}
+
+
+
+%\LEO{Cambierei leggermente l'ordine della presentazione per i paragrafi che seguono. A questo punto mostrerei come questo sistema e' specificato in Proteus, poi mostrerei come e' fatta una specifica di inhjection, poi userei e commenterei i due grafici che fanno vedere in cosa si tradure la specifica di injection, presenterei la specifica di discovery e chiuderei con l'applicazione delle discovery all'esempio.}
+%\LEO{secondo me dovremmo  poi chiudere spiegando cosa l'utente ha ottenuto facendo uno sforzo molto contenuto. Ha scoperto cioe' empiricamente come certi tipi di malfunzionamenti si propagano dall'input all'output, scrivendo poche regole ma eseguendo un esperimento complesso.}
+
+%Testing \tool with different simulation platforms is out of the scope of this paper. Instead, we focus on the specification and execution of all the main steps of the failure propagation analysis process, i.e., system design, injections, and discovery.
+
+\newtext{Figure~\ref{fig:sim2} visually shows two different execution scenarios. On the left side (a), the simulation of the original scenario, with irrigation occurring in time intervals 5-10, 20-25, and 35-50 (e.g., a flat line set to 0 indicates 0 voltage, which translates to no irrigation performed). On the right side (b), the simulation of a mutated scenario, resulting from two injections performed on the input time series: a first injection uses a \textit{edit operator} (e.g., \texttt{setAllValuesToValue}) to invert the irrigation request in the interval 5-10, flattening all values to 0 and resulting in an aborted irrigation - an instance of a \textit{value coarse} failure; a second injection uses a \textit{remove operator} (e.g., \texttt{removeTimeValuesInRange}) to introduce an idle phase within the interval 35-50, splitting a single long irrigation into two shorter ones - an instance of an \textit{omission} failure.}
+
+In the scope of this paper, we focus on providing injection and discovery rules. Therefore, we leave the full integration of multiple simulation platforms for future work.  
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figs/sim1.pdf}
+    \caption{Simulation of original scenario.}
+    \label{fig:figura1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figs/sim2.pdf}
+    \caption{Simulation of mutated scenario.}
+    \label{fig:figura2}
+    \end{subfigure}
+    \caption{A comparison between original (a) and mutated (b) simulations for the irrigation unit component of Figure~\ref{fig:isolated}.}
+    \label{fig:sim2}
+\end{figure}
+
+%Listing~\ref{lst:dslSpec} depicts an explanatory specification of the isolated system written using \tool that is fully executable. In particular, developers can combine abstract concepts like \texttt{Component}s or \texttt{Port}s with actual Java code for writing custom injections and discoveries. In addition, both can be configured to run on multiple ports, thus simplifying the whole FLA process. The specification eventually runs the simulation and collects the results from Proteus.
+
+
+
+
+
+
+
+The generated Java code for this specification automatically inherits from \texttt{ProteusService}, gaining access to all time series manipulation operations, Proteus-specific simulation execution, and discovery evaluation capabilities. The entire workflow - from model specification to executable test harness - is automated, ensuring consistency, type safety, and maintainability.
+
+\textbf{Remark:} By discussing the running example, we showed how \tool can be used to automate key tasks in failure propagation analysis, from the injection specification to the discovery phase. In this respect, the manual effort is reduced, and developers can rely on the proposed tool to test different scenarios by specifying a small number of rules. 
+
+

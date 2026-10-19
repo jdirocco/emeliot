@@ -1,0 +1,53 @@
+model S1_I4:
+ 
+ specification
+ 	components : 
+	 	Component1	 ports : 	
+	 		port c1_in INPUT 
+	 		port c1_out OUTPUT  
+	 		
+	 	Component2	 ports : 	
+	 		port c2_in INPUT 
+	 		port c2_out OUTPUT
+
+	 	
+	 
+ 	//TO BE DISCUSSED 	  
+ time_series :
+ 	ts_c1 path "experiments/IrrigationUnit_S1_1C_SMALL/irrigationUnit1.txt"
+	ts_c2 path "experiments/IrrigationUnit_S1_1C_SMALL/irrigationUnit2.txt"
+
+ injection s1 {
+ 	var times = getAllTimes(inTS)
+ 	var prev = times.get(0)
+ 	var starts = newArrayList()
+ 	var ends = newArrayList()
+	for(var i=1; i<times.size;i++){
+		if (times.get(i) - prev > 2){
+			starts.add(prev)
+			ends.add(times.get(i))
+			System.out.println(prev + " - " + times.get(i));
+		}
+		prev = times.get(i)	
+	}
+	var randomizer = new java.util.Random()
+	var interval_index = randomizer.nextInt(0,starts.size())
+	
+	var start = randomizer.nextDouble(starts.get(interval_index),ends.get(interval_index) -2)
+	var end = randomizer.nextDouble(start, ends.get(interval_index))
+	var value = randomizer.nextDouble(0,10)
+	addTimeAndValue(inTS, start, value)
+	addTimeAndValue(inTS, end, value)
+	
+	
+			
+ }
+
+
+config:
+	inj s1 port 'C1_in' timeSeries ts_c1
+	inj s1 port 'C2_in' timeSeries ts_c2
+
+
+simultation_platfrom: proteus
+project_file: "experiments/S1_BIG/component.pdsprj" 

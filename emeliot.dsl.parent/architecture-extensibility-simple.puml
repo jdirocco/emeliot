@@ -1,0 +1,128 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam nodesep 20
+skinparam ranksep 20
+skinparam padding 1
+
+' ═══ ROW 1: Service Interfaces ═══
+
+package "Service Interfaces" <<Rectangle>> #E8F5E9 {
+    interface "<<interface>>\nEmeliotService" as Service {
+        reorderTimeSeries(TimeSeries s)
+        getAllTimes(TimeSeries ts): List<Double>
+        readInTSFromFile(String path): TimeSeries
+        ...
+        <<~50 query operations>>
+    }
+
+    interface "<<interface>>\nEmeliotMutationService" as MutService {
+        addTimeAndValue(TimeSeries s, double t, double v)
+        changeValue(TimeSeries s, double t, double v)
+        changeTimeLate(TimeSeries s, double eps, ...)
+        ...
+        <<~100 mutation operators>>
+    }
+
+    interface "<<interface>>\nEmeliotDiscoveryService" as DiscService {
+        isCommission(TimeSeries exp, TimeSeries mut): DiscoveryOutcome
+        isOmission(TimeSeries exp, TimeSeries mut): DiscoveryOutcome
+        isLate(TimeSeries exp, TimeSeries mut, double eps): DiscoveryOutcome
+        ...
+        <<~20 discovery operators>>
+    }
+}
+
+' ═══ ROW 2: Base Layer ═══
+
+package "Base Layer" <<Rectangle>> #FFF3E0 {
+    abstract class EmeliotLib {
+        {static} read(String fileName): String
+        --
+        <<Common utilities>>
+    }
+}
+
+' ═══ ROW 3: Platform Implementations + Code Generation ═══
+
+package "Platform Implementations" <<Rectangle>> #E3F2FD {
+    class ProteusService {
+        readInTSFromFile(String path): TimeSeries
+        writeInTSToFile(TimeSeries ts, String path)
+        runProteus(Path comp, List<String> ports)
+        runTestCase(Path comp, Path in, Path out, List<String> ports)
+        --
+        <<Proteus-specific>>
+        <<GUI automation via Robot>>
+    }
+
+    class "Other Platforms...\n<<future>>" as Other {
+        ModelSimService
+        HILTestbedService
+        DigitalTwinService
+    }
+}
+
+package "Code Generation" <<Rectangle>> #FCE4EC {
+    class EmeliotJvmModelInferrer <<generator>> {
+        infer(Model m, ...)
+        --
+        {method} Selects platform service
+        based on simulationPlatform
+    }
+}
+
+note right of EmeliotJvmModelInferrer
+    if (platform == "proteus")
+        extends ProteusService
+    else if (platform == "modelsim")
+        extends ModelSimService
+    ...
+end note
+
+' ═══ ROW 4: Generated Code ═══
+
+package "Generated Java Code" <<Rectangle>> #F3E5F5 {
+    class "<<generated>>\nIrrigationUnit_S1" as Generated {
+        {static} main(String[] args)
+        doExecute()
+        --
+        s1(TimeSeries inTS)
+        first(TimeSeries exp, TimeSeries mut): boolean
+        --
+        <<Inherits all ~170 operations>>
+    }
+}
+
+' ═══ Layout ═══
+
+' Row 1: interfaces left to right
+Service -[hidden]right- MutService
+MutService -[hidden]right- DiscService
+
+' Row 3: platform left, code generation right
+ProteusService -[hidden]right- Other
+Other -[hidden]right- EmeliotJvmModelInferrer
+
+' ═══ Relationships ═══
+
+' Interfaces -> Base (EmeliotLib implements all three)
+EmeliotLib .up.|> Service
+EmeliotLib .up.|> MutService
+EmeliotLib .up.|> DiscService
+
+' Base -> Platform (inheritance)
+ProteusService -up-|> EmeliotLib
+Other -up-|> EmeliotLib
+
+' Code generation
+EmeliotJvmModelInferrer ..> ProteusService : <<references>>
+EmeliotJvmModelInferrer .down.> Generated : <<generates>>
+
+' Generated inherits from platform
+Generated -up-|> ProteusService : <<when platform=proteus>>
+
+@enduml

@@ -1,0 +1,31 @@
+model IrrigationJavaSim :
+
+ specification
+ 	components :
+	 	IrrigationUnit ports :
+	 		port request INPUT
+	 		port valve OUTPUT
+
+ time_series :
+ 	ts_request path "experiments/javasim/irrigationUnit.txt"
+ 	ts_expected path "experiments/javasim/expected/irrigationUnit.csv"
+ 	ts_valve path "experiments/javasim/out/irrigationUnit.csv"
+
+// Aborted irrigation: the request issued at time 25 is lowered below the activation threshold
+injection abortIrrigation {
+	changeValue(inTS, 25.00001, 0)
+	changeValue(inTS, 30, 0)
+}
+
+// The valve stays closed when it should be open
+discovery ValveNotOpened {
+	return isValueSubtle(expectedTS, outTS, 0.5, 0.0, 5.0).hasError()
+}
+
+config :
+	inj abortIrrigation port 'request' timeSeries ts_request
+	discovery ValveNotOpened port 'valve' expectedSeries ts_expected injectedSeries ts_valve
+
+// Same model as for Proteus: only the platform and the project change
+simultation_platfrom: javasim
+project_file: "examples.javasim.IrrigationUnit"

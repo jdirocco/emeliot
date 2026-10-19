@@ -1,0 +1,39 @@
+model S1_I1:
+ 
+ specification
+ 	components : 
+	 	Component1	 ports : 	
+	 		port c1_in INPUT 
+	 		port c1_out OUTPUT  
+	 		
+	 	Component2	 ports : 	
+	 		port c2_in INPUT 
+	 		port c2_out OUTPUT
+
+	 	
+	 
+ 	//TO BE DISCUSSED 	  
+ time_series :
+ 	ts_c1 path "experiments/IrrigationUnit_S1_1C_SMALL/irrigationUnit1.txt"
+	ts_c2 path "experiments/IrrigationUnit_S1_1C_SMALL/irrigationUnit2.txt"
+
+ injection s1 {
+ 	
+ 	var times = getAllTimes(inTS)
+ 	var randomer = new java.util.Random()
+ 	var index = randomer.nextInt(times.size-1)
+ 	var value = getValueAt(inTS, index)
+ 	if (value < 2.5)
+ 		changeValue(inTS, times.get(index), randomer.nextDouble(2.5,10))
+ 	else
+ 		changeValue(inTS, times.get(index), randomer.nextDouble(0,2.5))
+ }
+
+
+config:
+	inj s1 port 'C1_in' timeSeries ts_c1
+	inj s1 port 'C2_in' timeSeries ts_c2
+
+
+simultation_platfrom: proteus
+project_file: "experiments/S1_BIG/component.pdsprj" 

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+	<!-- Contributes the Java simulation platform to FATE-DSL without modifying the language bundle -->
+	<extension point="emeliot.dsl.simulationPlatforms">
+		<platform
+			id="javasim"
+			name="Java component simulator"
+			serviceClass="emeliot.dsl.platform.javasim.JavaComponentService"/>
+	</extension>
+</plugin>

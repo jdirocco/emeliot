@@ -1,0 +1,252 @@
+@startuml Emeliot Platform Extensibility Architecture
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam groupInheritance 2
+
+package "DSL Metamodel" <<Rectangle>> {
+    class Model {
+        +String name
+        +Specification specification
+        +List<TimeSeries> timeSeries
+        +List<Injection> injections
+        +List<Discovery> discoveries
+        +List<Configuration> configurations
+        +String simulationPlatform
+        +String projectFile
+    }
+}
+
+package "Service Layer Interfaces" <<Rectangle>> {
+    interface EmeliotService {
+        +{abstract} void reorderTimeSeries(TimeSeries s)
+        +{abstract} List<Double> getAllTimes(TimeSeries s)
+        +{abstract} List<Double> getAllValues(TimeSeries s)
+        +{abstract} double getValueAt(TimeSeries s, int index)
+        +{abstract} double getTimeAt(TimeSeries s, int index)
+        +{abstract} TimeSeries readInTSFromFile(String filePath)
+        +{abstract} void writeInTSToFile(TimeSeries s, String filePath)
+        +{abstract} TimeSeries readOutTSFromFile(String filePath)
+        ...
+        <<50+ time series query operations>>
+    }
+
+    interface EmeliotMutationService {
+        +{abstract} void addTimeAndValue(TimeSeries s, double time, double value)
+        +{abstract} void changeValue(TimeSeries s, double time, double value)
+        +{abstract} void changeTime(TimeSeries s, double timeOld, double timeNew)
+        +{abstract} void removeTimeValue(TimeSeries s, double time, double value)
+        +{abstract} void changeTimeLate(TimeSeries s, double eps, double time, double timeMaxDomain)
+        +{abstract} void changeTimeEarly(TimeSeries s, double eps, double time, double timeMinDomain)
+        +{abstract} void changeValueCoarse(TimeSeries s, double eps, double time, double valueMin, double valueMax)
+        +{abstract} void changeValueSubtle(TimeSeries s, double eps, double time, double valueMin, double valueMax)
+        ...
+        <<100+ mutation operators>>
+    }
+
+    interface EmeliotDiscoveryService {
+        +{abstract} DiscoveryOutcome isCommission(TimeSeries tsOriginal, TimeSeries tsMutated)
+        +{abstract} DiscoveryOutcome isOmission(TimeSeries tsOriginal, TimeSeries tsMutated)
+        +{abstract} DiscoveryOutcome isLate(TimeSeries tsOriginal, TimeSeries tsMutated, double eps)
+        +{abstract} DiscoveryOutcome isEarly(TimeSeries tsOriginal, TimeSeries tsMutated, double eps)
+        +{abstract} DiscoveryOutcome isValueCoarse(TimeSeries tsOriginal, TimeSeries tsMutated, double eps, double valueMin, double valueMax)
+        +{abstract} DiscoveryOutcome isValueSubtle(TimeSeries tsOriginal, TimeSeries tsMutated, double eps, double valueMin, double valueMax)
+        +{abstract} void serializeDiscovery(DiscoveryOutcome outcome, String filename)
+        ...
+        <<20+ discovery operators>>
+    }
+}
+
+package "Base Implementation" <<Rectangle>> {
+    abstract class EmeliotLib {
+        +{static} String read(String fileName)
+        +{static} void doSomething(String fileName)
+        --
+        <<May define common utilities>>
+    }
+
+    class EmeliotStandardLibrary {
+        +{static} ... standard library functions
+    }
+}
+
+package "Platform-Specific Implementations" <<Rectangle>> {
+    class ProteusService {
+        -Path componentPath
+        --
+        +void writeInTSToFile(TimeSeries s, String filePath)
+        +TimeSeries readInTSFromFile(String filePath)
+        +TimeSeries readOutTSFromFile(String filePath)
+        +void runTestCase(Path componentPath, Path inputTSPath, Path outputTSPath, List<String> outputPorts)
+        +void runProteus(Path componentPath, List<String> outputPorts)
+        --
+        -void backupOriginalTS(Path componentPath)
+        -void moveInputTS(Path componentPath, Path inputTSPath)
+        -void moveOutputTS(Path componentPath, Path outputTSPath)
+        -void restoreOriginalTS(Path componentPath)
+        --
+        <<Proteus-specific simulation automation>>
+        <<GUI automation via Robot class>>
+    }
+
+    class TinkercadService <<future>> {
+        +void runTestCase(...)
+        +void runTinkercad(...)
+        --
+        <<Tinkercad-specific implementation>>
+        <<REST API integration>>
+    }
+
+    class ModelSimService <<future>> {
+        +void runTestCase(...)
+        +void runModelSim(...)
+        --
+        <<ModelSim-specific implementation>>
+        <<CLI automation>>
+    }
+
+    class HILTestbedService <<future>> {
+        +void runTestCase(...)
+        +void executeOnHardware(...)
+        --
+        <<Hardware-in-the-loop implementation>>
+        <<Serial/UART communication>>
+    }
+
+    class DigitalTwinService <<future>> {
+        +void runTestCase(...)
+        +void executeOnDigitalTwin(...)
+        --
+        <<Digital twin integration>>
+        <<Real-time synchronization>>
+    }
+}
+
+package "Code Generation Layer" <<Rectangle>> {
+    class EmeliotJvmModelInferrer {
+        +void infer(Model element, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase)
+        --
+        -selectPlatformService(String platformName): JvmTypeReference
+    }
+
+    note right of EmeliotJvmModelInferrer
+        **Platform Selection Logic:**
+
+        if ("proteus".equals(model.simulationPlatform))
+            superTypes += typeRef(ProteusService)
+        else if ("tinkercad".equals(model.simulationPlatform))
+            superTypes += typeRef(TinkercadService)
+        else if ("modelsim".equals(model.simulationPlatform))
+            superTypes += typeRef(ModelSimService)
+        else if ("hil".equals(model.simulationPlatform))
+            superTypes += typeRef(HILTestbedService)
+        else
+            // Default or custom platform
+            superTypes += typeRef(EmeliotLib)
+    end note
+}
+
+package "Generated Code" <<Rectangle>> {
+    class "GeneratedModel_XXX" as Generated {
+        +Path path
+        +ReadFactory factory
+        +TimeSeries ts_c1
+        +TimeSeries ts_c2
+        ...
+        --
+        +{static} void main(String[] args)
+        +void doExecute()
+        +void injection_s1(TimeSeries inTS)
+        +boolean discovery_first(TimeSeries expectedTS, TimeSeries outTS)
+        --
+        <<Generated from Emeliot DSL>>
+        <<Inherits from platform-specific service>>
+    }
+}
+
+package "EMF Metamodel" <<Rectangle>> {
+    class ReadFactory {
+        +{static} ReadFactory eINSTANCE
+        --
+        +TimeSeries createTimeSeries()
+        +TimeValue createTimeValue()
+    }
+
+    class TimeSeries {
+        +List<TimeValue> timeValues
+        +String name
+        +String timeSeriesPath
+    }
+
+    class TimeValue {
+        +double time
+        +double value
+    }
+
+    class DiscoveryOutcome {
+        -boolean hasError
+        -String outcomeMsg
+        --
+        +boolean hasError()
+        +String getOutcomeMsg()
+        +void setHasError(boolean hasError)
+        +void setOutcomeMsg(String outcomeMsg)
+    }
+}
+
+' Inheritance relationships
+EmeliotLib <|-- ProteusService
+EmeliotLib <|-- TinkercadService
+EmeliotLib <|-- ModelSimService
+EmeliotLib <|-- HILTestbedService
+EmeliotLib <|-- DigitalTwinService
+
+' Interface implementation (conceptually)
+EmeliotService <|.. ProteusService : <<realizes>>
+EmeliotMutationService <|.. ProteusService : <<realizes>>
+EmeliotDiscoveryService <|.. ProteusService : <<realizes>>
+
+EmeliotService <|.. TinkercadService : <<realizes>>
+EmeliotMutationService <|.. TinkercadService : <<realizes>>
+EmeliotDiscoveryService <|.. TinkercadService : <<realizes>>
+
+' Generated code inherits from selected platform
+ProteusService <|-- Generated : <<when platform=proteus>>
+TinkercadService <|.. Generated : <<when platform=tinkercad>>
+
+' Code generation dependency
+EmeliotJvmModelInferrer ..> Model : <<reads>>
+EmeliotJvmModelInferrer ..> Generated : <<generates>>
+EmeliotJvmModelInferrer ..> ProteusService : <<references>>
+EmeliotJvmModelInferrer ..> TinkercadService : <<references>>
+
+' EMF relationships
+ReadFactory ..> TimeSeries : <<creates>>
+ReadFactory ..> TimeValue : <<creates>>
+TimeSeries o-- TimeValue : contains
+Generated ..> ReadFactory : uses
+Generated ..> TimeSeries : manipulates
+Generated ..> DiscoveryOutcome : returns
+
+' Model composition
+Model o-- TimeSeries
+Model ..> EmeliotJvmModelInferrer : <<transformed by>>
+
+legend right
+    **Extensibility Pattern:**
+
+    1. **Base Layer**: EmeliotLib provides common functionality
+    2. **Interface Layer**: Service interfaces define contracts
+    3. **Platform Layer**: Platform-specific implementations
+    4. **Generation Layer**: JvmModelInferrer selects platform
+    5. **Runtime Layer**: Generated code inherits capabilities
+
+    **Adding a New Platform:**
+    1. Create new class extending EmeliotLib
+    2. Implement EmeliotService interfaces
+    3. Add platform-specific methods (e.g., runXXX)
+    4. Update JvmModelInferrer platform selection
+    5. Set simulationPlatform in .emeliot model
+end legend
+
+@enduml

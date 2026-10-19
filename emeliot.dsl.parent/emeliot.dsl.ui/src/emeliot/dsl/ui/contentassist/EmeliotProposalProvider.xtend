@@ -3,10 +3,28 @@
  */
 package emeliot.dsl.ui.contentassist
 
+import com.google.inject.Inject
+import emeliot.dsl.platform.SimulationPlatformRegistry
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.Assignment
+import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
+import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/310_eclipse_support.html#content-assist
  * on how to customize the content assistant.
  */
 class EmeliotProposalProvider extends AbstractEmeliotProposalProvider {
+
+	@Inject SimulationPlatformRegistry platformRegistry
+
+	/** Proposes the simulation platforms contributed to the emeliot.dsl.simulationPlatforms extension point. */
+	override completeModel_SimulationPlatform(EObject model, Assignment assignment, ContentAssistContext context,
+		ICompletionProposalAcceptor acceptor) {
+		for (entry : platformRegistry.platforms.entrySet) {
+			val id = entry.key
+			val proposal = if (id.matches('[a-zA-Z_][a-zA-Z0-9_]*')) id else '"' + id + '"'
+			acceptor.accept(createCompletionProposal(proposal, id + ' - ' + entry.value, null, context))
+		}
+	}
 }

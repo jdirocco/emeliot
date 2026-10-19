@@ -1,0 +1,115 @@
+========First============
+expected time 134.000005        output time 134.000005  expected value 6e-07    output value 4.95868
+Errors found: 1
+Discovery first on PORT 'c1_out' 
+	time series EXPECTED:ts_e1
+	OUTPUT:ts_e1
+========Second============
+Errors found: 0
+========Tirth============
+Errors found: 0
+========Four============
+Consecutive new pairs with identical value: 4.95868     latest time: 21.06617713        runLength: 2
+Consecutive new pairs with identical value: 4.95868     latest time: 21.06617737        runLength: 3
+Consecutive new pairs with identical value: 4.95868     latest time: 21.06617961        runLength: 4
+Consecutive new pairs with identical value: 4.95868     latest time: 21.0665216 runLength: 5
+Consecutive new pairs with identical value: 4.95868     latest time: 21.0790703 runLength: 6
+Consecutive new pairs with identical value: 4.95868     latest time: 21.24324989        runLength: 7
+Consecutive new pairs with identical value: 4.95868     latest time: 21.26003238        runLength: 8
+Consecutive new pairs with identical value: 4.95868     latest time: 21.26003491        runLength: 9
+Consecutive new pairs with identical value: 4.95868     latest time: 21.26003548        runLength: 10
+Consecutive new pairs with identical value: 4.95868     latest time: 21.26003621        runLength: 11
+Consecutive new pairs with identical value: 4.95868     latest time: 21.26003686        runLength: 12
+Consecutive new pairs with identical value: 4.95868     latest time: 21.26003763        runLength: 13
+Consecutive new pairs with identical value: 4.95868     latest time: 21.26013467        runLength: 14
+Consecutive new pairs with identical value: 4.95868     latest time: 21.32838877        runLength: 15
+Consecutive new pairs with identical value: 4.95868     latest time: 21.34357119        runLength: 16
+Consecutive new pairs with identical value: 4.95868     latest time: 21.34365225        runLength: 17
+Consecutive new pairs with identical value: 4.95868     latest time: 21.34365284        runLength: 18
+Consecutive new pairs with identical value: 4.95868     latest time: 21.34365345        runLength: 19
+Consecutive new pairs with identical value: 4.95868     latest time: 21.34365426        runLength: 20
+Consecutive new pairs with identical value: 4.95868     latest time: 21.34365464        runLength: 21
+Consecutive new pairs with identical value: 4.95868     latest time: 21.34367231        runLength: 22
+Consecutive new pairs with identical value: 4.95868     latest time: 21.37940846        runLength: 23
+Consecutive new pairs with identical value: 4.95868     latest time: 21.66153361        runLength: 24
+Consecutive new pairs with identical value: 4.95868     latest time: 21.6633036 runLength: 25
+Consecutive new pairs with identical value: 4.95868     latest time: 21.663321  runLength: 26
+Consecutive new pairs with identical value: 4.95868     latest time: 21.66332162        runLength: 27
+Consecutive new pairs with identical value: 4.95868     latest time: 21.66332211        runLength: 28
+Consecutive new pairs with identical value: 4.95868     latest time: 21.66332299        runLength: 29
+Consecutive new pairs with identical value: 4.95868     latest time: 21.66344188        runLength: 30
+Consecutive new pairs with identical value: 4.95868     latest time: 21.68201939        runLength: 31
+Consecutive new pairs with identical value: 4.95868     latest time: 21.74669023        runLength: 32
+Consecutive new pairs with identical value: 4.95868     latest time: 21.74689606        runLength: 33
+Consecutive new pairs with identical value: 4.95868     latest time: 21.74689625        runLength: 34
+Consecutive new pairs with identical value: 4.95868     latest time: 21.74689693        runLength: 35
+Consecutive new pairs with identical value: 4.95868     latest time: 21.746901  runLength: 36
+Consecutive new pairs with identical value: 4.95868     latest time: 21.74696465        runLength: 37
+Consecutive new pairs with identical value: 4.95868     latest time: 21.74696529        runLength: 38
+Consecutive new pairs with identical value: 4.95868     latest time: 21.74696585        runLength: 39
+Consecutive new pairs with identical value: 4.95868     latest time: 21.74696665        runLength: 40
+Consecutive new pairs with identical value: 4.95868     latest time: 21.74744942        runLength: 41
+Consecutive new pairs with identical value: 4.95868     latest time: 21.97881203        runLength: 42
+Consecutive new pairs with identical value: 4.95868     latest time: 22.06617677        runLength: 43
+Consecutive new pairs with identical value: 4.95868     latest time: 22.06655843        runLength: 44
+Consecutive new pairs with identical value: 4.95868     latest time: 22.06655865        runLength: 45
+Consecutive new pairs with identical value: 4.95868     latest time: 22.06655986        runLength: 46
+Consecutive new pairs with identical value: 4.95868     latest time: 22.06755067        runLength: 47
+Consecutive new pairs with identical value: 4.95868     latest time: 22.14685411        runLength: 48
+Consecutive new pairs with identical value: 4.95868     latest time: 22.15023845        runLength: 49
+Consecutive new pairs with identical value: 4.95868     latest time: 22.15025646        runLength: 50
+Consecutive new pairs with identical value: 4.95868     latest time: 22.15025704        runLength: 51
+Consecutive new pairs with identical value: 4.95868     latest time: 22.15032436        runLength: 52
+Consecutive new pairs with identical value: 4.95868     latest time: 22.28820189        runLength: 53
+Consecutive new pairs with identical value: 4.95868     latest time: 22.46976814        runLength: 54
+Consecutive new pairs with identical value: 4.95868     latest time: 22.46981693        runLength: 55
+Consecutive new pairs with identical value: 4.95868     latest time: 22.46981758        runLength: 56
+Consecutive new pairs with identical value: 4.95868     latest time: 22.46981814        runLength: 57
+Consecutive new pairs with identical value: 4.95868     latest time: 22.46981894        runLength: 58
+Consecutive new pairs with identical value: 4.95868     latest time: 22.47030211        runLength: 59
+Consecutive new pairs with identical value: 4.95868     latest time: 22.55296428        runLength: 60
+Consecutive new pairs with identical value: 4.95868     latest time: 22.55305417        runLength: 61
+Consecutive new pairs with identical value: 4.95868     latest time: 22.5530547 runLength: 62
+Consecutive new pairs with identical value: 4.95868     latest time: 22.5530559 runLength: 63
+Consecutive new pairs with identical value: 4.95868     latest time: 22.55308018        runLength: 64
+Consecutive new pairs with identical value: 4.95868     latest time: 22.55308291        runLength: 65
+Consecutive new pairs with identical value: 4.95868     latest time: 22.55316675        runLength: 66
+Consecutive new pairs with identical value: 4.95868     latest time: 22.64972156        runLength: 67
+Consecutive new pairs with identical value: 4.95868     latest time: 22.87152077        runLength: 68
+Consecutive new pairs with identical value: 4.95868     latest time: 22.87312054        runLength: 69
+Consecutive new pairs with identical value: 4.95868     latest time: 22.87312332        runLength: 70
+Consecutive new pairs with identical value: 4.95868     latest time: 22.8731237 runLength: 71
+Consecutive new pairs with identical value: 4.95868     latest time: 22.87314087        runLength: 72
+Consecutive new pairs with identical value: 4.95868     latest time: 22.9078809 runLength: 73
+Consecutive new pairs with identical value: 4.95868     latest time: 22.95592284        runLength: 74
+Consecutive new pairs with identical value: 4.95868     latest time: 22.95592779        runLength: 75
+Consecutive new pairs with identical value: 4.95868     latest time: 22.95592838        runLength: 76
+Consecutive new pairs with identical value: 4.95868     latest time: 22.9559291 runLength: 77
+Consecutive new pairs with identical value: 4.95868     latest time: 22.95593551        runLength: 78
+Consecutive new pairs with identical value: 4.95868     latest time: 22.96835977        runLength: 79
+Consecutive new pairs with identical value: 4.95868     latest time: 23.03297998        runLength: 2
+Consecutive new pairs with identical value: 4.95868     latest time: 23.03300676        runLength: 3
+Consecutive new pairs with identical value: 4.95868     latest time: 23.03354369        runLength: 4
+Consecutive new pairs with identical value: 4.95868     latest time: 23.03796658        runLength: 5
+Consecutive new pairs with identical value: 4.95868     latest time: 23.24323929        runLength: 6
+Consecutive new pairs with identical value: 4.95868     latest time: 23.27599357        runLength: 7
+Consecutive new pairs with identical value: 4.95868     latest time: 23.27600436        runLength: 8
+Consecutive new pairs with identical value: 4.95868     latest time: 23.27600516        runLength: 9
+Consecutive new pairs with identical value: 4.95868     latest time: 23.27635259        runLength: 10
+Consecutive new pairs with identical value: 4.95868     latest time: 23.52071728        runLength: 11
+Consecutive new pairs with identical value: 4.95868     latest time: 23.67883113        runLength: 12
+Consecutive new pairs with identical value: 4.95868     latest time: 23.67884709        runLength: 13
+Consecutive new pairs with identical value: 4.95868     latest time: 23.67884797        runLength: 14
+Consecutive new pairs with identical value: 4.95868     latest time: 23.67909163        runLength: 15
+Consecutive new pairs with identical value: 4.95868     latest time: 23.85046724        runLength: 16
+Consecutive new pairs with identical value: 4.95868     latest time: 24.000005  runLength: 17
+Consecutive new pairs with identical value: 4.95868     latest time: 24.00000511        runLength: 18
+Consecutive new pairs with identical value: 4.95868     latest time: 24.00000543        runLength: 19
+Consecutive new pairs with identical value: 4.95868     latest time: 24.00001071        runLength: 20
+Consecutive new pairs with identical value: 4.95868     latest time: 24.00043888        runLength: 21
+Consecutive new pairs with identical value: 4.95868     latest time: 24.01630301        runLength: 22
+Consecutive new pairs with identical value: 4.95868     latest time: 24.08194004        runLength: 23
+Errors found > 100
+Discovery four on PORT 'c1_out' 
+	time series EXPECTED:ts_e1
+	OUTPUT:ts_e1

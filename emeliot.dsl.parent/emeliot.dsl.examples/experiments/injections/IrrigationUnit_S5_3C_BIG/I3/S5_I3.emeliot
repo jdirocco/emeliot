@@ -1,0 +1,57 @@
+model S5_I3:
+ 
+ specification
+ 	components : 
+	 	Component1	 ports : 	
+	 		port c1_in INPUT 
+	 		port c1_out OUTPUT  
+	 		
+	 	Component2	 ports : 	
+	 		port c2_in INPUT 
+	 		port c2_out OUTPUT
+	
+	 	Component3	 ports : 	
+	 		port c3_in INPUT 
+	 		port c3_out OUTPUT  
+	 		
+	 	Component4  ports : 	
+	 		port c4_in INPUT 
+	 		port c4_out OUTPUT
+	 	
+	 	Component5	 ports : 	
+	 		port c5_in INPUT 
+	 		port c5_out OUTPUT  
+	 		
+	 	Component6	 ports : 	
+	 		port c6_in INPUT 
+	 		port c6_out OUTPUT
+
+	 	
+	 
+ 	//TO BE DISCUSSED 	  
+ time_series :
+ 	ts_c1 path "experiments/IrrigationUnit_S5_3C_BIG/irrigationUnit1.txt"
+	ts_c2 path "experiments/IrrigationUnit_S5_3C_BIG/irrigationUnit2.txt"
+	ts_c3 path "experiments/IrrigationUnit_S5_3C_BIG/irrigationUnit3.txt"
+	ts_c4 path "experiments/IrrigationUnit_S5_3C_BIG/irrigationUnit4.txt"
+	ts_c5 path "experiments/IrrigationUnit_S5_3C_BIG/irrigationUnit5.txt"
+	ts_c6 path "experiments/IrrigationUnit_S5_3C_BIG/irrigationUnit6.txt"
+
+ injection s1 {
+ 	var inject = new S1_I3()
+ 	inject.s1(inTS)
+ }
+
+
+config:
+	inj s1 port 'C1_in' timeSeries ts_c1
+	inj s1 port 'C2_in' timeSeries ts_c2
+	inj s1 port 'C3_in' timeSeries ts_c3
+	inj s1 port 'C4_in' timeSeries ts_c4
+	inj s1 port 'C5_in' timeSeries ts_c5
+	inj s1 port 'C6_in' timeSeries ts_c6
+	
+
+
+simultation_platfrom: proteus
+project_file: "experiments/S1_BIG/component.pdsprj" 

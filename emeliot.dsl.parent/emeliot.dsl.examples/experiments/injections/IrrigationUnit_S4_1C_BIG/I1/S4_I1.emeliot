@@ -1,0 +1,31 @@
+model S4_I1:
+ 
+ specification
+ 	components : 
+	 	Component1	 ports : 	
+	 		port c1_in INPUT 
+	 		port c1_out OUTPUT  
+	 		
+	 	Component2	 ports : 	
+	 		port c2_in INPUT 
+	 		port c2_out OUTPUT
+	 	
+	 		 	
+	  
+ time_series :
+ 	ts_c1 path "experiments/IrrigationUnit_S4_1C_BIG/irrigationUnit1.txt"
+	ts_c2 path "experiments/IrrigationUnit_S4_1C_BIG/irrigationUnit2.txt"
+	
+ 	 
+ injection s1 {
+ 	var inject = new S1_I1()
+ 	inject.s1(inTS)
+ }
+
+
+config:
+	inj s1 port 'C1_in' timeSeries ts_c1
+	inj s1 port 'C2_in' timeSeries ts_c2
+	
+simultation_platfrom: proteus
+project_file: "experiments/S1_BIG/component.pdsprj" 

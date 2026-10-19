@@ -1,0 +1,264 @@
+model Check5Mut:
+ 
+ specification
+ 	components : 
+	 	Component1	 ports : 	
+	 		port c1_in INPUT 
+	 		port c1_out OUTPUT  
+	 		
+	 	Component2	 ports : 	
+	 		port c2_in INPUT 
+	 		port c2_out OUTPUT
+
+	 	
+	 
+ 	//TO BE DISCUSSED 	  
+ time_series :
+ 	ts_e1 path "experiments/discoveries/check 5/original.DAT"
+	ts_o1 path "experiments/discoveries/check 5/mutated.DAT" 
+
+discovery first{
+	System.out.println("========First============")
+
+  val EPS_T = 1e-12
+  val EPS_V = 1e-9
+  val TH = 2.5
+
+  var i = 0
+  var j = 0
+  var guard = false
+  var count = 0
+
+  while (i < expectedTS.allTimes.size && j < outTS.allTimes.size) {
+    val te = expectedTS.getTimeAt(i)
+    val to = outTS.getTimeAt(j)
+
+    val dt = te - to
+    if (Math.abs(dt) <= EPS_T) {
+      val ve = expectedTS.getValueAt(i)
+      val vo = outTS.getValueAt(j)
+
+      // valori su lati opposti della soglia 2.5
+      val crosses = (ve < TH && vo >= TH) || (ve >= TH && vo < TH)
+
+      // "mutated pair does not exist in original" -> qui implica value diverso a stesso time
+      if (crosses && Math.abs(ve - vo) > EPS_V) {
+        count = count + 1
+        System.out.println(
+          "expected time " + te +
+          "\toutput time " + to +
+          "\texpected value " + ve +
+          "\toutput value " + vo
+        )
+        guard = true
+      }
+
+      i = i + 1
+      j = j + 1
+    } else if (dt < 0) {
+      i = i + 1
+    } else {
+      j = j + 1
+    }
+  }
+
+  System.out.println("Errors found: " + count)
+  return guard
+}
+
+
+discovery second{
+	 System.out.println("========Second============")
+
+  val EPS_T = 1e-12
+  val EPS_V = 1e-9
+  val AVG_TOL = 1.0  // come nel tuo abs(out-average)<1
+
+  // media expected (singola passata)
+  var sum = 0.0
+  var k = 0
+  while (k < expectedTS.allValues.size) {
+    sum = sum + expectedTS.getValueAt(k)
+    k = k + 1
+  }
+  val average = if (expectedTS.allValues.size > 0) sum / expectedTS.allValues.size else 0.0
+
+  var i = 0
+  var j = 0
+  var guard = false
+  var count = 0
+
+  while (i < expectedTS.allTimes.size && j < outTS.allTimes.size) {
+    val te = expectedTS.getTimeAt(i)
+    val to = outTS.getTimeAt(j)
+
+    val dt = te - to
+    if (Math.abs(dt) <= EPS_T) {
+      val ve = expectedTS.getValueAt(i)
+      val vo = outTS.getValueAt(j)
+
+      if (Math.abs(ve - vo) > EPS_V && Math.abs(vo - average) <= AVG_TOL) {
+        count = count + 1
+        System.out.println(
+          "expected time " + te +
+          "\toutput time " + to +
+          "\texpected value " + ve +
+          "\toutput value " + vo +
+          "\taverage " + average
+        )
+        guard = true
+      }
+
+      i = i + 1
+      j = j + 1
+    } else if (dt < 0) {
+      i = i + 1
+    } else {
+      j = j + 1
+    }
+  }
+
+  System.out.println("Errors found: " + count)
+  return guard
+}
+
+
+discovery tirth{
+	System.out.println("========Tirth============")
+
+  val EPS_T = 1e-12
+  val EPS_V = 1e-9
+
+  var guard = false
+  var count = 0
+
+  if (expectedTS.allTimes.size <= 1) {
+    System.out.println("Errors found: 0")
+    return false
+  }
+
+  var i = 1
+  var j = 0
+
+  var prevTime = expectedTS.getTimeAt(0)
+  var prevVal  = expectedTS.getValueAt(0)
+
+  while (i < expectedTS.allTimes.size) {
+    val curTime = expectedTS.getTimeAt(i)
+    val curVal  = expectedTS.getValueAt(i)
+
+    val isChange = Math.abs(curVal - prevVal) > EPS_V
+    if (isChange) {
+      // porta j almeno a curTime (o oltre)
+      var k = j
+      while (k < outTS.allTimes.size) {
+        val to = outTS.getTimeAt(j)
+        val dt = to - curTime
+        if (Math.abs(dt) <= EPS_T || dt > 0) {
+          k = outTS.allTimes.size
+        }
+        j = j + 1
+        k = j
+      }
+
+      val missing =
+        (j >= outTS.allTimes.size) ||
+        (outTS.getTimeAt(j) - curTime > EPS_T)  // out è oltre -> curTime manca
+
+      if (missing) {
+        count = count + 1
+        System.out.println(
+          "missing mutated time: " + curTime +
+          "\tprevious time: " + prevTime +
+          "\tprevious value: " + prevVal +
+          "\texpected value: " + curVal
+        )
+        guard = true
+      }
+    }
+
+    prevTime = curTime
+    prevVal = curVal
+    i = i + 1
+  }
+
+  System.out.println("Errors found: " + count)
+  return guard
+	 
+}
+
+discovery four {
+System.out.println("========Four============")
+
+  val EPS_T = 1e-12
+  val EPS_V = 1e-9
+
+  var guard = false
+  var count = 0
+
+  var i = 0 // cursore expected
+  var j = 0 // cursore out
+
+  var run = 0
+  var runValue = 0.0
+
+  while (j < outTS.allTimes.size) {
+    val to = outTS.getTimeAt(j)
+    val vo = outTS.getValueAt(j)
+
+    // Avanza expected finché expected.time < to (senza break)
+    while (i < expectedTS.allTimes.size && (expectedTS.getTimeAt(i) - to) < -EPS_T) {
+      i = i + 1
+    }
+
+    // Verifica se la coppia (time,value) esiste in expected
+    var pairExists = false
+    if (i < expectedTS.allTimes.size) {
+      val te = expectedTS.getTimeAt(i)
+      if (Math.abs(te - to) <= EPS_T) {
+        val ve = expectedTS.getValueAt(i)
+        pairExists = Math.abs(ve - vo) <= EPS_V
+      }
+    }
+
+    val isNewPair = !pairExists
+
+    if (isNewPair) {
+      if (run == 0) {
+        run = 1
+        runValue = vo
+      } else {
+        if (Math.abs(vo - runValue) <= EPS_V) {
+          run = run + 1
+        } else {
+          run = 1
+          runValue = vo
+        }
+      }
+
+      if (run >= 2) {
+        count = count + 1
+        guard = true
+        System.out.println(
+          "Consecutive new pairs with identical value: " + runValue +
+          "\tlatest time: " + to +
+          "\trunLength: " + run
+        )
+      }
+    } else {
+      run = 0
+    }
+
+    j = j + 1
+  }
+
+  System.out.println("Errors found: " + count)
+  return guard
+}
+config:
+	discovery first port 'c1_out' expectedSeries ts_e1 injectedSeries ts_o1
+	discovery second port 'c1_out' expectedSeries ts_e1 injectedSeries ts_o1
+	discovery tirth port 'c1_out' expectedSeries ts_e1 injectedSeries ts_o1
+	discovery four port 'c1_out' expectedSeries ts_e1 injectedSeries ts_o1
+simultation_platfrom: proteus
+project_file: "experiments/discoveries/check 1/" 

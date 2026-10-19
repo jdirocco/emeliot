@@ -1,0 +1,169 @@
+model Check2Mut:
+ 
+ specification
+ 	components : 
+	 	Component1	 ports : 	
+	 		port c1_in INPUT 
+	 		port c1_out OUTPUT  
+	 		
+	 	Component2	 ports : 	
+	 		port c2_in INPUT 
+	 		port c2_out OUTPUT
+
+	 	
+	 
+ 	//TO BE DISCUSSED 	  
+ time_series :
+ 	ts_e1 path "experiments/discoveries/check 2/original.DAT"
+	ts_o1 path "experiments/discoveries/check 2/mutated.DAT" 
+
+discovery first{
+	System.out.println("========First============");
+	var guard = false;
+	var count = 0;
+	for (emeliot.dsl.read.TimeValue exElement : expectedTS.timeValues)
+		for (emeliot.dsl.read.TimeValue outElement: outTS.timeValues) 
+			if (exElement.time == outElement.time)//CONSIDERARE EPSILON?
+				if (exElement.value != outElement.value)
+					if((exElement.value < 2.5 && outElement.value >= 2.5)
+						||(exElement.value >= 2.5 && outElement.value < 2.5)
+					){
+						count = count +1; 
+						System.out.println("expected time " + exElement.time + 
+							"\toutput time " +outElement.time + 
+							"\texpected value " + exElement.value + 
+							"\toutput value " +outElement.value)
+						guard = true;
+						if (count >100){
+				 			System.out.println("Errors found > "+count);
+				 			return true;
+				 		}
+					}
+	System.out.println("Errors found: "+count)
+	return guard; 
+}
+
+
+discovery second{
+	 System.out.println("========Second============");
+	 var sum = 0.0
+	 for (Double expectedValue : expectedTS.allValues)
+	 	sum = sum + expectedValue
+	 var average = sum / expectedTS.allValues.size
+	 var guard = false
+	 var count = 0;
+	 for (emeliot.dsl.read.TimeValue exElement : expectedTS.timeValues)
+		for (emeliot.dsl.read.TimeValue outElement: outTS.timeValues){
+			if (exElement.time == outElement.time) 
+				if (exElement.value != outElement.value)
+					if (Math.abs(outElement.value - average)<1){
+						count = count + 1;
+						System.out.println("expected time " + exElement.time + 
+							"\toutput time " +outElement.time +
+							"\texpected value " + exElement.value + 
+							"\toutput value " +outElement.value)
+						
+						guard = true;
+						if (count >100){
+				 			System.out.println("Errors found > "+count);
+				 			return true;
+				 		}
+					}			
+		}
+	System.out.println("Errors found: "+count)	
+	return guard
+}
+
+
+discovery tirth{
+	System.out.println("========Tirth============");
+	 var guard = false;
+	 var changeTimeList = new java.util.ArrayList();
+	 var changeValueList = new java.util.ArrayList();
+	 var changeIndexList = new java.util.ArrayList();
+	 var prevChangeTimeList = new java.util.ArrayList();
+	 var prevChangeValueList = new java.util.ArrayList();
+	 var prevChangeIndexList = new java.util.ArrayList();
+	 var prev = expectedTS.getValueAt(0)
+	 for (var i = 1; i <= expectedTS.allValues.size-1; i++){
+	 	if (prev != expectedTS.getValueAt(i)){
+	 		changeTimeList.add(expectedTS.getTimeAt(i));
+	 		changeIndexList.add(i);
+	 		changeValueList.add(expectedTS.getValueAt(i));
+	 		prevChangeTimeList.add(expectedTS.getTimeAt(i-1));
+	 		prevChangeIndexList.add(i-1);
+	 		prevChangeValueList.add(expectedTS.getValueAt(i-1));
+	 	}
+	 	prev = expectedTS.getValueAt(i)
+	 }
+	 var count = 0;
+	 for(var i = 1; i <= outTS.allTimes.size-1; i++) {
+		var prevIndex = prevChangeTimeList.indexOf(outTS.getTimeAt(i));
+	 	if(prevIndex != -1){
+	 		count = count + 1;
+	 		println("expected time: " + changeTimeList.get(prevIndex) +
+	 			"\toutput time: " + outTS.getTimeAt(i) + 
+	 			"\tprevious time: " + prevChangeTimeList.get(prevIndex) + 
+	 			"\texpected value: " + changeValueList.get(prevIndex) +
+	 			"\toutput value: " + outTS.getValueAt(i) +
+	 			"\tprevious value: " + prevChangeValueList.get(prevIndex)
+	 		);
+	 		guard = true;
+	 		if (count >100){
+	 			System.out.println("Errors found > "+count);
+	 			return true;
+	 		}
+	 	}
+	 		
+	 }
+	 System.out.println("Errors found: "+count);
+	 return guard;
+	 
+}
+
+discovery four {
+	 System.out.println("========Four============");
+	 var firstTime = new java.util.ArrayList();
+	 var secondTime = new java.util.ArrayList();
+	 var firstValue = new java.util.ArrayList();
+	 var secondValue = new java.util.ArrayList();
+	 var prec = outTS.allValues.get(0);
+	 var guard = false;
+	 println(outTS.allValues.size)
+	 for (var i=1; i <= outTS.allValues.size - 1; i++){
+	 	if (prec == outTS.allValues.get(i)) {
+	 		firstTime.add(outTS.allTimes.get(i-1));
+	 		secondTime.add(outTS.allTimes.get(i));
+	 		firstValue.add(outTS.allValues.get(i-1));
+	 		secondValue.add(outTS.allValues.get(i))
+	 	}
+	 	prec = outTS.getValueAt(i);	
+	 }
+	 var count = 0;
+	 for (var i = 0; i < firstTime.size; i++){
+	 	if (!(expectedTS.allTimes.contains(firstTime.get(i)) && expectedTS.allTimes.contains(secondTime.get(i)))){
+	 		println("output first time: " + firstTime.get(i) +
+	 			"\toutput second time: " + secondTime.get(i) + 
+	 			"\toutput first value: " + firstValue.get(i) +
+	 			"\toutput second value: " + secondValue.get(i) 
+	 		);
+	 		guard = true;
+	 		count = count + 1;
+	 		if (count >100){
+	 			System.out.println("Errors found > "+count);
+	 			return true;
+	 		}
+	 	}
+	 }
+ 	 System.out.println("Errors found: "+count);
+	 return guard
+}
+
+
+config:
+	discovery first port 'c1_out' expectedSeries ts_e1 injectedSeries ts_o1
+	discovery second port 'c1_out' expectedSeries ts_e1 injectedSeries ts_o1
+	discovery tirth port 'c1_out' expectedSeries ts_e1 injectedSeries ts_o1
+	discovery four port 'c1_out' expectedSeries ts_e1 injectedSeries ts_o1
+simultation_platfrom: proteus
+project_file: "experiments/discoveries/check 1/" 

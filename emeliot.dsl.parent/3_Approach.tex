@@ -1,0 +1,211 @@
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figs/DSL-FLA-DSL_approach.drawio.pdf}
+    \caption{The \tool approach}
+    \label{fig:approach-overview}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figs/EmeliotMM.png}
+    \caption{The \tool metamodel}
+    \label{fig:ememliotMM-excerpt}
+\end{figure}
+This section introduces \tool, a domain-specific language designed for specifying IoT systems and performing time series injections, simulations, and failure discoveries.  While we target a specific simulation platform, the approach is agnostic enough to manipulate different time series, which are pivotal in special classes of IoT systems, e.g., safety-critical systems. \tool offers modelers various constructs for defining injections, to inject failures by manipulating a time series, e.g., adding random values to an existing series or computing the average. It also allows for the definition and reuse of both atomic and complex discovery operations. 
+
+An overview of the concepts implemented by the language is shown in Figure~\ref{fig:ememliotMM-excerpt}. 
+The metamodel supports the refinement of FLA rules by capturing both the structural elements of IoT systems and the artifacts necessary for failure injection, observation, and rule inference. At the center of the metamodel is the \texttt{Model} metaclass, which represents an executable instance of the system. A \texttt{Model} is characterized by attributes such as \texttt{name}, \texttt{simulationPlatform}, and \texttt{projectFile}, and it is associated with multiple \texttt{injections}, \texttt{discoveries}, and \texttt{configurations} that guide its testing and analysis process.
+
+The system structure is described by the \texttt{Specification} metaclass, which groups multiple \texttt{Component} instances through the \texttt{components} reference. Each \texttt{Component}, identified by a \texttt{name}, may contain several \texttt{Port}s, referenced via the \texttt{ports} association. A \texttt{Port} has a \texttt{name} and a \texttt{type}, the latter defined by the \texttt{PORT\_TYPE} enumeration, which distinguishes between \texttt{INPUT} and \texttt{OUTPUT} ports.
+
+To simulate failures and study their propagation, the metamodel defines the \texttt{Injection} and \texttt{Discovery} metaclasses. An \texttt{Injection} models the act of perturbing the system, defined by its \texttt{name} and an \texttt{operation} expressed as an \texttt{XExpression}. Conversely, a \texttt{Discovery} represents an analysis operation that aims to derive or validate failure propagation rules, based on an \texttt{expression} that interprets observed behavior.
+Each \texttt{TimeSeries} captures the evolution of a signal or system output over time and includes a \texttt{name}, a \texttt{timeSeriesPath}, and a sequence of \texttt{TimeValue} instances. Each \texttt{TimeValue} denotes a pair of \texttt{time} and \texttt{value}, both of type \texttt{EDouble}, enabling fine-grained traceability of dynamic behaviors.
+System executions are described using the \texttt{Configuration} metaclass.%, which can be linked to a single \texttt{TimeSeries} instance, \ie the timeseries where the injection is applied, and two \texttt{TimeSeries} instances in case of discovery, \ie expected and mutated timeserie that point to the expected result for an execution without injections and the outcomes of the simulation obtained by giving in input injected time series. 
+
+To enable rule refinement, the metamodel introduces \texttt{Config}  and \texttt{ConfigDiscovery} as specialized views on configurations. A \texttt{ConfigInjection} refers to a modified configuration obtained by applying a specific \texttt{Injection}; it holds a reference to the corresponding \texttt{injection} and stores the resulting \texttt{mutatedTimeSeries}. In parallel, a \texttt{ConfigDiscovery} links a \texttt{Discovery} with a configuration and captures the \texttt{expectedTimeSeries} that the rule attempts to explain or validate.
+
+
+
+
+
+\subsection{Specification phase}
+The \tool DSL has been implemented with Xtext~\citep{10.5555/3074444}, a popular Eclipse framework for the development of programming languages and domain-specific languages. Given a language grammar definition, Xtext generates the infrastructure
+for the compiler and a complete IDE support based on Eclipse (e.g., editor with syntax highlighting, code completion, error
+reporting and incremental building).
+%Figure 3 shows the artifacts that are involved when evolving a metamodel by means of Edelta. The Ecore Metamodel subject of the evolution is imported in the Edelta program being specified. 
+The \tool program includes a set of instructions that describe the injections to be executed by reusing the operations defined in existing libraries. When the \tool program is saved and the compiler does not detect errors, the corresponding Java code is generated to manipulate the input time series using the injections specified in the \tool program. In addition, Java code is also generated to run the simulation platform and identify potential failures. This generated Java code utilizes the \tool Java runtime APIs and can be called from any Java program.
+
+
+The tool employs Xbase~\citep{efftinge2012xbase} to deliver an expressive syntax akin to Java for its expressions. Xbase is an extensible and reusable expression language that is fully compatible with Java and its type system. It is specifically designed for incorporation within an Xtext Domain Specific Language (DSL). The syntax of Xbase closely resembles that of Java: all existing Java types can be referred and used from within an Xbase expression, that is, all existing Java libraries can be seamlessly reused in \tool. 
+This interoperability of Xbase DSLs with Java types follows the standard Java classpath mechanisms, meaning that all the Java libraries that are part of the current classpath can be used seamlessly in \tool programs. 
+%Furthermore, Xbase handles the classpath of standard Eclipse projects, including the Eclipse project created by the Edelta project wizard itself. This means that in order to reuse a refactoring library, which can be imported in an Edelta program with the clause use ...as ... as shown later, that library must be specified as a dependency of the Eclipse project; no further custom registries for Java refactorings needs to be implemented. Terminating semicolons are optional in Xbase. Variable declarations in Xbase start with val or var, for final and non final variables, respectively, and do not require to specify the type if it can be inferred from the initialization expression.
+%A cast expression in Xbase is written using the infix keyword as. Xbase extension methods are a syntactic sugar mechanism to simulate adding new methods to existing types without modifying them. For example, if m(Entity) is an extension method, and e is of type Entity, you can write e.m() instead of m(e), even though m is not a method defined in Entity. Xbase lambda expressions have a simpler shape than Java lambda expressions:
+%[ param1, param2, ... | body ]. The types of parameters can be omitted if they can be inferred from the context. When a lambda is the last argument of a method call, it can be moved out of the parenthesis; for example, instead of writing m(..., [...]), one can write m(...)[...]. Xbase has special syntax for collections: #[e1, ..., en] allows the programmer to easily specify a list with initial contents. Operators such as +, -, +=, -= are available in Xbase also on collections. Xbase provides syntactic sugar for getters and setters: instead of writing o.getName(), one can simply write o.name; similarly, instead of writing o.setName("..."), one can write o.name = "...". Besides this, Xbase has another additional special variable, it. Just like this, which has the same semantics as in Java, it can be omitted as object receiver of method call and member access expressions. Differently from this, the programmer is allowed to declare any variable or method parameter with the name it. Thus, the programmer can define a custom implicit object receiver in any scope of the program. Furthermore, when a lambda is expected to have a single parameter, the parameter can be omitted and it will be automatically available with the name it.
+
+
+
+
+
+
+\subsection{Injection phase}
+
+FATE-DSL relies on a Standard Library that implements injections to  simulate failures by manipulating time series.
+From an implementation perspective, injections are Java methods that take as input a time series (i.e., a sequence of time-value pairs), along with additional parameters specific to each injection, and perform mutations on the provided time series.
+The current implementation supports 41 different types of injections that cover the majority of the state-of-the-art \citep{gomez-abajo_wodel-test_2021,cotroneo_profipy_2020}. In addition, we defined specific injections for time series, e.g., adding or removing specific values leveraging the index.  
+
+For example, the \texttt{addRandomTimeAndRandomValue} injection takes as input a time series and min-max ranges for time and value. The injection adds a new time-value pair to the time series, randomly generated within the provided ranges, aimed at simulating a \textit{commission} failure type (e.g., changing a time series from $\{t_0 v_0 ... t_n v_n\}$ to $\{t_0 v_0 ... t_k v_k ... t_{n+1} v_{n+1}\}$, by adding a new time-value $t_k v_k$ in position $k$. In our prior work, we identified seven categories of failure \citep{10350526}. While we provide all the operators to support them, we do not include specific operators, as our goal is to be agnostic to the failure types.  
+Another example is the \texttt{changeTimeLate} injection, which takes as input a time series, a time to mutate, a threshold value, and an upper time bound. This injection adjusts the specified time,  so that it exceeds the given threshold while remaining within the upper bound, thereby simulating a possible \textit{late} failure type (e.g., changing a time-value pair from $t_k v_k$ to $(t_k + t_\varepsilon) v_k $, where $t_\varepsilon > \varepsilon \land (t_k + t_\varepsilon) \leq t_{max}$), as the time within the time series is now mutated to be delivered later than expected. Noteworthy, setting those operators requires domain-specific knowledge to implement meaningful mutations. Therefore, developers with limited expertise in the field might be driven by abstract constructors provided by \tool.   
+
+Injections can also affect multiple elements of the input time series at the same time. For instance, the \texttt{removeTimeValuesAfterTime} injection removes all time-value pairs whose time is after a given input time, simulating an \textit{omission} failure type, as the new time series presents less elements than expected.
+
+Additionally, the injections rely on approximately one hundred utility functions, performing time series reordering, I/O operations, time series querying (e.g., searching for the minimum value), and more.
+
+
+
+
+
+
+\subsection{Discovery phase}
+FATE-DSL also relies on the Standard Library for analyzing the behavior of the system under test (i.e., the output time series), in order to derive or validate failure propagation rules through discovery operators.
+Although most of the injections are deterministic, the produced output may vary from the expected one due to the simulation step performed by the target platform, i.e., Proteus. Although we can post-process the output to limit the number of wrong outputs, this is a limitation of the simulation platform. 
+ Discovery operators are Java methods that take as input time series representing the original and mutated behaviors of a system (i.e., the ideal scenario in which no injections occurred and the mutated scenario following an injection phase), along with additional parameters specific to each discovery type, each one returning the reason and type of detected failure (if any) for testing purposes. Similar to injections, developers can customize the discovery rules by writing additional rules by combining pre-defined and atomic rules. This allows the discovery of new failures, possibly different from the expected one identified before running the simulation.   
+ 
+
+The current implementation supports 11 different types of discovery, even though additional ones can be easily added by updating the underpinning DSL.
+
+For example, the \texttt{isValueCoarse} discovery method checks whether a difference between values at a given time, comparing mutated and original time series, violates the accepted value range. Specifically, if the value at time $t$ in the original time series is $v$, and the corresponding value in the mutated time series is $v'$, then a \textit{value coarse} failure is detected at that time if $ (v' < a) \lor (v' > b) $, where $[a, b]$ is the accepted value range. 
+
+Another notable example is the \texttt{isSmaller} discovery method, which checks whether the mutated time series has a smaller size than the original one, potentially indicating \textit{omission} or \textit{commission} failure types. The outcomes of the discovery process are eventually printed in a JSON file that can be reviewed by developers. 
+
+%Another case is the \texttt{isLate} discovery method, which checks whether a mutated time exceeds by a certain threshold the original time.  
+
+%\DIEGO{da qualche parte, dire in che modo useremmo le info ricavate dalle discovery}
+
+
+
+
+
+
+
+\subsection{Running example}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{figs/isolated_component.pdf}
+    \caption{The irrigation component modeled in Proteus}
+    \label{fig:isolated}
+\end{figure}
+
+As an explanatory scenario, we simulate an irrigation plant with two sensors. 
+In particular, this resembles the typical IoT scenario where the moisture level triggers the activation of the irrigation plant. Although the scenario has few components, failure analysis still plays an important role to identify unexpected behaviours, e..g, a waste of water or late communication between teamshe sensor and the actuators. In particular,  a sensor can send \textit{i)} the wrong value that does not represent the actual soil's conditions or \textit{ii)}  the message at a different time than expected, causing therefore a wrong activation of the actuators.  To simulate this scenario, we opt for the Proteus suite\footnote{\url{https://www.labcenter.com/}} as it provides all the needed components for interacting with the time series. Figure \ref{fig:isolated} depicts the irrigation component in Proteus. 
+\newtext{In the example, the system receives timeseries as input through the \texttt{GEN\_IRRIGATION} input generator, which reads from a file the irrigation requests, expressed as the time intervals during which the irrigation must be activated. The irrigation requests then propagate to the sub-components, while the two \texttt{PROBE\_IRRIGATION} probes capture the actual activation timings. In this example, injections affect the file the \texttt{GEN\_IRRIGATION} uses to feed the irrigation componet, and can be detected by analyzing the output of the probes.}
+
+
+Testing the \tool with different simulation platforms is out of the scope of this paper. Instead, we focus on the specification and execution of all the main steps of the failure propagation analysis process, i.e., system design, injections, and discovery. 
+
+\newtext{In Proteus, a simulation of the running example can be captured by means of a graph, where the X axis represents the timings and the Y axis represents the irrigation state  (e.g., a flat line set to 0 indicates 0 voltage, which translates to no irrigation performed).
+On the left side (a), the simulation of the original scenario, with irrigation occurring in time intervals 5-10, 20-25, and 35-50. On the right side (b), the simulation of a mutated scenario, resulting from two injections performed on the input time series: a first injection inverts the irrigation request in the interval 5-10, resulting in an aborted irrigation (i.e., all values are flattened to 0); a second injection introduces an idle phase (i.., no irrigation performed) within the interval 35-50, resulting in two shorter, separated, irrigations instead of a unique, longer, one. 
+}
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figs/sim1.pdf}
+    \caption{Simulation of original scenario.}
+    \label{fig:figura1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figs/sim2.pdf}
+    \caption{Simulation of mutated scenario.}
+    \label{fig:figura2}
+    \end{subfigure}
+    \caption{A comparison between original (a) and mutated (b) simulations for the irrigation unit component of Figure~\ref{fig:isolated}.}
+    \label{fig:sim2}
+\end{figure}
+
+
+
+
+
+
+Listing \ref{lst:dslSpec} depicts an explanatory specification of the isolated system written using \tool that is fully executable. In particular, developers can combine abstract concepts like \texttt{Components} or \texttt{Ports} with actual Java code for writing custom injections and discoveries. In addition, both of them can be configured to run on multiple ports, thus simplifying the whole FLA process. The specification eventually runs the simulation and collects the results from Proteus. 
+
+
+
+%\captionof{listing}{Java equivalent}
+\begin{lstlisting}[style=JavaStyle,caption=Specification of the irrigation plant in \tool,label=lst:dslSpec]   
+model IrrigationUnit :
+ specification
+ 	components : 
+	 	Component1	 ports : 	
+	 		port c1_in INPUT 
+	 		port c1_out OUTPUT  
+	 		
+	 	Component2	 ports : 	
+	 		port c2_in INPUT 
+	 		port c2_out OUTPUT
+ 
+ time_series :
+ 	ts_c1 path "path/to/input data"
+	ts_c1_output path "path/to/results"
+	ts_c1_expected path ""
+	ts_c2 path "path/to/input data"
+	ts_c2_output path "path/to/mutated data"
+	ts_c2_expected path "path/to/real data"
+ 	 
+ mutation simpleMutation {
+ 	addTimeAndValue(inTS, 12.0, 14)
+ } 	
+  mutation usingCheckOnExistingValue  {   
+ 	var mv = getMaxValue(inTS)
+ 	if (mv > 100)
+ 		addMultipleRandomTimeValues(inTS,4,7,1,2,4)
+ 	else
+ 		changeTimeAndValue(inTS, 5, 3, 43)
+ } 
+ 
+ mutation complexMutation  {   
+ 	var currentDate = java.time.LocalDate.now();
+ 	if (currentDate.dayOfWeek == java.time.DayOfWeek.FRIDAY){
+		setAllTimesToTime(inTS, 6)
+		addMultipleRandomTimeValues(inTS,1,2,0.1,0.3,1) 
+ 		changeARandomTimeValue(inTS, 100, 140) 	
+ 	}
+ 	else {
+ 		var tm = new java.util.ArrayList(java.util.List.of(2.0,3.0,4.0,5.0,6.0,7.0));
+ 		changeMultipleTimeLate(inTS, 0.5, tm,5);
+ 	}
+ }
+ 
+ 
+ discovery Omission {
+ 	return isOmission(outTS, expectedTS); 
+ }
+ 
+ discovery CustomFailure {
+ 	return smaller(outTS, expectedTS) || outOfRange(outTS, expectedTS);
+ }
+ 
+ discovery outOfRange{
+ 	return hasTimeOutRange(outTS, 0.0, 3.0)
+ }
+ 
+config :
+	mut simpleMutation port 'cp1p1' timeSeries ts_c1
+	mut simpleMutation port 'cp1p1' timeSeries ts_c2
+	discovery Omission port 'c1_out' expectedSeries ts_c1_expected mutatedSeries ts_c1_output
+	discovery CustomFailure port 'c2_out' expectedSeries ts_c2_expected mutatedSeries ts_c2_output  
+	 
+		 
+simultation_platfrom: proteus
+project_file : "project_file_path"
+\end{lstlisting}
+%\cds{Diego potresti mettere qui uno screen della simulazione di proteus?}
+
+
+
+
+
