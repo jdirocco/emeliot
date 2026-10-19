@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Schema file written by PDE -->
+<schema targetNamespace="emeliot.dsl" xmlns="http://www.w3.org/2001/XMLSchema">
+<annotation>
+      <appinfo>
+         <meta.schema plugin="emeliot.dsl" id="simulationPlatforms" name="FATE-DSL Simulation Platforms"/>
+      </appinfo>
+      <documentation>
+         Contributes a simulation platform on which FATE-DSL models can be executed. The identifier of the platform is the value used in the simulation_platform clause of a model; the class generated from the model extends the contributed service class, which provides the platform-specific simulation step and inherits the platform-independent standard library.
+      </documentation>
+   </annotation>
+
+   <element name="extension">
+      <annotation>
+         <appinfo>
+            <meta.element />
+         </appinfo>
+      </annotation>
+      <complexType>
+         <sequence>
+            <element ref="platform" minOccurs="1" maxOccurs="unbounded"/>
+         </sequence>
+         <attribute name="point" type="string" use="required"/>
+         <attribute name="id" type="string"/>
+         <attribute name="name" type="string">
+            <annotation>
+               <appinfo>
+                  <meta.attribute translatable="true"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="platform">
+      <complexType>
+         <attribute name="id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  Identifier of the platform, used in the simulation_platform clause of FATE-DSL models (e.g., proteus).
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string">
+            <annotation>
+               <documentation>
+                  Human-readable name of the platform, shown by content assist.
+               </documentation>
+               <appinfo>
+                  <meta.attribute translatable="true"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="serviceClass" type="string" use="required">
+            <annotation>
+               <documentation>
+                  Fully qualified name of the platform service. The class must extend emeliot.dsl.lib.AbstractPlatformService and must be visible on the classpath of the projects that use the platform.
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn="emeliot.dsl.lib.AbstractPlatformService:"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <annotation>
+      <appinfo>
+         <meta.section type="examples"/>
+      </appinfo>
+      <documentation>
+         &lt;extension point=&quot;emeliot.dsl.simulationPlatforms&quot;&gt;
+   &lt;platform id=&quot;proteus&quot; name=&quot;Proteus Design Suite&quot; serviceClass=&quot;emeliot.dsl.lib.ProteusService&quot;/&gt;
+&lt;/extension&gt;
+      </documentation>
+   </annotation>
+</schema>

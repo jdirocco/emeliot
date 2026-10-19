@@ -25,7 +25,25 @@ import emeliot.dsl.read.TimeSeries;
 import emeliot.dsl.read.TimeValue;
 import emeliot.dsl.lib.DiscoveryOutcome;
 
-public class ProteusService extends EmeliotLib {
+/**
+ * Simulation platform service for the Proteus Design Suite.
+ * <p>
+ * The service is contributed to the {@code emeliot.dsl.simulationPlatforms}
+ * extension point with identifier {@code proteus}, in the same way as any
+ * other platform (see {@code plugin.xml}).
+ */
+public class ProteusService extends AbstractPlatformService {
+
+	/**
+	 * Runs the Proteus component contained in {@code project}. Proteus reads the
+	 * input time series from the component folder and exports the output time
+	 * series observed by the configured discoveries.
+	 */
+	@Override
+	public void runSimulation(Path project, List<String> inputSeries, List<String> outputSeries) throws Exception {
+		runProteus(project, outputSeries);
+	}
+
 
 	
 	

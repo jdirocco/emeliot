@@ -3,22 +3,34 @@
  */
 package emeliot.dsl.validation
 
+import com.google.inject.Inject
+import emeliot.dsl.platform.SimulationPlatformRegistry
+import emeliot.dsl.read.Model
+import emeliot.dsl.read.ReadPackage
+import org.eclipse.xtext.validation.Check
+
 /**
  * This class contains custom validation rules. 
  *
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#validation
  */
 class EmeliotValidator extends AbstractEmeliotValidator {
-	
-//	public static val INVALID_NAME = 'invalidName'
-//
-//	@Check
-//	def checkGreetingStartsWithCapital(Greeting greeting) {
-//		if (!Character.isUpperCase(greeting.name.charAt(0))) {
-//			warning('Name should start with a capital', 
-//					EmeliotPackage.Literals.GREETING__NAME,
-//					INVALID_NAME)
-//		}
-//	}
-	
+
+	public static val UNKNOWN_SIMULATION_PLATFORM = 'unknownSimulationPlatform'
+
+	@Inject SimulationPlatformRegistry platformRegistry
+
+	/**
+	 * The simulation platform of a model must be contributed to the
+	 * emeliot.dsl.simulationPlatforms extension point.
+	 */
+	@Check
+	def checkSimulationPlatform(Model model) {
+		val platforms = platformRegistry.platforms
+		if (!platforms.containsKey(model.simulationPlatform)) {
+			error('''Unknown simulation platform '«model.simulationPlatform»'. Available platforms: «platforms.keySet.join(', ')»''',
+				ReadPackage.Literals.MODEL__SIMULATION_PLATFORM, UNKNOWN_SIMULATION_PLATFORM)
+		}
+	}
+
 }

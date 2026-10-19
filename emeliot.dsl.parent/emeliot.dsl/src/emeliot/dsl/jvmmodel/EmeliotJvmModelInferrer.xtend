@@ -17,7 +17,9 @@ import org.eclipse.xtext.common.types.JvmVisibility
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
-import emeliot.dsl.lib.ProteusService
+import emeliot.dsl.lib.AbstractPlatformService
+import emeliot.dsl.platform.SimulationPlatformRegistry
+import org.eclipse.xtext.util.Strings
 import emeliot.dsl.read.PORT_TYPE
 import emeliot.dsl.read.Configuration
 import emeliot.dsl.read.Port
@@ -37,6 +39,12 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 	 * convenience API to build and initialize JVM types and their members.
 	 */
 	@Inject extension JvmTypesBuilder
+
+	/**
+	 * Registry of the simulation platforms contributed to the
+	 * emeliot.dsl.simulationPlatforms extension point.
+	 */
+	@Inject SimulationPlatformRegistry platformRegistry
 
 	/**
 	 * The dispatch method {@code infer} is called for each instance of the
@@ -71,8 +79,15 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 //			members += element.toField('path', typeRef(String))[
 //				initializer = '''"«element.timeSeries»"'''
 //			]
-			if ("proteus".equals(element.simulationPlatform))
-				superTypes+= typeRef(ProteusService)
+			// The platform service is resolved through the emeliot.dsl.simulationPlatforms
+			// extension point: no simulation platform is hard-coded in the inferrer.
+			// If the platform is unknown, the abstract service is used so that the library
+			// operators still resolve, and EmeliotValidator reports the unknown platform.
+			val serviceClass = platformRegistry.getServiceClassName(element.simulationPlatform)
+			if (serviceClass !== null)
+				superTypes += typeRef(serviceClass)
+			else
+				superTypes += typeRef(AbstractPlatformService)
 //			superTypes += typeRef(ProteusServiceImpl).cloneWithProxies
 			typeRef(ReadFactory)
 			typeRef(TimeValue)
@@ -202,28 +217,15 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 						
 						
 						
-					this.runProteus(Path.of(«element.projectFile»),new ArrayList<>(List.of(«FOR i : 0 ..< element.configurations.filter[e|e instanceof ConfigDiscovery].size »
-										        "«(element.configurations.filter[e|e instanceof ConfigDiscovery].get(i) 
-										        	as ConfigDiscovery).mutatedTimeSeries.timeSeriesPath»"«IF i < element.configurations.filter[e|e instanceof ConfigDiscovery].size
-										        	 - 1», «ENDIF»										    
-					«ENDFOR»)));
-					
-					/*  
-					
-					
-					
-					element.configurations.filter[e|e instanceof ConfigDiscovery]
-					
-					   this.runProteus(Path.of("C:\\Users\\claud\\OneDrive\\Desktop\\paperTo Submit\\Repos\\emeliot\\emeliot.dsl.parent\\emeliot.dsl\\proteus-example\\Component\\component.pdsprj"),
-					    		
-					    	new ArrayList<>(List.of(   	
-					    "C://Users//claud//OneDrive//irrigation_test//irrigationUnit1_MUT.DAT",
-					    "C://Users//claud//OneDrive//Desktop//irrigation_test//irrigationUnit2_MUT.DAT"
-					    )));
-					    */ 
-					
-					
-					//TODO Claudio and Juri
+					««« Platform-independent simulation step: the call is dispatched to the service
+					««« registered for simulation_platform through the emeliot.dsl.simulationPlatforms extension point.
+					««« The simulation is run only when the model configures at least one injection.
+					«IF !element.configurations.filter(ConfigMutation).empty»
+					this.runSimulation(java.nio.file.Path.of("«element.projectFile.javaString»"),
+						java.util.List.of(«FOR o : element.configurations.filter(ConfigMutation) SEPARATOR ', '»"«o.timeSeries.name.javaString»_M.txt"«ENDFOR»),
+						java.util.List.of(«FOR o : element.configurations.filter(ConfigDiscovery) SEPARATOR ', '»"«(o.mutatedTimeSeries.timeSeriesPath ?: o.mutatedTimeSeries.name).javaString»"«ENDFOR»));
+					«ENDIF»
+
 					//DISCOVERY
 					boolean guard = false;	
 						«FOR o : element.configurations.filter[e|e instanceof ConfigDiscovery]»		
@@ -238,7 +240,7 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 											
 								tv.setTime(«e.time»);
 								tv.setValue(«e.value»);								
-								« (o as ConfigMutation).timeSeries.name».getTimeValues().add(tv);
+								«(o as ConfigDiscovery).expectedTimeSeries.name».getTimeValues().add(tv);
 												
 							«ENDFOR»
 							
@@ -247,8 +249,8 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 							«ENDIF »
 							
 							«IF (o as ConfigDiscovery).expectedTimeSeries.name !== null»
-								« ((o as ConfigDiscovery).expectedTimeSeries.name)» = readInTSFromFile("« (o as ConfigDiscovery).expectedTimeSeries.timeSeriesPath»");
-								« ((o as ConfigDiscovery).mutatedTimeSeries.name)» = readInTSFromFile("« (o as ConfigDiscovery).mutatedTimeSeries.timeSeriesPath»");
+								« ((o as ConfigDiscovery).expectedTimeSeries.name)» = readOutTSFromFile("« (o as ConfigDiscovery).expectedTimeSeries.timeSeriesPath»");
+								« ((o as ConfigDiscovery).mutatedTimeSeries.name)» = readOutTSFromFile("« (o as ConfigDiscovery).mutatedTimeSeries.timeSeriesPath»");
 							«ENDIF»
 							if («(o as ConfigDiscovery).discovery.name»(«(o as ConfigDiscovery).expectedTimeSeries.name»,«(o as ConfigDiscovery).mutatedTimeSeries.name»))	{
 								System.out.println("Discovery «(o as ConfigDiscovery).discovery.name» on PORT «(o as ConfigDiscovery).port» \n\ttime series EXPECTED:«(o as ConfigDiscovery).expectedTimeSeries.name»\n\tOUTPUT:«(o as ConfigDiscovery).expectedTimeSeries.name»");
@@ -296,6 +298,11 @@ class EmeliotJvmModelInferrer extends AbstractModelInferrer {
 //				var TSpath = conf.timeSeries as TimeSeriesPath
 //								 
 //			}
+
+	/** Escapes a value so that it can be embedded in a Java string literal of the generated code. */
+	def private String javaString(String value) {
+		if (value === null) '' else Strings.convertToJavaString(value)
+	}
 
 	def private void copyTypeParameters(JvmTypeParameterDeclarator target, List<JvmTypeParameter> typeParameters) {
 		for (typeParameter : typeParameters) {

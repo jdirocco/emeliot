@@ -7,4 +7,13 @@
 			class = "emeliot.dsl.read.ReadPackage"
 			genModel = "model/generated/Emeliot.genmodel" />
 	</extension>
+	<!-- Extension point to which simulation platforms are contributed -->
+	<extension-point id="simulationPlatforms" name="FATE-DSL Simulation Platforms" schema="schema/simulationPlatforms.exsd"/>
+	<!-- Proteus is contributed in the same way as any other platform -->
+	<extension point="emeliot.dsl.simulationPlatforms">
+		<platform
+			id="proteus"
+			name="Proteus Design Suite"
+			serviceClass="emeliot.dsl.lib.ProteusService"/>
+	</extension>
 </plugin>
