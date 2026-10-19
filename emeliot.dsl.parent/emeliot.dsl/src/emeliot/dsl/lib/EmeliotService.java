@@ -1020,5 +1020,341 @@ public interface EmeliotService {
 	 */
 	public TimeSeries readOutTSFromFile(String filePath) throws IOException;
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 * Retrieves all intervals in the given time series.
+	 * An interval is defined as a sequence (usually a couple) of consecutive time-value pairs
+	 * sharing the same value.
+	 *
+	 * @param ts the time series to analyze
+	 * @return a list of intervals, where each interval is a list of TimeValue objects
+	 */
+	public List<List<TimeValue>> getIntervalsInTimeseries(TimeSeries ts);
+	
+	
+	/**
+	 * Reads a TimeSeries from a file and retrieves all intervals in the series.
+	 * An interval is defined as a sequence (usually a couple) of consecutive time-value pairs
+	 * sharing the same value.
+	 *
+	 * @param tsInputPath the path to the input file
+	 * @return a list of intervals contained in the time series
+	 * @throws IOException if an error occurs while reading the file
+	 */
+	public List<List<TimeValue>> getIntervalsInTimeseries_File(String tsInputPath) throws IOException;
+	
+	/**
+	 * Counts the number of intervals in the given time series.
+	 *
+	 * @param ts the time series to analyze
+	 * @return the number of intervals
+	 */
+	public int countIntervalsInTimeseries(TimeSeries ts);
+	
+	/**
+	 * Reads a TimeSeries from a file and counts the number of intervals.
+	 *
+	 * @param tsInputPath the path to the input file
+	 * @return the number of intervals in the time series
+	 * @throws IOException if an error occurs while reading the file
+	 */
+	public int countIntervalsInTimeseries_File(String tsInputPath) throws IOException;
+	
+	/**
+	 * Retrieves all intervals in the time series whose value matches the specified value.
+	 *
+	 * @param ts the time series to analyze
+	 * @param value the value used to filter intervals
+	 * @return a list of intervals whose time-value pairs share the specified value
+	 */
+	public List<List<TimeValue>> getIntervalsWithValueInTimeseries(TimeSeries ts, double value);
+	
+	/**
+	 * Reads a TimeSeries from a file and retrieves all intervals whose value
+	 * matches the specified value.
+	 *
+	 * @param tsInputPath the path to the input file
+	 * @param value the value used to filter intervals
+	 * @return a list of intervals with the specified value
+	 * @throws IOException if an error occurs while reading the file
+	 */
+	public List<List<TimeValue>> getIntervalsWithValueInTimeseries_File(String tsInputPath, double value) throws IOException;
+	
+	/**
+	 * Retrieves the interval at the specified position in the time series.
+	 *
+	 * @param ts the time series to analyze
+	 * @param intervalPos the position of the interval
+	 * @return the interval at the specified position
+	 * @throws IllegalArgumentException if the interval position is out of bounds
+	 */
+	public List<TimeValue> getIntervalAt(TimeSeries ts, int intervalPos);
+	
+	/**
+	 * Reads a TimeSeries from a file and retrieves the interval at the specified position.
+	 *
+	 * @param tsInputPath the path to the input file
+	 * @param intervalPos the position of the interval
+	 * @return the interval at the specified position
+	 * @throws IOException if an error occurs while reading the file
+	 */
+	public List<TimeValue> getIntervalAt_File(String tsInputPath, int intervalPos) throws IOException;
+	
+	/**
+	 * Retrieves the time of the first time-value pair in the given interval.
+	 *
+	 * @param interval the interval to query
+	 * @return the first time in the interval
+	 * @throws IllegalArgumentException if the interval is empty
+	 */
+	public double getFirstTimeInInterval(List<TimeValue> interval);
+	
+	/**
+	 * Retrieves the time of the last time-value pair in the given interval.
+	 *
+	 * @param interval the interval to query
+	 * @return the last time in the interval
+	 * @throws IllegalArgumentException if the interval is empty
+	 */
+	public double getLastTimeInInterval(List<TimeValue> interval);
+	
+	/**
+	 * Retrieves the time of the last time-value pair in the given interval.
+	 *
+	 * @param interval the interval to query
+	 * @return the value in the interval
+	 * @throws IllegalArgumentException if the interval is empty
+	 */
+	public double getValueInInterval(List<TimeValue> interval);
+	
+	/**
+	 * Retrieves the time-value pair at the specified position within the interval.
+	 *
+	 * @param interval the interval to query
+	 * @param pos the position of the time-value pair
+	 * @return the TimeValue at the specified position
+	 * @throws IllegalArgumentException if the interval is empty or the position is out of bounds
+	 */
+	public TimeValue getTimeValueAt(List<TimeValue> interval, int pos);
+	
+	/**
+	 * Adds a new interval to the time series by inserting two time-value pairs
+	 * representing the start and end of the interval.
+	 *
+	 * @param ts the time series to modify
+	 * @param startTime the start time of the interval
+	 * @param endTime the end time of the interval
+	 * @param value the value associated with the interval
+	 * @throws IllegalArgumentException if startTime is greater than or equal to endTime
+	 */
+	public void addIntervalToTimeseries(TimeSeries ts, double startTime, double endTime, double value);
+	
+	/**
+	 * Reads a TimeSeries from a file, adds a new interval, and writes the result to an output file.
+	 *
+	 * @param tsInputPath the path to the input file
+	 * @param tsOutputPath the path to the output file
+	 * @param startTime the start time of the interval
+	 * @param endTime the end time of the interval
+	 * @param value the value associated with the interval
+	 * @throws IOException if an error occurs while reading or writing the file
+	 */
+	public void addIntervalToTimeseries_File(String tsInputPath, String tsOutputPath, double startTime, double endTime, double value) throws IOException;
+	
+	/**
+	 * Removes the interval at the specified position from the time series.
+	 *
+	 * @param ts the time series to modify
+	 * @param intervalPos the position of the interval to remove
+	 * @throws IllegalArgumentException if the interval position is out of bounds
+	 */
+	public void removeIntervalAt(TimeSeries ts, int intervalPos);
+	
+	/**
+	 * Reads a TimeSeries from a file, removes the interval at the specified position,
+	 * and writes the resulting TimeSeries to an output file.
+	 *
+	 * @param tsInputPath the path to the input file
+	 * @param tsOutputPath the path to the output file
+	 * @param intervalPos the position of the interval to remove
+	 * @throws IOException if an error occurs while reading or writing the file
+	 */
+	public void removeIntervalAt_File(String tsInputPath, String tsOutputPath, int intervalPos) throws IOException;
+	
+	/**
+	 * Removes a randomly selected interval from the time series.
+	 *
+	 * @param ts the time series to modify
+	 */
+	public void removeRandomIntervalFromTimeseries(TimeSeries ts);
+	
+	/**
+	 * Reads a TimeSeries from a file, removes a randomly selected interval,
+	 * and writes the resulting TimeSeries to an output file.
+	 *
+	 * @param tsInputPath the path to the input file
+	 * @param tsOutputPath the path to the output file
+	 * @throws IOException if an error occurs while reading or writing the file
+	 */
+	public void removeRandomIntervalFromTimeseries_File(String tsInputPath, String tsOutputPath) throws IOException;
+	
+	/**
+	 * Removes the first time-value pair from the specified interval in the time series.
+	 *
+	 * @param ts the time series to modify
+	 * @param interval the interval from which the first time-value pair will be removed
+	 * @throws IllegalArgumentException if the interval is empty
+	 */
+	public void removeFirstTimeValueFromInterval(TimeSeries ts, List<TimeValue> interval);
+	
+	/**
+	 * Reads a TimeSeries from a file, removes the first time-value pair from the
+	 * specified interval, and writes the resulting TimeSeries to an output file.
+	 *
+	 * @param tsInputPath the path to the input file
+	 * @param tsOutputPath the path to the output file
+	 * @param interval the interval from which the first time-value pair will be removed
+	 * @throws IOException if an error occurs while reading or writing the file
+	 */
+	public void removeFirstTimeValueFromInterval_File(String tsInputPath, String tsOutputPath, List<TimeValue> interval) throws IOException;
+	
+	/**
+	 * Removes the first time-value pair from the interval at the specified position.
+	 *
+	 * @param ts the time series to modify
+	 * @param intervalPos the position of the interval
+	 */
+	public void removeFirstTimeValueFromIntervalAt(TimeSeries ts, int intervalPos);
+	
+	/**
+	 * Reads a TimeSeries from a file, removes the first time-value pair from the
+	 * interval at the specified position, and writes the resulting TimeSeries to an output file.
+	 *
+	 * @param tsInputPath the path to the input file
+	 * @param tsOutputPath the path to the output file
+	 * @param intervalPos the position of the interval
+	 * @throws IOException if an error occurs while reading or writing the file
+	 */
+	public void removeFirstTimeValueFromIntervalAt_File(String tsInputPath, String tsOutputPath, int intervalPos) throws IOException;
+	
+	/**
+	 * Removes the last time-value pair from the specified interval in the time series.
+	 *
+	 * @param ts the time series to modify
+	 * @param interval the interval from which the last time-value pair will be removed
+	 * @throws IllegalArgumentException if the interval is empty
+	 */
+	public void removeLastTimeValueFromInterval(TimeSeries ts, List<TimeValue> interval);
+	
+	/**
+	 * Reads a TimeSeries from a file, removes the last time-value pair from the
+	 * specified interval, and writes the resulting TimeSeries to an output file.
+	 *
+	 * @param tsInputPath the path to the input file
+	 * @param tsOutputPath the path to the output file
+	 * @param interval the interval from which the last time-value pair will be removed
+	 * @throws IOException if an error occurs while reading or writing the file
+	 */
+	public void removeLastTimeValueFromInterval_File(String tsInputPath, String tsOutputPath, List<TimeValue> interval) throws IOException;
+	
+	/**
+	 * Removes the last time-value pair from the interval at the specified position.
+	 *
+	 * @param ts the time series to modify
+	 * @param intervalPos the position of the interval
+	 */
+	public void removeLastTimeValueFromIntervalAt(TimeSeries ts, int intervalPos);
+	
+	/**
+	 * Reads a TimeSeries from a file, removes the last time-value pair from the
+	 * interval at the specified position, and writes the resulting TimeSeries to an output file.
+	 *
+	 * @param tsInputPath the path to the input file
+	 * @param tsOutputPath the path to the output file
+	 * @param intervalPos the position of the interval
+	 * @throws IOException if an error occurs while reading or writing the file
+	 */
+	public void removeLastTimeValueFromIntervalAt_File(String tsInputPath, String tsOutputPath, int intervalPos) throws IOException;
+	
+	/**
+	 * Changes the value of the first time-value pair in the specified interval.
+	 *
+	 * @param ts the time series to modify
+	 * @param interval the interval containing the time-value pair
+	 * @param value the new value
+	 * @throws IllegalArgumentException if the interval is empty
+	 */
+	public void changeFirstValueFromInterval(TimeSeries ts, List<TimeValue> interval, double value);
+	
+	/**
+	 * Changes the value of the first time-value pair in the interval at the specified position.
+	 *
+	 * @param ts the time series to modify
+	 * @param value the new value to assign
+	 * @param intervalPos the position of the interval
+	 */
+	public void changeFirstValueFromIntervalAt(TimeSeries ts, double value, int intervalPos);
+	
+	/**
+	 * Reads a TimeSeries from a file, changes the value of the first time-value pair
+	 * in the interval at the specified position, and writes the resulting TimeSeries to an output file.
+	 *
+	 * @param tsInputPath the path to the input file
+	 * @param tsOutputPath the path to the output file
+	 * @param value the new value to assign
+	 * @param intervalPos the position of the interval
+	 * @throws IOException if an error occurs while reading or writing the file
+	 */
+	public void changeFirstValueFromIntervalAt_File(String tsInputPath, String tsOutputPath, double value, int intervalPos) throws IOException;
+	
+	/**
+	 * Changes the value of the last time-value pair in the specified interval.
+	 *
+	 * @param ts the time series to modify
+	 * @param interval the interval containing the time-value pair
+	 * @param value the new value
+	 * @throws IllegalArgumentException if the interval is empty
+	 */
+	public void changeLastValueFromInterval(TimeSeries ts, List<TimeValue> interval, double value);
+	
+	/**
+	 * Changes the value of the last time-value pair in the interval at the specified position.
+	 *
+	 * @param ts the time series to modify
+	 * @param value the new value to assign
+	 * @param intervalPos the position of the interval
+	 */
+	public void changeLastValueFromIntervalAt(TimeSeries ts, double value, int intervalPos);
+	
+	/**
+	 * Reads a TimeSeries from a file, changes the value of the last time-value pair
+	 * in the interval at the specified position, and writes the resulting TimeSeries to an output file.
+	 *
+	 * @param tsInputPath the path to the input file
+	 * @param tsOutputPath the path to the output file
+	 * @param value the new value to assign
+	 * @param intervalPos the position of the interval
+	 * @throws IOException if an error occurs while reading or writing the file
+	 */
+	public void changeLastValueFromIntervalAt_File(String tsInputPath, String tsOutputPath, double value, int intervalPos) throws IOException;
+	
+	
+	
 
 }

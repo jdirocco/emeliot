@@ -10,7 +10,7 @@ public interface EmeliotDiscoveryService {
 
 
 	/**
-	 * Checks if the mutated time series contains more time-values than the original, indicating a commission error.
+	 * Checks if the mutated time series has additional time-values than the original, indicating a commission error.
 	 * @param tsOriginal the original time series.
 	 * @param tsMutated the mutated time series.
 	 * @return a {@code discovery outcome} object having {@code hasError} field set to {@code true} and {@code errorMsg} field set to a string describing the error found, if the number of time-values in the mutated time series is greater than in the original; a {@code discovery outcome} object having fields set to false and to empty string otherwise.
@@ -18,7 +18,7 @@ public interface EmeliotDiscoveryService {
 	public DiscoveryOutcome isCommission(TimeSeries tsOriginal, TimeSeries tsMutated);
 	
 	/**
-	 * Checks if the mutated time series contains more time-values than the original, both read from files, indicating a commission error.
+	 * Checks if the mutated time series has additional time-values than the original, both read from files, indicating a commission error.
 	 * @param tsOriginalPath the path to the original time series.
 	 * @param tsMutatedPath the path to the mutated time series.
 	 * @return a {@code discovery outcome} object having {@code hasError} field set to {@code true} and {@code errorMsg} field set to a string describing the error found, if the number of time-values in the mutated time series is greater than in the original; a {@code discovery outcome} object having fields set to false and to empty string otherwise.
@@ -27,7 +27,7 @@ public interface EmeliotDiscoveryService {
 	public DiscoveryOutcome isCommission_File(String tsOriginalPath, String tsMutatedPath) throws IOException;
 
 	/**
-	 * Checks if the mutated time series contains fewer time-values than the original, indicating an omission error.
+	 * Checks if the mutated time series has missing time-values than the original, indicating an omission error.
 	 * @param tsOriginal the original time series.
 	 * @param tsMutated the mutated time series.
 	 * @return a {@code discovery outcome} object having {@code hasError} field set to {@code true} and {@code errorMsg} field set to a string describing the error found, if the number of time-values in the mutated time series is less than in the original; a {@code discovery outcome} object having fields set to false and to empty string otherwise.
@@ -35,7 +35,7 @@ public interface EmeliotDiscoveryService {
 	public DiscoveryOutcome isOmission(TimeSeries tsOriginal, TimeSeries tsMutated);
 	
 	/**
-	 * Checks if the mutated time series contains fewer time-values than the original, both read from files, indicating an omission error.
+	 * Checks if the mutated time series has missing time-values than the original, both read from files, indicating an omission error.
 	 * @param tsOriginalPath the path to the original time series.
 	 * @param tsMutatedPath the path to the mutated time series.
 	 * @return a {@code discovery outcome} object having {@code hasError} field set to {@code true} and {@code errorMsg} field set to a string describing the error found, if the number of time-values in the mutated time series is less than in the original; a {@code discovery outcome} object having fields set to false and to empty string otherwise.

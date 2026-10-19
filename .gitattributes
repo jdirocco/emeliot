@@ -1,0 +1,2 @@
+*.zip filter=lfs diff=lfs merge=lfs -text
+evaluation/RQ2/DISCOVERIES.zip filter=lfs diff=lfs merge=lfs -text

@@ -172,7 +172,7 @@ ConfigInjection returns ConfigMutation:
 
 ## Standard library injection utilities
 
-The injection functions, inserted in the [EmeliotStandardLibrary.java](https://github.com/jdirocco/emeliot/blob/master/emeliot.dsl.parent/emeliot.dsl/emeliotlib/emeliot/dsl/lib/EmeliotStandardLibrary.java) currently supported by the DSL (**41**) are the following: 
+The injection functions, inserted in the [EmeliotStandardLibrary.java](https://github.com/jdirocco/emeliot/blob/master/emeliot.dsl.parent/emeliot.dsl/emeliotlib/emeliot/dsl/lib/EmeliotStandardLibrary.java) currently supported by the DSL (**44**) are the following: 
 
 - `addTimeAndValue`: add a time-value pair to a time series  
 - `addRandomTimeAndValue`: add a time-value pair to a time series, where time is random  
@@ -195,21 +195,21 @@ The injection functions, inserted in the [EmeliotStandardLibrary.java](https://g
 - `changeARandomTimeValueWithRandomTimeValue`: replace a random time-value pair from a time series with another time-value pair, where time and value are random  
 - `changeMultipleTimeValues`: replace multiple time-value pairs from a time series with another time-value pairs  
 - `changeMultipleTimeValuesWithRandomTimeValues`: replace multiple time-value pairs from a time series with another time-value pairs, where time and value are random  
-- `changeTimeLate`: replace the time of a time-value pair from a time series with a time exceeding the upper bound time constraint  
-- `changeRandomTimeLate`: replace the time of a random time-value pair from a time series with a time exceeding the upper bound time constraint  
-- `changeMultipleTimeLate`: replace the time of multiple time-value pairs from a time series with a time exceeding the upper bound time constraint  
-- `changeTimeEarly`: replace the time of a time-value pair from a time series with a time exceeding the lower bound time constraint  
-- `changeRandomTimeEarly`: replace the time of a random time-value pair from a time series with a time exceeding the lower bound time constraint  
-- `changeMultipleTimeEarly`: replace the time of multiple time-value pairs from a time series with a time exceeding the lower bound time constraint  
+- `changeTimeLate`: replace the time of a time-value pair from a time series with a time within the upper bound time constraint but exceeding upper threshold  
+- `changeRandomTimeLate`: replace the time of a random time-value pair from a time series with a time within the upper bound time constraint but exceeding upper threshold 
+- `changeMultipleTimeLate`: replace the time of multiple time-value pairs from a time series with a time within the upper bound time constraint but exceeding upper threshold  
+- `changeTimeEarly`: replace the time of a time-value pair from a time series with a time within the lower bound time constraint but exceeding lower threshold  
+- `changeRandomTimeEarly`: replace the time of a random time-value pair from a time series with a time within the lower bound time constraint but exceeding lower threshold 
+- `changeMultipleTimeEarly`: replace the time of multiple time-value pairs from a time series with a time within the lower bound time constraint but exceeding lower threshold 
 - `changeValueCoarse`: replace the value of a time-value pair from a time series with a value exceeding the value constraint  
 - `changeRandomValueCoarse`: replace the value of a random time-value pair from a time series with a value exceeding the value constraint  
 - `changeMultipleValueCoarse`: replace the value of multiple time-value pairs from a time series with a value exceeding the value constraint  
 - `changeValueSubtle`: replace the value of a time-value pair from a time series with a value within the value constraint but exceeding threshold  
 - `changeRandomValueSubtle`: replace the value of a random time-value pair from a time series with a value within the value constraint but exceeding threshold  
 - `changeMultipleValueSubtle`: replace the value of multiple time-value pairs from a time series with a value within the value constraint but exceeding threshold  
-- `removeTimeValue`: remove a time-value pair from a time series  
+- `removeTimeValue`: remove a time-value pair from a time series (two overloaded methods)
 - `removeRandomTimeValue`: remove a random time-value pair from a time series  
-- `removeMultipleTimeValues`: remove multiple time-value pairs from a time series  
+- `removeMultipleTimeValues`: remove multiple time-value pairs from a time series  (three overloaded methods) 
 - `removeAllTimeValues`: remove all time-value pairs from a time series  
 - `removeTimeValuesBeforeTime`: remove all time-value pairs with time before a given time from a time series  
 - `removeTimeValuesAfterTime`: remove all time-value pairs with time after a given time from a time series  
@@ -249,10 +249,10 @@ where the developer can set the expected and injected series, allowing the compa
 
 The discovery functions currently supported by the DSL (**11**) are the following (see the [EmeliotStandardLibray.java](https://github.com/jdirocco/emeliot/blob/master/emeliot.dsl.parent/emeliot.dsl/emeliotlib/emeliot/dsl/lib/EmeliotStandardLibrary.java)): 
 
-- `isCommission`: check if the injected time series has more time-value pairs than the the original
-- `isOmission`: check if the injected time series has fewer time-value pairs than the original
-- `isLate`: check if the injected time series has time-value pairs with time exceeding upper bound time constraint with respect to the original
-- `isEarly`: check if the injected time series has time-value pairs with time exceeding lower bound time constraint with respect to the original
+- `isCommission`: check if the injected time series has additional time-value pairs than the the original
+- `isOmission`: check if the injected time series has missing time-value pairs than the original
+- `isLate`: check if the injected time series has time-value pairs with time exceeding threshold with respect to the original
+- `isEarly`: check if the injected time series has time-value pairs with time exceeding threshold with respect to the original
 - `isValueCoarse`: check if the injected time series has time-value pairs with value exceeding value constraint with respect to the original
 - `isValueSubtle`: check if the injected time series has time-value pairs with value within value constraint but exceeding threshold with respect to the original
 - `areSameSize`: check if two time series have the same number of time-value pairs
@@ -278,6 +278,10 @@ The simulation is handled by using the last two components of the **Model** root
 The simulation is carried out by the `runTestCase` method, which runs a Proteus instance through simulation graphs. The method reads input time series from files to feed the target Proteus project and writes the output time series to files.
 
 # Demo
+
+
+
+The demo for the irrigation plant system is available [here](https://univaq-my.sharepoint.com/:v:/g/personal/claudio_disipio_univaq_it/IQCRsLOS80hqRoddknSTHk_XAZTNBLBndv7YhqLFFxpy4WA?e=Dn45is&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D)
 
 
 
